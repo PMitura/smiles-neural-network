@@ -15,8 +15,8 @@ DB_COLS = 'canonical_smiles, molweight'
 def getDataFromDb():
     print('  Downloading data...')
 
-    cnx = mysql.connector.connect(user=DB_USER, password=DB_PASS,
-            host=DB_HOST, database=DB_NAME)
+    cnx = mysql.connector.connect(user = DB_USER, password = DB_PASS,
+            host = DB_HOST, database= DB_NAME)
     query = ('SELECT {} FROM {}'.format(DB_COLS, DB_TABLE))
     cursor = cnx.cursor()
     cursor.execute(query)
@@ -57,12 +57,12 @@ def formatData(rawData):
         output.append(itemArray)
 
     print('  ...done')
-    return output
+    return ctr, output
 
 
 def prepareData():
     data = getDataFromDb()
-    formattedWords = formatData(data)
+    alphaSize, formattedWords = formatData(data)
     reference = []
     for item in data:
         reference.append(item[1])
@@ -70,6 +70,6 @@ def prepareData():
     for item in formattedData:
         print item
     """
-    return formattedWords, reference
+    return formattedWords, reference, alphaSize
 
 
