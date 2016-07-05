@@ -11,7 +11,7 @@ DB_NAME = 'ctu_qsar'
 # DB_TABLE = 'target_molweight_1000'
 # DB_COLS = 'canonical_smiles, molweight'
 DB_TABLE = 'target_properties_1000'
-DB_COLS = 'canonical_smiles, alogp'
+DB_COLS = 'canonical_smiles, mw_freebase, alogp'
 
 # Connects to remote DB, reads input data into array.
 def getDataFromDb():
@@ -24,8 +24,8 @@ def getDataFromDb():
     cursor.execute(query)
 
     array = []
-    for canonical_smiles, molweight in cursor:
-        array.append((canonical_smiles, molweight))
+    for a, b, c in cursor:
+        array.append((a, b, c))
     cursor.close()
     cnx.close()
 
@@ -48,7 +48,6 @@ def formatData(rawData):
     colMapping = {}
     size = 1
     for char in alphabet:
-        print("{} mapped to {}".format(char, size))
         colMapping[char] = size
         size += 1
 
@@ -87,9 +86,12 @@ def formatData(rawData):
 def prepareData():
     data = getDataFromDb()
     alphaSize, formattedWords = formatData(data)
-    reference = []
+    reference = np.zeros((len(data), 2))
+    i = 0
     for item in data:
-        reference.append(item[1])
+        reference[i][0] = item[1]
+        reference[i][1] = item[2]
+        i += 1
 
     """ DEBUG
     for item in formattedWords:

@@ -12,13 +12,13 @@ def setup(alphaSize):
     print('  Compiling model...')
 
     model = Sequential()
-    model.add(LSTM(2*alphaSize, activation = 'sigmoid',
+    model.add(LSTM(alphaSize, activation = 'sigmoid',
         input_shape = (None, alphaSize), return_sequences = True))
-    model.add(LSTM(2*alphaSize, activation = 'sigmoid'))
+    model.add(LSTM(alphaSize, activation = 'sigmoid'))
     """
     model.add(AveragePooling1D(pool_length = 2, border_mode='valid'))
     """
-    model.add(Dense(1))
+    model.add(Dense(2))
     model.compile(loss = 'mse', optimizer = 'rmsprop')
 
     print('  ...done')
@@ -37,21 +37,35 @@ def train(model, nnInput, refOutput):
 def predict(model, nnInput, refOutput):
     print('  Predicting...')
     pre = model.predict(nnInput, batch_size = 16)
-    preAvg = 0.0
-    refAvg = 0.0
-    misAvg = 0.0
+    preAvg1 = 0.0
+    refAvg1 = 0.0
+    misAvg1 = 0.0
+    preAvg2 = 0.0
+    refAvg2 = 0.0
+    misAvg2 = 0.0
     for i in range(len(pre)):
-        preAvg += pre[i][0]
-        refAvg += refOutput[i]
-        misAvg += abs(pre[i][0] - refOutput[i])
-        print("    prediction: {}, reference: {}".format(pre[i][0], 
-            refOutput[i]))
-    preAvg /= len(pre)
-    refAvg /= len(pre)
-    misAvg /= len(pre)
-    print("    prediction average: {}".format(preAvg))
-    print("    reference average:  {}".format(refAvg))
-    print("    mistake average:    {}".format(misAvg))
+        preAvg1 += pre[i][0]
+        refAvg1 += refOutput[i][0]
+        misAvg1 += abs(pre[i][0] - refOutput[i][0])
+        preAvg2 += pre[i][1]
+        refAvg2 += refOutput[i][1]
+        misAvg2 += abs(pre[i][1] - refOutput[i][1])
+        print("    prediction1: {}, reference1: {}".format(pre[i][0], 
+            refOutput[i][0]))
+        print("    prediction2: {}, reference2: {}".format(pre[i][1], 
+            refOutput[i][1]))
+    preAvg1 /= len(pre)
+    refAvg1 /= len(pre)
+    misAvg1 /= len(pre)
+    preAvg2 /= len(pre)
+    refAvg2 /= len(pre)
+    misAvg2 /= len(pre)
+    print("    prediction1 average: {} | prediction2 average: {}"
+            .format(preAvg1, preAvg2))
+    print("    reference1 average:  {} | reference2 average: {}"
+            .format(refAvg1, refAvg2))
+    print("    mistake1 average:    {} | mistake2 average:{}"
+            .format(misAvg1, refAvg2))
     print('  ...done')
 
 
