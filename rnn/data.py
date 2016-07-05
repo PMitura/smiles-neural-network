@@ -86,11 +86,12 @@ def formatData(rawData):
 def prepareData():
     data = getDataFromDb()
     alphaSize, formattedWords = formatData(data)
-    reference = np.zeros((len(data), 2))
+    reference1 = np.zeros((len(data)))
+    reference2 = np.zeros((len(data)))
     i = 0
     for item in data:
-        reference[i][0] = item[1]
-        reference[i][1] = item[2]
+        reference1[i] = item[1]
+        reference2[i] = item[2]
         i += 1
 
     """ DEBUG
@@ -98,6 +99,6 @@ def prepareData():
         print item
     """
 
-    return formattedWords, reference, alphaSize
+    return formattedWords, reference1, reference2, alphaSize
 
 
