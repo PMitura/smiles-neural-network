@@ -12,8 +12,9 @@ def setup(alphaSize):
     print('  Compiling model...')
 
     model = Sequential()
-    model.add(LSTM(32, activation = 'sigmoid', input_shape =
-        (None, alphaSize)))
+    model.add(LSTM(2 * alphaSize, activation = 'sigmoid',
+        input_shape = (None, alphaSize), return_sequences = 1))
+    model.add(LSTM(2 * alphaSize, activation = 'sigmoid'))
     """
     model.add(AveragePooling1D(pool_length = 2, border_mode='valid'))
     """
@@ -26,7 +27,10 @@ def setup(alphaSize):
 
 def train(model, nnInput, refOutput):
     print('  Training model...')
-    model.fit(nnInput, refOutput, nb_epoch = 10, batch_size = 16)
+    model.fit(nnInput, refOutput, nb_epoch = 1000, batch_size = 16)
+    print('    Model weights:')
+    # print(model.summary())
+    # print(model.get_weights())
     print('  ...done')
 
 

@@ -8,10 +8,10 @@ DB_HOST = 'relational.fit.cvut.cz'
 DB_NAME = 'ctu_qsar'
 
 # data range
-# DB_TABLE = 'target_molweight_1000'
-# DB_COLS = 'canonical_smiles, molweight'
-DB_TABLE = 'target_sum_1000'
-DB_COLS = 'x, label'
+DB_TABLE = 'target_molweight_1000'
+DB_COLS = 'canonical_smiles, molweight'
+# DB_TABLE = 'target_sum5_1000'
+# DB_COLS = 'x, label'
 
 # Connects to remote DB, reads input data into array.
 def getDataFromDb():
@@ -48,6 +48,7 @@ def formatData(rawData):
     colMapping = {}
     size = 1
     for char in alphabet:
+        print("{} mapped to {}".format(char, size))
         colMapping[char] = size
         size += 1
 
