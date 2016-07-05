@@ -12,9 +12,9 @@ def setup(alphaSize):
     print('  Compiling model...')
 
     model = Sequential()
-    model.add(LSTM(2 * alphaSize, activation = 'sigmoid',
-        input_shape = (None, alphaSize), return_sequences = 1))
-    model.add(LSTM(2 * alphaSize, activation = 'sigmoid'))
+    model.add(LSTM(2*alphaSize, activation = 'sigmoid',
+        input_shape = (None, alphaSize), return_sequences = True))
+    model.add(LSTM(2*alphaSize, activation = 'sigmoid'))
     """
     model.add(AveragePooling1D(pool_length = 2, border_mode='valid'))
     """
@@ -27,7 +27,7 @@ def setup(alphaSize):
 
 def train(model, nnInput, refOutput):
     print('  Training model...')
-    model.fit(nnInput, refOutput, nb_epoch = 1000, batch_size = 16)
+    model.fit(nnInput, refOutput, nb_epoch = 500, batch_size = 16)
     print('    Model weights:')
     # print(model.summary())
     # print(model.get_weights())
@@ -56,17 +56,16 @@ def predict(model, nnInput, refOutput):
 
 
 def test(model, nnInput, refOutput):
+    # should work, untested
+    print("  Testing...")
     score = model.evaluate(nnInput, refOutput, batch_size = 16)
-    print("Score on traning data: {}".format(score))
+    print("    Score on traning data: {}".format(score))
+    print("  ...done")
 
 
-def main():
+def run():
     nnInput, refOutput, alphaSize = data.prepareData()
     model = setup(alphaSize)
     train(model, nnInput, refOutput)
     predict(model, nnInput, refOutput)
     # test(model, nnInput, refOutput)
-
-
-if __name__ == '__main__':
-    main()
