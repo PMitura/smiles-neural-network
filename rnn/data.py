@@ -1,4 +1,5 @@
 import mysql.connector
+import numpy as np
 
 # login credentials
 DB_USER = 'petermitura'
@@ -7,9 +8,10 @@ DB_HOST = 'relational.fit.cvut.cz'
 DB_NAME = 'ctu_qsar'
 
 # data range
-DB_TABLE = 'target_molweight_1000'
-DB_COLS = 'canonical_smiles, molweight'
-
+# DB_TABLE = 'target_molweight_1000'
+# DB_COLS = 'canonical_smiles, molweight'
+DB_TABLE = 'target_sum_1000'
+DB_COLS = 'x, label'
 
 # Connects to remote DB, reads input data into array.
 def getDataFromDb():
@@ -32,7 +34,7 @@ def getDataFromDb():
 
 
 # Transforms data into 1 of k encoding
-# Output format is 2D array of integers, representing positions of binary 1
+# Output format is 3D array of integers, representing positions of binary 1
 def formatData(rawData):
     print('  Formatting data...')
 
@@ -44,20 +46,41 @@ def formatData(rawData):
 
     # Map columns to letters
     colMapping = {}
-    ctr = 0
+    size = 1
     for char in alphabet:
-        colMapping[char] = ctr
-        ctr += 1
+        colMapping[char] = size
+        size += 1
 
-    output = []
+    maxLen = 0
     for item in rawData:
-        itemArray = []
+        maxLen = max(maxLen, len(item[0]))
+    padArray = np.zeros((1, size))
+    padArray[0] = 1
+
+    # DEBUG, data properties
+    print("    Number of samples: {}".format(len(rawData)))
+    print("    Maximum length of sample: {}".format(maxLen))
+    print("    Size of alphabet: {}".format(size))
+    output = np.zeros((len(rawData), maxLen, size))
+
+    itemCtr = 0
+    for item in rawData:
+        charCtr = 0
         for char in item[0]:
-            itemArray.append(colMapping[char])
-        output.append(itemArray)
+            charIdx = colMapping[char]
+            output[itemCtr][charCtr][charIdx] = 1
+            charCtr += 1
+        for i in range(charCtr, maxLen):
+            output[itemCtr][charCtr][0] = 1
+        itemCtr += 1
+
+    """ DEBUG: print whole data
+    np.set_printoptions(threshold='nan')
+    print output
+    """
 
     print('  ...done')
-    return ctr, output
+    return size, output
 
 
 def prepareData():
@@ -66,10 +89,12 @@ def prepareData():
     reference = []
     for item in data:
         reference.append(item[1])
+
     """ DEBUG
-    for item in formattedData:
+    for item in formattedWords:
         print item
     """
+
     return formattedWords, reference, alphaSize
 
 
