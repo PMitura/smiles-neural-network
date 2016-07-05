@@ -5,9 +5,8 @@ from keras.models import Sequential
 from keras.layers import Activation, Dense, LSTM, AveragePooling1D
 
 # RNN parameters
-MAX_BACKWARD_STEPS = 100
 LAYER_MULTIPLIER = 1
-EPOCHS = 5
+EPOCHS = 500
 
 # 3D input: dimensions are (number of samples, length of word, alphabet)
 def setup(alphaSize):
@@ -57,21 +56,21 @@ def train(model, nnInput, refOutput):
 def predict(model, nnInput, refOutput):
     print('  Predicting...')
     pre = model.predict(nnInput, batch_size = 16)
-    preAvg1 = 0.0
-    refAvg1 = 0.0
-    misAvg1 = 0.0
+    preAvg = 0.0
+    refAvg = 0.0
+    misAvg = 0.0
     for i in range(len(pre)):
-        preAvg1 += pre[i][0]
-        refAvg1 += refOutput[i]
-        misAvg1 += abs(pre[i][0] - refOutput[i])
-        print("    prediction1: {}, reference1: {}".format(pre[i][0], 
+        preAvg += pre[i][0]
+        refAvg += refOutput[i]
+        misAvg += abs(pre[i][0] - refOutput[i])
+        print("    prediction: {}, reference: {}".format(pre[i][0], 
             refOutput[i]))
-    preAvg1 /= len(pre)
-    refAvg1 /= len(pre)
-    misAvg1 /= len(pre)
-    print("    prediction1 average: {}".format(preAvg1))
-    print("    reference1 average:  {}".format(refAvg1))
-    print("    mistake1 average:    {}".format(misAvg1))
+    preAvg /= len(pre)
+    refAvg /= len(pre)
+    misAvg /= len(pre)
+    print("    prediction average: {}".format(preAvg1))
+    print("    reference average:  {}".format(refAvg1))
+    print("    mistake average:    {}".format(misAvg1))
     print('  ...done')
 
 
