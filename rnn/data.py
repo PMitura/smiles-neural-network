@@ -16,6 +16,8 @@ DB_TABLE = 'target_properties_norm_1000'
 # DB_COLS = 'canonical_smiles, mw_freebase, alogp'
 DB_COLS = 'canonical_smiles, hba, hbd'
 
+LABEL_COUNT = 2
+
 # Connects to remote DB, reads input data into array.
 def getDataFromDb():
     print('  Downloading data...')
@@ -125,12 +127,14 @@ def holdout(ratio, words, ref):
 def prepareData():
     data = getDataFromDb()
     alphaSize, formattedWords = formatData(data)
-    reference1 = np.zeros((len(data)))
-    reference2 = np.zeros((len(data)))
+
+    labels = []
+    for i in range(LABEL_COUNT):
+        labels.append(np.zeros((len(data))))
     i = 0
     for item in data:
-        reference1[i] = item[1]
-        reference2[i] = item[2]
+        for labelID in range(LABEL_COUNT):
+            labels[labelID][i] = item[labelID + 1]
         i += 1
 
     """ DEBUG
@@ -138,6 +142,6 @@ def prepareData():
         print item
     """
 
-    return formattedWords, reference1, reference2, alphaSize
+    return formattedWords, labels, alphaSize
 
 

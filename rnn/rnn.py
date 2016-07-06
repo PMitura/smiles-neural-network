@@ -1,10 +1,12 @@
 import data
 import numpy as np
-from theano.tensor import *
+
+from math import sqrt
+
 from keras.models import Sequential
 from keras.layers import Activation, Dense, Dropout, LSTM, AveragePooling1D
 from keras.layers import TimeDistributed, SimpleRNN, GRU
-from keras.optimizers import RMSprop
+from keras.optimizers import Adam, RMSprop
 
 # RNN parameters
 LAYER_MULTIPLIER = 1
@@ -35,7 +37,7 @@ def configureModel(alphaSize):
     # model.add(Activation('tanh'))
 
     # default learning rate 0.001
-    model.compile(loss = 'mse', optimizer = RMSprop(lr = LEARNING_RATE))
+    model.compile(loss = 'mse', optimizer = Adam(lr = LEARNING_RATE))
 
     print('  ...done')
     return model
@@ -62,31 +64,46 @@ def train(model, nnInput, refOutput):
     return model.get_weights()
 
 
+# Serves as extended version of test, gives averages
 def predict(model, nnInput, refOutput):
     pre = model.predict(nnInput, batch_size = BATCH)
-    preAvg = 0.0
-    refAvg = 0.0
-    misAvg = 0.0
-    for i in range(len(pre)):
-        preAvg += pre[i][0]
-        refAvg += refOutput[i]
-        misAvg += abs(pre[i][0] - refOutput[i])
 
+    # print samples of predictions
     for i in range(PREDICT_PRINT_SAMPLES):
         print("    prediction: {}, reference: {}".format(pre[i][0], 
             refOutput[i]))
 
+    # array of errors
+    error = []
+    for i in range(len(pre)):
+        error.append(abs(pre[i][0] - refOutput[i]))
+
+    # averages of everything
+    preAvg = 0.0
+    refAvg = 0.0
+    errAvg = 0.0
+    for i in range(len(pre)):
+        preAvg += pre[i][0]
+        refAvg += refOutput[i]
+        errAvg += error[i]
     preAvg /= len(pre)
     refAvg /= len(pre)
-    misAvg /= len(pre)
-    print("    prediction average: {}".format(preAvg))
-    print("    reference average:  {}".format(refAvg))
-    print("    mistake average:    {}".format(misAvg))
+    errAvg /= len(pre)
+
+    # std. deviation of error
+    errDev = 0.0
+    for i in range(len(pre)):
+        errDev += (error[i] - errAvg) * (error[i] - errAvg)
+    errDev = sqrt(errDev / len(pre))
+
+    print("    prediction average:     {}".format(preAvg))
+    print("    reference average:      {}".format(refAvg))
+    print("    error average:          {}".format(errAvg))
+    print("    error std. deviation:   {}".format(errDev))
 
 
 def test(model, nnInput, refOutput):
-    # should work, untested
-    print("  Scoring using evaluate...")
+    print("\n  Scoring using evaluate...")
     score = model.evaluate(nnInput, refOutput, batch_size = BATCH,
             verbose = False)
     print("    Score on traning data: {}".format(score))
@@ -96,7 +113,7 @@ def test(model, nnInput, refOutput):
 def run():
     # Initialize using same seed (to get stable results on comparisons)
     np.random.seed(12345)
-    fullIn, labelCol1, labelCol2, alphaSize = data.prepareData()
+    fullIn, labels, alphaSize = data.prepareData()
 
     """ In case a subset is wanted
     nnInput, ref2 = data.randomSelection(RANDOM_SAMPLES, nnInput, ref2)
@@ -104,12 +121,12 @@ def run():
 
     """ Single model setup """
     trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,
-            fullIn, labelCol2)
+            fullIn, labels[1])
     model = setup(alphaSize)
     train(model, trainIn, trainLabel)
-    print("  \nPrediction of training data:")
+    print("\n  Prediction of training data:")
     predict(model, trainIn, trainLabel)
-    print("  \nPrediction of testing data:")
+    print("\n  Prediction of testing data:")
     predict(model, testIn, testLabel)
     test(model, testIn, testLabel)
 
@@ -120,11 +137,11 @@ def run():
     modelCol2 = setupInitialized(alphaSize, chainSetup)
 
     trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,
-            fullIn, labelCol2)
+            fullIn, labels[1])
     train(modelCol2, trainIn, trainLabel)
-    print("  \nPrediction of training data:")
+    print("\n  Prediction of training data:")
     predict(modelCol2, trainIn, trainLabel)
-    print("  \nPrediction of testing data:")
+    print("\n  Prediction of testing data:")
     predict(modelCol2, testIn, testLabel)
     test(modelCol2, testIn, testLabel)
     """
