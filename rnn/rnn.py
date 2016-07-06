@@ -5,11 +5,12 @@ from math import sqrt
 
 from keras.models import Sequential
 from keras.layers import Activation, Dense, Dropout, LSTM, AveragePooling1D
-from keras.layers import TimeDistributed, SimpleRNN, GRU
+from keras.layers import TimeDistributed, SimpleRNN, GRU, Flatten
 from keras.optimizers import Adam, RMSprop
+from keras.regularizers import l1l2, l2
 
 # RNN parameters
-LAYER_MULTIPLIER = 1
+LAYER_MULTIPLIER = 0.5
 EPOCHS = 150
 BATCH = 16
 RANDOM_SAMPLES = 20
@@ -26,12 +27,12 @@ def configureModel(alphaSize):
     model.add(LSTM(LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid',
         input_shape = (None, alphaSize), return_sequences = True))
     """
-    model.add(TimeDistributed(Dense(LAYER_MULTIPLIER * alphaSize),
+    model.add(TimeDistributed(Dense(int(LAYER_MULTIPLIER * alphaSize)),
         input_shape = (None, alphaSize)))
     # model.add(TimeDistributed(Dense(LAYER_MULTIPLIER * alphaSize)))
-    model.add(GRU(LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid'))
+    model.add(GRU(int(LAYER_MULTIPLIER * alphaSize), activation = 'sigmoid'))
     # model.add(SimpleRNN(2 * LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid'))
-    # model.add(AveragePooling1D(pool_length = 2, border_mode='valid'))
+    # model.add(AveragePooling1D(pool_length = alphaSize, border_mode='valid'))
     # model.add(Dropout(0.5))
     model.add(Dense(1))
     # model.add(Activation('tanh'))
@@ -58,7 +59,7 @@ def train(model, nnInput, refOutput):
     print('  Training model...')
     model.fit(nnInput, refOutput, nb_epoch = EPOCHS, batch_size = BATCH)
     print('    Model weights:')
-    # print(model.summary())
+    print(model.summary())
     # print(model.get_weights())
     print('  ...done')
     return model.get_weights()
@@ -121,7 +122,7 @@ def run():
 
     """ Single model setup """
     trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,
-            fullIn, labels[1])
+            fullIn, labels[0])
     model = setup(alphaSize)
     train(model, trainIn, trainLabel)
     print("\n  Prediction of training data:")
@@ -145,3 +146,5 @@ def run():
     predict(modelCol2, testIn, testLabel)
     test(modelCol2, testIn, testLabel)
     """
+
+    # predict(5, labels[0], labels[1])
