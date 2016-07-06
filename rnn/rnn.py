@@ -3,12 +3,14 @@ import numpy as np
 from theano.tensor import *
 from keras.models import Sequential
 from keras.layers import Activation, Dense, Dropout, LSTM, AveragePooling1D
-from keras.layers import TimeDistributed, SimpleRNN
+from keras.layers import TimeDistributed, SimpleRNN, GRU
 
 # RNN parameters
 LAYER_MULTIPLIER = 1
-EPOCHS = 150
+EPOCHS = 1500
 BATCH = 16
+RANDOM_SAMPLES = 20
+
 
 # 3D input: dimensions are (number of samples, length of word, alphabet)
 def setup(alphaSize):
@@ -21,7 +23,9 @@ def setup(alphaSize):
     """
     model.add(TimeDistributed(Dense(LAYER_MULTIPLIER * alphaSize),
         input_shape = (None, alphaSize)))
-    model.add(SimpleRNN(2 * LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid'))
+    model.add(TimeDistributed(Dense(LAYER_MULTIPLIER * alphaSize)))
+    model.add(GRU(LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid'))
+    # model.add(SimpleRNN(2 * LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid'))
     # model.add(AveragePooling1D(pool_length = 2, border_mode='valid'))
     # model.add(Dropout(0.5))
     model.add(Dense(1))
@@ -89,9 +93,9 @@ def test(model, nnInput, refOutput):
 def run():
     # Initialize using same seed (to get stable results on comparisons)
     np.random.seed(12345)
-
     nnInput, ref1, ref2, alphaSize = data.prepareData()
-    """
+
+    """ Chained models setup
     model1 = setup(alphaSize)
     weights = train(model1, nnInput, ref1)
     model2 = setupInitialized(alphaSize, weights)
@@ -99,7 +103,11 @@ def run():
     predict(model1, nnInput, ref1)
     predict(model2, nnInput, ref2)
     """
+
+    """ Single model setup """
+    nnInput, ref2 = data.randomSelection(RANDOM_SAMPLES, nnInput, ref2)
     model = setup(alphaSize)
     train(model, nnInput, ref2)
     predict(model, nnInput, ref2)
     # test(model, nnInput, refOutput)
+

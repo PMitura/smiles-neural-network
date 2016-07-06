@@ -1,5 +1,6 @@
 import mysql.connector
 import numpy as np
+import random
 
 # login credentials
 DB_USER = 'petermitura'
@@ -83,6 +84,18 @@ def formatData(rawData):
     return size, output
 
 
+# Randomly choose n samples, with repetition
+def randomSelection(n, words, ref):
+    rWords = np.zeros((n, len(words[0]), len(words[0][0])))
+    rRef = np.zeros((n))
+    for i in range(n):
+        rng = random.randint(0, len(words) - 1)
+        rWords[i] = words[rng]
+        rRef[i] = ref[rng]
+    return rWords, rRef
+
+
+# Call all routines to prepare data for neural network
 def prepareData():
     data = getDataFromDb()
     alphaSize, formattedWords = formatData(data)
