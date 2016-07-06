@@ -120,8 +120,8 @@ def run():
 
     """ Chained models setup """
     modelWeights = setup(alphaSize)
-    chainSetup = train(model, fullIn, labelWeight)
-    predict(model, fullIn, labelWeight)
+    chainSetup = train(modelWeights, fullIn, labelWeight)
+    predict(modelWeights, fullIn, labelWeight)
     modelAlogP = setupInitialized(alphaSize, chainSetup)
 
     trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,
@@ -130,5 +130,5 @@ def run():
     print("  \nPrediction of training data:")
     predict(modelAlogP, trainIn, trainLabel)
     print("  \nPrediction of testing data:")
-    predict(model, testIn, testLabel)
+    predict(modelAlogP, testIn, testLabel)
     test(modelAlogP, testIn, testLabel)
