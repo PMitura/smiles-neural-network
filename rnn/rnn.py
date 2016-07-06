@@ -7,10 +7,10 @@ from keras.layers import TimeDistributed, SimpleRNN, GRU
 
 # RNN parameters
 LAYER_MULTIPLIER = 1
-EPOCHS = 1500
+EPOCHS = 50
 BATCH = 16
 RANDOM_SAMPLES = 20
-
+PREDICT_PRINT_SAMPLES = 10
 
 # 3D input: dimensions are (number of samples, length of word, alphabet)
 def setup(alphaSize):
@@ -71,8 +71,11 @@ def predict(model, nnInput, refOutput):
         preAvg += pre[i][0]
         refAvg += refOutput[i]
         misAvg += abs(pre[i][0] - refOutput[i])
+
+    for i in range(PREDICT_PRINT_SAMPLES):
         print("    prediction: {}, reference: {}".format(pre[i][0], 
             refOutput[i]))
+
     preAvg /= len(pre)
     refAvg /= len(pre)
     misAvg /= len(pre)
