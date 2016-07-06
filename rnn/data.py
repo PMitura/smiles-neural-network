@@ -1,6 +1,7 @@
 import mysql.connector
 import numpy as np
 import random
+from math import floor
 
 # login credentials
 DB_USER = 'petermitura'
@@ -93,6 +94,30 @@ def randomSelection(n, words, ref):
         rWords[i] = words[rng]
         rRef[i] = ref[rng]
     return rWords, rRef
+
+
+# Splits the data into training and testing set
+def holdout(ratio, words, ref):
+    if ratio >= 1 or ratio <= 0:
+        raise ValueError('Ratio must be in (0, 1) interval')
+
+    # Prepare training set
+    trainSize = int(floor(len(words) * ratio))
+    trainWords = np.zeros((trainSize, len(words[0]), len(words[0][0])))
+    trainRef = np.zeros((trainSize))
+    for i in range(trainSize):
+        trainWords[i] = words[i]
+        trainRef[i] = ref[i]
+
+    # Prepare testing set
+    testSize = int(floor(len(words) - (len(words) * ratio)))
+    testWords = np.zeros((testSize, len(words[0]), len(words[0][0])))
+    testRef = np.zeros((testSize))
+    for i in range(testSize):
+        testWords[i] = words[i + testSize]
+        testRef[i] = ref[i + testSize]
+
+    return trainWords, trainRef, testWords, testRef
 
 
 # Call all routines to prepare data for neural network

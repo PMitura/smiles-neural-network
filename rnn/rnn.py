@@ -4,16 +4,19 @@ from theano.tensor import *
 from keras.models import Sequential
 from keras.layers import Activation, Dense, Dropout, LSTM, AveragePooling1D
 from keras.layers import TimeDistributed, SimpleRNN, GRU
+from keras.optimizers import RMSprop
 
 # RNN parameters
 LAYER_MULTIPLIER = 1
-EPOCHS = 50
+EPOCHS = 150
 BATCH = 16
 RANDOM_SAMPLES = 20
 PREDICT_PRINT_SAMPLES = 10
+HOLDOUT_RATIO = 0.8
+LEARNING_RATE = 0.01
 
-# 3D input: dimensions are (number of samples, length of word, alphabet)
-def setup(alphaSize):
+
+def configureModel(alphaSize):
     print('  Initializing and compiling...')
 
     model = Sequential()
@@ -23,28 +26,30 @@ def setup(alphaSize):
     """
     model.add(TimeDistributed(Dense(LAYER_MULTIPLIER * alphaSize),
         input_shape = (None, alphaSize)))
-    model.add(TimeDistributed(Dense(LAYER_MULTIPLIER * alphaSize)))
+    # model.add(TimeDistributed(Dense(LAYER_MULTIPLIER * alphaSize)))
     model.add(GRU(LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid'))
     # model.add(SimpleRNN(2 * LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid'))
     # model.add(AveragePooling1D(pool_length = 2, border_mode='valid'))
     # model.add(Dropout(0.5))
     model.add(Dense(1))
     # model.add(Activation('tanh'))
-    model.compile(loss = 'mse', optimizer = 'rmsprop')
+
+    # default learning rate 0.001
+    model.compile(loss = 'mse', optimizer = RMSprop(lr = LEARNING_RATE))
 
     print('  ...done')
     return model
 
 
+# 3D input: dimensions are (number of samples, length of word, alphabet)
+def setup(alphaSize):
+    return configureModel(alphaSize)
+
+
 def setupInitialized(alphaSize, weights):
     print('  Initializing and compiling...')
 
-    model = Sequential()
-    model.add(LSTM(LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid',
-        input_shape = (None, alphaSize), return_sequences = True))
-    model.add(LSTM(LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid'))
-    model.add(Dense(1))
-    model.compile(loss = 'mse', optimizer = 'rmsprop')
+    model = configureModel(alphaSize)
     model.set_weights(weights)
 
     print('  ...done')
@@ -62,7 +67,6 @@ def train(model, nnInput, refOutput):
 
 
 def predict(model, nnInput, refOutput):
-    print('  Predicting...')
     pre = model.predict(nnInput, batch_size = BATCH)
     preAvg = 0.0
     refAvg = 0.0
@@ -82,13 +86,13 @@ def predict(model, nnInput, refOutput):
     print("    prediction average: {}".format(preAvg))
     print("    reference average:  {}".format(refAvg))
     print("    mistake average:    {}".format(misAvg))
-    print('  ...done')
 
 
 def test(model, nnInput, refOutput):
     # should work, untested
-    print("  Testing...")
-    score = model.evaluate(nnInput, refOutput, batch_size = BATCH)
+    print("  Scoring using evaluate...")
+    score = model.evaluate(nnInput, refOutput, batch_size = BATCH,
+            verbose = False)
     print("    Score on traning data: {}".format(score))
     print("  ...done")
 
@@ -96,21 +100,35 @@ def test(model, nnInput, refOutput):
 def run():
     # Initialize using same seed (to get stable results on comparisons)
     np.random.seed(12345)
-    nnInput, ref1, ref2, alphaSize = data.prepareData()
+    fullIn, labelWeight, labelALogP, alphaSize = data.prepareData()
 
-    """ Chained models setup
-    model1 = setup(alphaSize)
-    weights = train(model1, nnInput, ref1)
-    model2 = setupInitialized(alphaSize, weights)
-    train(model2, nnInput, ref2)
-    predict(model1, nnInput, ref1)
-    predict(model2, nnInput, ref2)
+    """ In case a subset is wanted
+    nnInput, ref2 = data.randomSelection(RANDOM_SAMPLES, nnInput, ref2)
     """
 
-    """ Single model setup """
-    nnInput, ref2 = data.randomSelection(RANDOM_SAMPLES, nnInput, ref2)
+    """ Single model setup
+    trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,
+            nnInput, labelALogP)
     model = setup(alphaSize)
-    train(model, nnInput, ref2)
-    predict(model, nnInput, ref2)
-    # test(model, nnInput, refOutput)
+    train(model, trainIn, trainLabel)
+    print("  \nPrediction of training data:")
+    predict(model, trainIn, trainLabel)
+    print("  \nPrediction of testing data:")
+    predict(model, testIn, testLabel)
+    test(model, testIn, testLabel)
+    """
 
+    """ Chained models setup """
+    modelWeights = setup(alphaSize)
+    chainSetup = train(model, fullIn, labelWeight)
+    predict(model, fullIn, labelWeight)
+    modelAlogP = setupInitialized(alphaSize, chainSetup)
+
+    trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,
+            fullIn, labelALogP)
+    train(modelAlogP, trainIn, trainLabel)
+    print("  \nPrediction of training data:")
+    predict(modelAlogP, trainIn, trainLabel)
+    print("  \nPrediction of testing data:")
+    predict(model, testIn, testLabel)
+    test(modelAlogP, testIn, testLabel)
