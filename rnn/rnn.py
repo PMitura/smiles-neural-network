@@ -47,12 +47,8 @@ def setup(alphaSize):
 
 
 def setupInitialized(alphaSize, weights):
-    print('  Initializing and compiling...')
-
     model = configureModel(alphaSize)
     model.set_weights(weights)
-
-    print('  ...done')
     return model
 
 
@@ -100,15 +96,15 @@ def test(model, nnInput, refOutput):
 def run():
     # Initialize using same seed (to get stable results on comparisons)
     np.random.seed(12345)
-    fullIn, labelWeight, labelALogP, alphaSize = data.prepareData()
+    fullIn, labelCol1, labelCol2, alphaSize = data.prepareData()
 
     """ In case a subset is wanted
     nnInput, ref2 = data.randomSelection(RANDOM_SAMPLES, nnInput, ref2)
     """
 
-    """ Single model setup
+    """ Single model setup """
     trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,
-            nnInput, labelALogP)
+            fullIn, labelCol2)
     model = setup(alphaSize)
     train(model, trainIn, trainLabel)
     print("  \nPrediction of training data:")
@@ -116,19 +112,19 @@ def run():
     print("  \nPrediction of testing data:")
     predict(model, testIn, testLabel)
     test(model, testIn, testLabel)
-    """
 
-    """ Chained models setup """
-    modelWeights = setup(alphaSize)
-    chainSetup = train(modelWeights, fullIn, labelWeight)
-    predict(modelWeights, fullIn, labelWeight)
-    modelAlogP = setupInitialized(alphaSize, chainSetup)
+    """ Chained models setup
+    modelCol1s = setup(alphaSize)
+    chainSetup = train(modelCol1s, fullIn, labelCol1)
+    predict(modelCol1s, fullIn, labelCol1)
+    modelCol2 = setupInitialized(alphaSize, chainSetup)
 
     trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,
-            fullIn, labelALogP)
-    train(modelAlogP, trainIn, trainLabel)
+            fullIn, labelCol2)
+    train(modelCol2, trainIn, trainLabel)
     print("  \nPrediction of training data:")
-    predict(modelAlogP, trainIn, trainLabel)
+    predict(modelCol2, trainIn, trainLabel)
     print("  \nPrediction of testing data:")
-    predict(modelAlogP, testIn, testLabel)
-    test(modelAlogP, testIn, testLabel)
+    predict(modelCol2, testIn, testLabel)
+    test(modelCol2, testIn, testLabel)
+    """
