@@ -11,7 +11,7 @@ from keras.regularizers import l1l2, l2
 
 # RNN parameters
 LAYER_MULTIPLIER = 0.5
-EPOCHS = 150
+EPOCHS = 10
 BATCH = 16
 RANDOM_SAMPLES = 20
 PREDICT_PRINT_SAMPLES = 10
@@ -111,10 +111,11 @@ def test(model, nnInput, refOutput):
     print("  ...done")
 
 
-def run():
+def run(source):
     # Initialize using same seed (to get stable results on comparisons)
     np.random.seed(12345)
-    fullIn, labels, alphaSize = data.prepareData()
+
+    fullIn, labels, alphaSize = data.prepareData(source)
 
     """ In case a subset is wanted
     nnInput, ref2 = data.randomSelection(RANDOM_SAMPLES, nnInput, ref2)
@@ -133,8 +134,8 @@ def run():
 
     """ Chained models setup
     modelCol1s = setup(alphaSize)
-    chainSetup = train(modelCol1s, fullIn, labelCol1)
-    predict(modelCol1s, fullIn, labelCol1)
+    chainSetup = train(modelCol1s, fullIn, labels[0])
+    predict(modelCol1s, fullIn, labels[0])
     modelCol2 = setupInitialized(alphaSize, chainSetup)
 
     trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,

@@ -1,5 +1,9 @@
 import pubchempy as pcp
 
+def getData():
+    # dummy, will not work
+    return []
+
 # Dummy function for testing capabilities of pubchempy
 def play():
     aspirin = pcp.get_compounds('Aspirin', 'name')
