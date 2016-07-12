@@ -11,7 +11,7 @@ from keras.regularizers import l1l2, l2
 
 # RNN parameters
 LAYER_MULTIPLIER = 0.5
-EPOCHS = 10
+EPOCHS = 150
 BATCH = 16
 RANDOM_SAMPLES = 20
 PREDICT_PRINT_SAMPLES = 10

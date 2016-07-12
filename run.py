@@ -15,9 +15,7 @@ def main(argv):
     for opt, arg in opts:
         if opt == '-s':
             source = arg
-            print arg
 
-    print 'Using source {}'.format(source)
     run(source)
 
 if __name__ == '__main__':
