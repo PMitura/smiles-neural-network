@@ -4,10 +4,14 @@ import pubchem as pc
 import chembl as ch
 import utility
 
-from math import floor, sqrt
+from math import floor, log, sqrt
 
 # Number of label columns to prepare
-LABEL_COUNT = 2
+INPUT_COUNT = 2
+LABEL_COUNT = 1
+
+# Epsilon for catching numbers close to zero
+EPS = 0.0001
 
 # Transforms data into 1 of k encoding
 # Output format is 3D array of integers, representing positions of binary 1
@@ -94,6 +98,18 @@ def holdout(ratio, words, ref):
     return trainWords, trainRef, testWords, testRef
 
 
+# Preprocess data using logarithm
+def logarithm(array):
+    loged = []
+    for i in range(len(array)):
+        if array[i] < EPS:
+            loged[i] = 0
+        else:
+            print array[i]
+            loged[i] = log(array[i])
+    return loged
+
+
 # Performs z-score normalization on given data
 def zScoreNormalize(array):
     normalized = np.zeros(len(array))
@@ -104,6 +120,7 @@ def zScoreNormalize(array):
         print "Original ", array[i]
         print "Normalized ", normalized[i]
     return normalized, avg, dev
+
 
 # Undo normalization
 def zScoreDenormalize(array, mean, dev):
@@ -130,7 +147,7 @@ def prepareData(source = 'chembl'):
     i = 0
     for item in data:
         for labelID in range(LABEL_COUNT):
-            labels[labelID][i] = item[labelID + 1]
+            labels[labelID][i] = item[labelID + INPUT_COUNT]
         i += 1
 
     """ DEBUG

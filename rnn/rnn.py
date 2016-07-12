@@ -11,8 +11,8 @@ from keras.regularizers import l1l2, l2
 
 # RNN parameters
 LABEL_IDX = 0
-LAYER_MULTIPLIER = 0.5
-EPOCHS = 20
+LAYER_MULTIPLIER = 1
+EPOCHS = 150
 BATCH = 16
 RANDOM_SAMPLES = 20
 PREDICT_PRINT_SAMPLES = 10
@@ -33,7 +33,7 @@ def configureModel(alphaSize):
     model.add(TimeDistributed(Dense(int(LAYER_MULTIPLIER * alphaSize)),
         input_shape = (None, alphaSize)))
     # model.add(TimeDistributed(Dense(LAYER_MULTIPLIER * alphaSize)))
-    model.add(GRU(int(LAYER_MULTIPLIER * alphaSize), activation = 'sigmoid'))
+    model.add(GRU(int(LAYER_MULTIPLIER * alphaSize), activation = 'relu'))
     # model.add(SimpleRNN(2 * LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid'))
     # model.add(AveragePooling1D(pool_length = alphaSize, border_mode='valid'))
     # model.add(Dropout(0.5))
@@ -136,6 +136,9 @@ def run(source):
     np.random.seed(12345)
 
     fullIn, labels, alphaSize = data.prepareData(source)
+
+    if LOGARITHM:
+        labels[LABEL_IDX] = data.logarithm(labels[LABEL_IDX])
 
     global zMean, zDev
     if ZSCORE_NORM:
