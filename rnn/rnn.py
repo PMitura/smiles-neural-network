@@ -3,6 +3,7 @@ import numpy as np
 
 from math import sqrt, exp
 
+# TODO: Remove unused imports after experiments are done
 from keras.models import Sequential
 from keras.layers import Activation, Dense, Dropout, LSTM, AveragePooling1D
 from keras.layers import TimeDistributed, SimpleRNN, GRU, Flatten
@@ -10,14 +11,18 @@ from keras.optimizers import Adam, RMSprop
 from keras.regularizers import l1l2, l2
 
 # RNN parameters
-LABEL_IDX = 0
 LAYER_MULTIPLIER = 1
 EPOCHS = 150
 BATCH = 16
-RANDOM_SAMPLES = 20
-PREDICT_PRINT_SAMPLES = 10
 HOLDOUT_RATIO = 0.8
 LEARNING_RATE = 0.01
+
+# Input settings
+LABEL_IDX = 0
+RANDOM_SAMPLES = 20
+PREDICT_PRINT_SAMPLES = 10
+
+# Preprocessing switches
 ZSCORE_NORM = False
 LOGARITHM = False
 
@@ -33,7 +38,7 @@ def configureModel(alphaSize):
     model.add(TimeDistributed(Dense(int(LAYER_MULTIPLIER * alphaSize)),
         input_shape = (None, alphaSize)))
     # model.add(TimeDistributed(Dense(LAYER_MULTIPLIER * alphaSize)))
-    model.add(GRU(int(LAYER_MULTIPLIER * alphaSize), activation = 'relu'))
+    model.add(GRU(int(LAYER_MULTIPLIER * alphaSize), activation = 'sigmoid'))
     # model.add(SimpleRNN(2 * LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid'))
     # model.add(AveragePooling1D(pool_length = alphaSize, border_mode='valid'))
     # model.add(Dropout(0.5))
@@ -101,7 +106,6 @@ def predict(model, nnInput, refOutput):
         errorSqr.append(e * e)
 
     # averages of everything
-    preAvg = 0.0
     preAvg = utility.mean(pre, len(pre))
     refAvg = utility.mean(refOutput, len(pre))
     errAvg = utility.mean(error, len(pre))

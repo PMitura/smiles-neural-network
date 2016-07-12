@@ -4,7 +4,7 @@ import pubchem as pc
 import chembl as ch
 import utility
 
-from math import floor, log, sqrt
+from math import floor, log, isnan, sqrt
 
 # Number of label columns to prepare
 INPUT_COUNT = 2
@@ -15,13 +15,13 @@ EPS = 0.0001
 
 # Transforms data into 1 of k encoding
 # Output format is 3D array of integers, representing positions of binary 1
-def formatData(rawData):
-    print('  Formatting data...')
+def formatSMILES(rawData, col):
+    print('  Formatting SMILES data column...')
 
     # Get a set of all used characters
     alphabet = set()
     for item in rawData:
-        for char in item[0]:
+        for char in item[col]:
             alphabet.add(char)
 
     # Map columns to letters
@@ -33,9 +33,7 @@ def formatData(rawData):
 
     maxLen = 0
     for item in rawData:
-        maxLen = max(maxLen, len(item[0]))
-    padArray = np.zeros((1, size))
-    padArray[0] = 1
+        maxLen = max(maxLen, len(item[col]))
 
     # DEBUG, data properties
     print("    Number of samples: {}".format(len(rawData)))
@@ -46,18 +44,49 @@ def formatData(rawData):
     itemCtr = 0
     for item in rawData:
         charCtr = 0
-        for char in item[0]:
+        for char in item[col]:
             charIdx = colMapping[char]
             output[itemCtr][charCtr][charIdx] = 1
             charCtr += 1
         for i in range(charCtr, maxLen):
-            output[itemCtr][charCtr][0] = 1
+            output[itemCtr][i][0] = 1
         itemCtr += 1
 
     """ DEBUG: print whole data
     np.set_printoptions(threshold='nan')
+    print output[0]
     print output
     """
+
+    print('  ...done')
+    return size, maxLen, output
+
+
+def formatNominal(rawData, timesteps, col):
+    print('  Formatting nominal data column...')
+
+    # Get a set of all possible values
+    nominals = set()
+    for item in rawData:
+        nominals.add(item[col])
+
+    # Map columns to nominals
+    colMapping = {}
+    size = 0
+    for value in nominals:
+        colMapping[value] = size
+        size += 1
+
+    print("    Number of samples: {}".format(len(rawData)))
+    print("    Number of unique values: {}".format(size))
+
+    itemCtr = 0
+    output = np.zeros((len(rawData), timesteps, size))
+    for item in rawData:
+        valIdx = colMapping[item[col]]
+        for step in range(timesteps):
+            output[itemCtr][step][valIdx] = 1
+        itemCtr += 1
 
     print('  ...done')
     return size, output
@@ -117,8 +146,8 @@ def zScoreNormalize(array):
     dev = utility.stddev(array, len(array))
     for i in range(len(array)):
         normalized[i] = (array[i] - avg) / dev
-        print "Original ", array[i]
-        print "Normalized ", normalized[i]
+        # print "Original ", array[i]
+        # print "Normalized ", normalized[i]
     return normalized, avg, dev
 
 
@@ -130,8 +159,20 @@ def zScoreDenormalize(array, mean, dev):
     return denormalized
 
 
+# Replaces missing labels with zero
+def resolveMissingLabels(labels):
+    print('  Resolving missing labels...')
+    for col in range(len(labels)):
+        for i in range(len(labels[col])):
+            if isnan(labels[col][i]):
+                labels[col][i] = 0
+    print('  ...done')
+
+
 # Call all routines to prepare data for neural network
 def prepareData(source = 'chembl'):
+    np.set_printoptions(threshold='nan')
+
     if source == 'pubchem':
         data = pc.getData()
     elif source == 'chembl':
@@ -139,7 +180,17 @@ def prepareData(source = 'chembl'):
     else:
         raise ValueError('Unknown data source.')
 
-    alphaSize, formattedWords = formatData(data)
+    # SMILES column
+    alphaSize, timesteps, formattedWords = formatSMILES(data, 0)
+    # Nominal data column
+    valueCnt, formattedNominals = formatNominal(data, timesteps, 1)
+    formattedWords = np.concatenate((formattedWords, formattedNominals),
+            axis = 2)
+    alphaSize += valueCnt
+
+    """ DEBUG: print sample row
+    print formattedWords[30]
+    """
 
     labels = []
     for i in range(LABEL_COUNT):
@@ -149,11 +200,8 @@ def prepareData(source = 'chembl'):
         for labelID in range(LABEL_COUNT):
             labels[labelID][i] = item[labelID + INPUT_COUNT]
         i += 1
-
-    """ DEBUG
-    for item in formattedWords:
-        print item
-    """
+    resolveMissingLabels(labels)
+    print labels
 
     return formattedWords, labels, alphaSize
 

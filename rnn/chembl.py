@@ -8,12 +8,12 @@ DB_NAME = 'ctu_qsar'
 
 # data range
 # DB_TABLE = 'target_molweight_1000'
-DB_TABLE = 'target_proteins_10000'
+DB_TABLE = 'target_protein_10000'
 # DB_TABLE = 'target_206_1683'
 
 # DB_COLS = 'canonical_smiles, molweight'
 # DB_COLS = 'canonical_smiles, mw_freebase, alogp'
-DB_COLS = 'canonical_smiles, hba, hbd'
+# DB_COLS = 'canonical_smiles, hba, hbd'
 # DB_COLS = 'canonical_smiles, log_value, standard_value'
 DB_COLS = 'canonical_smiles, standard_type, standard_value'
 
