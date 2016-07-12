@@ -2,8 +2,9 @@ import numpy as np
 import random
 import pubchem as pc
 import chembl as ch
+import utility
 
-from math import floor
+from math import floor, sqrt
 
 # Number of label columns to prepare
 LABEL_COUNT = 2
@@ -91,6 +92,25 @@ def holdout(ratio, words, ref):
         testRef[i] = ref[i + testSize]
 
     return trainWords, trainRef, testWords, testRef
+
+
+# Performs z-score normalization on given data
+def zScoreNormalize(array):
+    normalized = np.zeros(len(array))
+    avg = utility.mean(array, len(array))
+    dev = utility.stddev(array, len(array))
+    for i in range(len(array)):
+        normalized[i] = (array[i] - avg) / dev
+        print "Original ", array[i]
+        print "Normalized ", normalized[i]
+    return normalized, avg, dev
+
+# Undo normalization
+def zScoreDenormalize(array, mean, dev):
+    denormalized = np.zeros(len(array))
+    for i in range(len(array)):
+        denormalized[i] = (array[i] * dev) + mean
+    return denormalized
 
 
 # Call all routines to prepare data for neural network

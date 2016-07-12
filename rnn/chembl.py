@@ -9,7 +9,7 @@ DB_NAME = 'ctu_qsar'
 # data range
 # DB_TABLE = 'target_molweight_1000'
 # DB_TABLE = 'target_properties_norm_1000'
-DB_TABLE = 'target_206_norm_pred_1683'
+DB_TABLE = 'target_206_1683'
 
 # DB_COLS = 'canonical_smiles, molweight'
 # DB_COLS = 'canonical_smiles, mw_freebase, alogp'

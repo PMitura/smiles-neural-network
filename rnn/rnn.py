@@ -1,7 +1,7 @@
-import data
+import data, utility
 import numpy as np
 
-from math import sqrt
+from math import sqrt, exp
 
 from keras.models import Sequential
 from keras.layers import Activation, Dense, Dropout, LSTM, AveragePooling1D
@@ -10,13 +10,16 @@ from keras.optimizers import Adam, RMSprop
 from keras.regularizers import l1l2, l2
 
 # RNN parameters
+LABEL_IDX = 0
 LAYER_MULTIPLIER = 0.5
-EPOCHS = 150
+EPOCHS = 20
 BATCH = 16
 RANDOM_SAMPLES = 20
 PREDICT_PRINT_SAMPLES = 10
 HOLDOUT_RATIO = 0.8
 LEARNING_RATE = 0.01
+ZSCORE_NORM = False
+LOGARITHM = False
 
 
 def configureModel(alphaSize):
@@ -67,29 +70,45 @@ def train(model, nnInput, refOutput):
 
 # Serves as extended version of test, gives averages
 def predict(model, nnInput, refOutput):
-    pre = model.predict(nnInput, batch_size = BATCH)
+    preRaw = model.predict(nnInput, batch_size = BATCH)
+    pre = []
+    for i in range(len(preRaw)):
+        pre.append(preRaw[i][0])
+
+    # temporarily undo z-score normalization, if applied
+    if ZSCORE_NORM:
+        pre = data.zScoreDenormalize(pre, zMean, zDev)
+        refOutput = data.zScoreDenormalize(refOutput, zMean, zDev)
 
     # print samples of predictions
     for i in range(PREDICT_PRINT_SAMPLES):
-        print("    prediction: {}, reference: {}".format(pre[i][0], 
-            refOutput[i]))
+        if LOGARITHM:
+            print("    prediction: {}, reference: {}".format(exp(pre[i]),
+                exp(refOutput[i])))
+        else:
+            print("    prediction: {}, reference: {}".format(pre[i],
+                refOutput[i]))
 
     # array of errors
     error = []
+    errorSqr = []
     for i in range(len(pre)):
-        error.append(abs(pre[i][0] - refOutput[i]))
+        if LOGARITHM:
+            e = abs(exp(pre[i]) - exp(refOutput[i]))
+        else:
+            e = abs(pre[i] - refOutput[i])
+        error.append(e)
+        errorSqr.append(e * e)
 
     # averages of everything
     preAvg = 0.0
-    refAvg = 0.0
-    errAvg = 0.0
+    preAvg = utility.mean(pre, len(pre))
+    refAvg = utility.mean(refOutput, len(pre))
+    errAvg = utility.mean(error, len(pre))
+    errSqr = 0.0
     for i in range(len(pre)):
-        preAvg += pre[i][0]
-        refAvg += refOutput[i]
-        errAvg += error[i]
-    preAvg /= len(pre)
-    refAvg /= len(pre)
-    errAvg /= len(pre)
+        errSqr += errorSqr[i]
+    errSqr = sqrt(errSqr / len(pre))
 
     # std. deviation of error
     errDev = 0.0
@@ -97,10 +116,11 @@ def predict(model, nnInput, refOutput):
         errDev += (error[i] - errAvg) * (error[i] - errAvg)
     errDev = sqrt(errDev / len(pre))
 
-    print("    prediction average:     {}".format(preAvg))
-    print("    reference average:      {}".format(refAvg))
-    print("    error average:          {}".format(errAvg))
+    print("    prediction mean:        {}".format(preAvg))
+    print("    reference mean:         {}".format(refAvg))
+    print("    mean absolute error:    {}".format(errAvg))
     print("    error std. deviation:   {}".format(errDev))
+    print("    root mean square error: {}".format(errSqr))
 
 
 def test(model, nnInput, refOutput):
@@ -117,13 +137,17 @@ def run(source):
 
     fullIn, labels, alphaSize = data.prepareData(source)
 
+    global zMean, zDev
+    if ZSCORE_NORM:
+        labels[LABEL_IDX], zMean, zDev = data.zScoreNormalize(labels[LABEL_IDX])
+
     """ In case a subset is wanted
     nnInput, ref2 = data.randomSelection(RANDOM_SAMPLES, nnInput, ref2)
     """
 
     """ Single model setup """
     trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,
-            fullIn, labels[0])
+            fullIn, labels[LABEL_IDX])
     model = setup(alphaSize)
     train(model, trainIn, trainLabel)
     print("\n  Prediction of training data:")
