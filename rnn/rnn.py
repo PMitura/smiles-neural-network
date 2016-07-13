@@ -1,6 +1,7 @@
 import data, utility
 import numpy as np
 
+from scipy.stats.stats import pearsonr
 from math import sqrt, exp
 
 # TODO: Remove unused imports after experiments are done
@@ -13,17 +14,17 @@ from keras.regularizers import l1l2, l2
 # RNN parameters
 LAYER_MULTIPLIER = 0.5
 EPOCHS = 150
-BATCH = 32
+BATCH = 64 # metacentrum recommended: 128 - 160
 HOLDOUT_RATIO = 0.8
 LEARNING_RATE = 0.01
 
 # Input settings
 LABEL_IDX = 0
-PREDICT_PRINT_SAMPLES = 10
+PREDICT_PRINT_SAMPLES = 15
 
 # Preprocessing switches
 ZSCORE_NORM = False
-LOGARITHM = True
+LOGARITHM = False
 
 
 def configureModel(alphaSize, nomiSize = 0):
@@ -34,15 +35,16 @@ def configureModel(alphaSize, nomiSize = 0):
     model.add(LSTM(LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid',
         input_shape = (None, alphaSize), return_sequences = True))
     """
-    model.add(TimeDistributed(Dense(int(LAYER_MULTIPLIER * (alphaSize +
-        nomiSize))), input_shape = (None, alphaSize + nomiSize)))
+    # model.add(TimeDistributed(Dense(int(LAYER_MULTIPLIER * (alphaSize +
+    #     nomiSize))), input_shape = (None, alphaSize + nomiSize)))
+    model.add(TimeDistributed(Dense(1), input_shape = (None, alphaSize + nomiSize)))
     # model.add(TimeDistributed(Dense(LAYER_MULTIPLIER * alphaSize)))
     model.add(GRU(int(LAYER_MULTIPLIER * alphaSize), activation = 'sigmoid'))
     # model.add(SimpleRNN(2 * LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid'))
     # model.add(AveragePooling1D(pool_length = alphaSize, border_mode='valid'))
     # model.add(Dropout(0.5))
     model.add(Dense(1))
-    # model.add(Activation('tanh'))
+    model.add(Activation('tanh'))
 
     # default learning rate 0.001
     model.compile(loss = 'mse', optimizer = Adam(lr = LEARNING_RATE))
@@ -114,6 +116,7 @@ def predict(model, nnInput, rawLabel):
     for i in range(len(pre)):
         errSqr += errorSqr[i]
     errSqr = sqrt(errSqr / len(pre))
+    pearCr = pearsonr(pre, refOutput)
 
     # std. deviation of error
     errDev = 0.0
@@ -121,11 +124,32 @@ def predict(model, nnInput, rawLabel):
         errDev += (error[i] - errAvg) * (error[i] - errAvg)
     errDev = sqrt(errDev / len(pre))
 
-    print("    prediction mean:        {}".format(preAvg))
-    print("    reference mean:         {}".format(refAvg))
-    print("    mean absolute error:    {}".format(errAvg))
-    print("    error std. deviation:   {}".format(errDev))
-    print("    root mean square error: {}".format(errSqr))
+    print("    prediction mean:         {}".format(preAvg))
+    print("    reference mean:          {}".format(refAvg))
+    print("    mean absolute error:     {}".format(errAvg))
+    print("    error std. deviation:    {}".format(errDev))
+    print("    root mean square error:  {}".format(errSqr))
+    print("    correlation coefficient: {}".format(pearCr[0]))
+    print("    correlation squared:     {}".format(pearCr[0] * pearCr[0]))
+
+
+# Two classes, bins to closest of {-1, 1}
+def classify(model, nnInput, label):
+    preRaw = model.predict(nnInput, batch_size = BATCH)
+    pre = []
+    for i in range(len(preRaw)):
+        pre.append(preRaw[i][0])
+
+    errors = 0.0
+    for i in range(len(pre)):
+        if i < PREDICT_PRINT_SAMPLES:
+            print "Predicted: {} Label: {}".format(pre[i], label[i])
+        if pre[i] <= 0 and label[i] == 1:
+            errors += 1
+        if pre[i] >= 0 and label[i] == -1:
+            errors += 1
+    print("    Classification accuracy: {}%"
+            .format((1 - errors / len(pre)) * 100))
 
 
 def test(model, nnInput, refOutput):
@@ -140,7 +164,12 @@ def run(source):
     # Initialize using same seed (to get stable results on comparisons)
     np.random.seed(12345)
 
-    """ Single model setup
+    tables = ['target_protein_p00734_ec50',
+              'target_protein_p00734_ic50',
+              'target_protein_p03372_ec50',
+              'target_protein_p03372_ic50']
+
+    """ Single model setup """
     fullIn, labels, alphaSize, nomiSize = data.prepareData(source)
 
     if LOGARITHM:
@@ -154,18 +183,16 @@ def run(source):
             fullIn, labels[LABEL_IDX])
     model = setup(alphaSize, nomiSize)
     train(model, trainIn, trainLabel)
-    print("\n  Prediction of training data:")
-    predict(model, trainIn, trainLabel)
-    print("\n  Prediction of testing data:")
-    predict(model, testIn, testLabel)
-    test(model, testIn, testLabel)
-    """
 
-    """ Chained models setup """
-    tables = ['target_protein_p00734_ec50',
-              'target_protein_p00734_ic50',
-              'target_protein_p03372_ec50',
-              'target_protein_p03372_ic50']
+    print("\n  Prediction of training data:")
+    # predict(model, trainIn, trainLabel)
+    classify(model, trainIn, trainLabel)
+    print("\n  Prediction of testing data:")
+    classify(model, testIn, testLabel)
+    # test(model, testIn, testLabel)
+    """ """
+
+    """ Chained models setup
     testInputs = []
     trainInputs = []
     trainLabels = []
@@ -186,6 +213,7 @@ def run(source):
         trainLabels.append(trainLabel)
         testLabels.append(testLabel)
 
+        # Do not reuse weights on first model
         if i == 0:
             model = setup(alphaSize)
         else:
@@ -198,6 +226,7 @@ def run(source):
         predict(model, trainInputs[i], trainLabels[i])
         print("\n  Prediction of testing data in table {}:".format(tables[i]))
         predict(model, testInputs[i], testLabels[i])
+    """
 
 
     """ Simple chained models setup
@@ -216,4 +245,3 @@ def run(source):
     test(modelCol2, testIn, testLabel)
     """
 
-    # predict(5, labels[0], labels[1])

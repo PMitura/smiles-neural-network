@@ -11,7 +11,7 @@ INPUT_COUNT = 1
 LABEL_COUNT = 1
 
 # Fixed alphasize options
-ALPHA_FIXED = True
+ALPHA_FIXED = False
 ALPHA_FIXED_SIZE = 42
 
 # Epsilon for catching numbers close to zero
@@ -190,8 +190,8 @@ def prepareData(source = 'chembl', table = ''):
     # SMILES column
     alphaSize, timesteps, formattedWords = formatSMILES(data, 0)
     # Nominal data columns
+    nomiSize = 0
     """ Not needed in this setup
-    nomiSize = 0.0 # return this if used
     n, formattedNominals = formatNominal(data, timesteps, 1)
     formattedWords = np.concatenate((formattedWords, formattedNominals),
             axis = 2)
@@ -216,5 +216,5 @@ def prepareData(source = 'chembl', table = ''):
         i += 1
     resolveMissingLabels(labels)
 
-    return formattedWords, labels, alphaSize
+    return formattedWords, labels, alphaSize, nomiSize
 
