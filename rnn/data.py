@@ -7,7 +7,7 @@ import utility
 from math import floor, log, isnan, sqrt
 
 # Number of label columns to prepare
-INPUT_COUNT = 2
+INPUT_COUNT = 3
 LABEL_COUNT = 1
 
 # Epsilon for catching numbers close to zero
@@ -129,12 +129,9 @@ def holdout(ratio, words, ref):
 
 # Preprocess data using logarithm
 def logarithm(array):
-    loged = []
+    loged = np.zeros(len(array))
     for i in range(len(array)):
-        if array[i] < EPS:
-            loged[i] = 0
-        else:
-            print array[i]
+        if array[i] > EPS:
             loged[i] = log(array[i])
     return loged
 
@@ -182,11 +179,16 @@ def prepareData(source = 'chembl'):
 
     # SMILES column
     alphaSize, timesteps, formattedWords = formatSMILES(data, 0)
-    # Nominal data column
-    valueCnt, formattedNominals = formatNominal(data, timesteps, 1)
+    # Nominal data columns
+    nomiSize = 0.0
+    n, formattedNominals = formatNominal(data, timesteps, 1)
     formattedWords = np.concatenate((formattedWords, formattedNominals),
             axis = 2)
-    alphaSize += valueCnt
+    nomiSize += n
+    n, formattedNominals = formatNominal(data, timesteps, 2)
+    formattedWords = np.concatenate((formattedWords, formattedNominals),
+            axis = 2)
+    nomiSize += n
 
     """ DEBUG: print sample row
     print formattedWords[30]
@@ -201,7 +203,6 @@ def prepareData(source = 'chembl'):
             labels[labelID][i] = item[labelID + INPUT_COUNT]
         i += 1
     resolveMissingLabels(labels)
-    print labels
 
-    return formattedWords, labels, alphaSize
+    return formattedWords, labels, alphaSize, nomiSize
 

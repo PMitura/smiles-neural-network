@@ -11,7 +11,7 @@ from keras.optimizers import Adam, RMSprop
 from keras.regularizers import l1l2, l2
 
 # RNN parameters
-LAYER_MULTIPLIER = 1
+LAYER_MULTIPLIER = 0.5
 EPOCHS = 150
 BATCH = 16
 HOLDOUT_RATIO = 0.8
@@ -23,11 +23,11 @@ RANDOM_SAMPLES = 20
 PREDICT_PRINT_SAMPLES = 10
 
 # Preprocessing switches
-ZSCORE_NORM = False
-LOGARITHM = False
+ZSCORE_NORM = True
+LOGARITHM = True
 
 
-def configureModel(alphaSize):
+def configureModel(alphaSize, nomiSize):
     print('  Initializing and compiling...')
 
     model = Sequential()
@@ -35,8 +35,8 @@ def configureModel(alphaSize):
     model.add(LSTM(LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid',
         input_shape = (None, alphaSize), return_sequences = True))
     """
-    model.add(TimeDistributed(Dense(int(LAYER_MULTIPLIER * alphaSize)),
-        input_shape = (None, alphaSize)))
+    model.add(TimeDistributed(Dense(int(LAYER_MULTIPLIER * (alphaSize +
+        nomiSize))), input_shape = (None, alphaSize + nomiSize)))
     # model.add(TimeDistributed(Dense(LAYER_MULTIPLIER * alphaSize)))
     model.add(GRU(int(LAYER_MULTIPLIER * alphaSize), activation = 'sigmoid'))
     # model.add(SimpleRNN(2 * LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid'))
@@ -53,8 +53,8 @@ def configureModel(alphaSize):
 
 
 # 3D input: dimensions are (number of samples, length of word, alphabet)
-def setup(alphaSize):
-    return configureModel(alphaSize)
+def setup(alphaSize, nomiSize):
+    return configureModel(alphaSize, nomiSize)
 
 
 def setupInitialized(alphaSize, weights):
@@ -139,7 +139,7 @@ def run(source):
     # Initialize using same seed (to get stable results on comparisons)
     np.random.seed(12345)
 
-    fullIn, labels, alphaSize = data.prepareData(source)
+    fullIn, labels, alphaSize, nomiSize = data.prepareData(source)
 
     if LOGARITHM:
         labels[LABEL_IDX] = data.logarithm(labels[LABEL_IDX])
@@ -155,7 +155,7 @@ def run(source):
     """ Single model setup """
     trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,
             fullIn, labels[LABEL_IDX])
-    model = setup(alphaSize)
+    model = setup(alphaSize, nomiSize)
     train(model, trainIn, trainLabel)
     print("\n  Prediction of training data:")
     predict(model, trainIn, trainLabel)
