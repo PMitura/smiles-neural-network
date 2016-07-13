@@ -7,8 +7,12 @@ import utility
 from math import floor, log, isnan, sqrt
 
 # Number of label columns to prepare
-INPUT_COUNT = 3
+INPUT_COUNT = 1
 LABEL_COUNT = 1
+
+# Fixed alphasize options
+ALPHA_FIXED = True
+ALPHA_FIXED_SIZE = 42
 
 # Epsilon for catching numbers close to zero
 EPS = 0.0001
@@ -39,6 +43,9 @@ def formatSMILES(rawData, col):
     print("    Number of samples: {}".format(len(rawData)))
     print("    Maximum length of sample: {}".format(maxLen))
     print("    Size of alphabet: {}".format(size))
+
+    if ALPHA_FIXED:
+        size = ALPHA_FIXED_SIZE
     output = np.zeros((len(rawData), maxLen, size))
 
     itemCtr = 0
@@ -167,20 +174,24 @@ def resolveMissingLabels(labels):
 
 
 # Call all routines to prepare data for neural network
-def prepareData(source = 'chembl'):
-    np.set_printoptions(threshold='nan')
+def prepareData(source = 'chembl', table = ''):
+    np.set_printoptions(threshold = 'nan')
 
     if source == 'pubchem':
         data = pc.getData()
     elif source == 'chembl':
-        data = ch.getData()
+        if table == '':
+            data = ch.getData()
+        else:
+            data = ch.getData(dbTable = table)
     else:
         raise ValueError('Unknown data source.')
 
     # SMILES column
     alphaSize, timesteps, formattedWords = formatSMILES(data, 0)
     # Nominal data columns
-    nomiSize = 0.0
+    """ Not needed in this setup
+    nomiSize = 0.0 # return this if used
     n, formattedNominals = formatNominal(data, timesteps, 1)
     formattedWords = np.concatenate((formattedWords, formattedNominals),
             axis = 2)
@@ -189,6 +200,7 @@ def prepareData(source = 'chembl'):
     formattedWords = np.concatenate((formattedWords, formattedNominals),
             axis = 2)
     nomiSize += n
+    """
 
     """ DEBUG: print sample row
     print formattedWords[30]
@@ -204,5 +216,5 @@ def prepareData(source = 'chembl'):
         i += 1
     resolveMissingLabels(labels)
 
-    return formattedWords, labels, alphaSize, nomiSize
+    return formattedWords, labels, alphaSize
 

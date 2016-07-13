@@ -13,21 +13,20 @@ from keras.regularizers import l1l2, l2
 # RNN parameters
 LAYER_MULTIPLIER = 0.5
 EPOCHS = 150
-BATCH = 16
+BATCH = 32
 HOLDOUT_RATIO = 0.8
 LEARNING_RATE = 0.01
 
 # Input settings
 LABEL_IDX = 0
-RANDOM_SAMPLES = 20
 PREDICT_PRINT_SAMPLES = 10
 
 # Preprocessing switches
-ZSCORE_NORM = True
+ZSCORE_NORM = False
 LOGARITHM = True
 
 
-def configureModel(alphaSize, nomiSize):
+def configureModel(alphaSize, nomiSize = 0):
     print('  Initializing and compiling...')
 
     model = Sequential()
@@ -53,7 +52,7 @@ def configureModel(alphaSize, nomiSize):
 
 
 # 3D input: dimensions are (number of samples, length of word, alphabet)
-def setup(alphaSize, nomiSize):
+def setup(alphaSize, nomiSize = 0):
     return configureModel(alphaSize, nomiSize)
 
 
@@ -74,34 +73,36 @@ def train(model, nnInput, refOutput):
 
 
 # Serves as extended version of test, gives averages
-def predict(model, nnInput, refOutput):
+def predict(model, nnInput, rawLabel):
     preRaw = model.predict(nnInput, batch_size = BATCH)
     pre = []
+    refOutput = []
     for i in range(len(preRaw)):
         pre.append(preRaw[i][0])
+        if LOGARITHM:
+            refOutput.append(exp(rawLabel[i]))
+        else:
+            refOutput.append(rawLabel[i])
 
     # temporarily undo z-score normalization, if applied
     if ZSCORE_NORM:
         pre = data.zScoreDenormalize(pre, zMean, zDev)
         refOutput = data.zScoreDenormalize(refOutput, zMean, zDev)
 
+    if LOGARITHM:
+        for i in range(len(pre)):
+            pre[i] = exp(pre[i])
+
     # print samples of predictions
-    for i in range(PREDICT_PRINT_SAMPLES):
-        if LOGARITHM:
-            print("    prediction: {}, reference: {}".format(exp(pre[i]),
-                exp(refOutput[i])))
-        else:
-            print("    prediction: {}, reference: {}".format(pre[i],
-                refOutput[i]))
+    for i in range(min(PREDICT_PRINT_SAMPLES, len(pre))):
+        print("    prediction: {}, reference: {}".format(pre[i],
+            refOutput[i]))
 
     # array of errors
     error = []
     errorSqr = []
     for i in range(len(pre)):
-        if LOGARITHM:
-            e = abs(exp(pre[i]) - exp(refOutput[i]))
-        else:
-            e = abs(pre[i] - refOutput[i])
+        e = abs(pre[i] - refOutput[i])
         error.append(e)
         errorSqr.append(e * e)
 
@@ -139,6 +140,7 @@ def run(source):
     # Initialize using same seed (to get stable results on comparisons)
     np.random.seed(12345)
 
+    """ Single model setup
     fullIn, labels, alphaSize, nomiSize = data.prepareData(source)
 
     if LOGARITHM:
@@ -148,11 +150,6 @@ def run(source):
     if ZSCORE_NORM:
         labels[LABEL_IDX], zMean, zDev = data.zScoreNormalize(labels[LABEL_IDX])
 
-    """ In case a subset is wanted
-    nnInput, ref2 = data.randomSelection(RANDOM_SAMPLES, nnInput, ref2)
-    """
-
-    """ Single model setup """
     trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,
             fullIn, labels[LABEL_IDX])
     model = setup(alphaSize, nomiSize)
@@ -162,8 +159,48 @@ def run(source):
     print("\n  Prediction of testing data:")
     predict(model, testIn, testLabel)
     test(model, testIn, testLabel)
+    """
 
-    """ Chained models setup
+    """ Chained models setup """
+    tables = ['target_protein_p00734_ec50',
+              'target_protein_p00734_ic50',
+              'target_protein_p03372_ec50',
+              'target_protein_p03372_ic50']
+    testInputs = []
+    trainInputs = []
+    trainLabels = []
+    testLabels = []
+
+    chainSetup = 0
+    model = 0
+    # Chained training
+    for i in range(4):
+        initIn, initLabel, alphaSize = data.prepareData(source, tables[i])
+        if LOGARITHM:
+            initLabel[LABEL_IDX] = data.logarithm(initLabel[LABEL_IDX])
+        trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,
+                initIn, initLabel[LABEL_IDX])
+
+        trainInputs.append(trainIn)
+        testInputs.append(testIn)
+        trainLabels.append(trainLabel)
+        testLabels.append(testLabel)
+
+        if i == 0:
+            model = setup(alphaSize)
+        else:
+            model = setupInitialized(alphaSize, chainSetup)
+        chainSetup = train(model, trainInputs[i], trainLabels[i])
+
+    # Test on all
+    for i in range(4):
+        print("\n  Prediction of training data in table {}:".format(tables[i]))
+        predict(model, trainInputs[i], trainLabels[i])
+        print("\n  Prediction of testing data in table {}:".format(tables[i]))
+        predict(model, testInputs[i], testLabels[i])
+
+
+    """ Simple chained models setup
     modelCol1s = setup(alphaSize)
     chainSetup = train(modelCol1s, fullIn, labels[0])
     predict(modelCol1s, fullIn, labels[0])
