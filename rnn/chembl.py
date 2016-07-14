@@ -11,19 +11,19 @@ DB_NAME = 'ctu_qsar'
 # DB_TABLE = 'target_protein_1000'
 # DB_TABLE = 'target_206_1683'
 # DB_TABLE = 'target_206_1977'
-# DB_TABLE = 'target_protein_big'
-DB_TABLE = 'target_protein_p03372_ic50_binary'
+DB_TABLE = 'target_protein_big_cleaned'
+# DB_TABLE = 'target_protein_p03372_ic50_binary'
 
 # DB_COLS = 'canonical_smiles, molweight'
 # DB_COLS = 'canonical_smiles, mw_freebase, alogp'
 # DB_COLS = 'canonical_smiles, hba, hbd'
 # DB_COLS = 'canonical_smiles, log_value, standard_value'
-# DB_COLS = 'canonical_smiles, standard_type, protein_accession, standard_value,\
-#         is_testing'
-DB_COLS = 'canonical_smiles, standard_value_50'
+DB_COLS = 'canonical_smiles, standard_type, protein_accession, standard_value,\
+        is_testing'
+# DB_COLS = 'canonical_smiles, standard_value_50'
 # DB_COLS = 'canonical_smiles, standard_value, is_testing'
 
-CAP_SIZE = 10000
+CAP_SIZE = 100
 
 # Connects to remote DB, reads input data into array.
 def getData(dbCols = DB_COLS, dbTable = DB_TABLE):
@@ -39,8 +39,8 @@ def getData(dbCols = DB_COLS, dbTable = DB_TABLE):
     # care, this is still fixed at certain number of cols
     # TODO: generalize
 
-    for a, b in cursor:
-        array.append((a, b))
+    for a, b, c, d, e in cursor:
+        array.append((a, b, c, d, e))
     cursor.close()
     cnx.close()
 

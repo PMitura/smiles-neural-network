@@ -2,8 +2,8 @@ import data, utility
 import numpy as np
 import keras.callbacks
 
-from scipy.stats.stats import pearsonr
-from sklearn.metrics import roc_auc_score
+# from scipy.stats.stats import pearsonr
+# from sklearn.metrics import roc_auc_score
 from math import sqrt, exp
 
 # TODO: Remove unused imports after experiments are done
@@ -11,22 +11,22 @@ from keras.models import Sequential
 from keras.layers import Activation, Dense, Dropout, LSTM, AveragePooling1D
 from keras.layers import TimeDistributed, SimpleRNN, GRU, Flatten
 from keras.optimizers import Adam, RMSprop
-from keras.regularizers import l1
+# from keras.regularizers import l1
 
 from keras import backend as K
 
 # RNN parameters
-GRU_LAYER_MULTIPLIER = 2
+GRU_LAYER_MULTIPLIER = 1
 TD_LAYER_MULTIPLIER = 0.5
 EPOCHS = 150
 BATCH = 160 # metacentrum recommended: 128 - 160
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.01
 EARLY_STOP = 10
 
 # Holdout settings
-FLAG_BASED_HOLD = False
+FLAG_BASED_HOLD = True
 HOLDOUT_RATIO = 0.8
-CLASSIFY = True
+CLASSIFY = False
 
 # Input settings
 LABEL_IDX = 0
@@ -34,7 +34,7 @@ PREDICT_PRINT_SAMPLES = 15
 
 # Preprocessing switches
 ZSCORE_NORM = False
-LOGARITHM = False
+LOGARITHM = True
 
 
 def configureModel(alphaSize, nomiSize = 0):
@@ -53,8 +53,9 @@ def configureModel(alphaSize, nomiSize = 0):
     # model.add(SimpleRNN(2 * LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid'))
     # model.add(AveragePooling1D(pool_length = alphaSize, border_mode='valid'))
     # model.add(Dropout(0.5))
-    model.add(Dense(1, W_regularizer = l1(0.01)))
-    model.add(Activation('tanh'))
+    # model.add(Dense(1, W_regularizer = l1(0.01)))
+    model.add(Dense(1))
+    # model.add(Activation('tanh'))
 
     # default learning rate 0.001
     model.compile(loss = 'mse', optimizer = Adam(lr = LEARNING_RATE))
@@ -128,7 +129,12 @@ def predict(model, nnInput, rawLabel):
     for i in range(len(pre)):
         errSqr += errorSqr[i]
     errSqr = sqrt(errSqr / len(pre))
-    pearCr = pearsonr(pre, label)
+
+    merged = np.zeros((2, len(pre)))
+    for i in range(len(pre)):
+        merged[0][i] = pre[i]
+        merged[1][i] = label[i]
+    pearCr = np.corrcoef(merged)
 
     # std. deviation of error
     errDev = 0.0
@@ -141,11 +147,12 @@ def predict(model, nnInput, rawLabel):
     print("    mean absolute error:     {}".format(errAvg))
     print("    error std. deviation:    {}".format(errDev))
     print("    root mean square error:  {}".format(errSqr))
-    print("    correlation coefficient: {}".format(pearCr[0]))
-    print("    R2:                      {}".format(pearCr[0] * pearCr[0]))
+    print("    correlation coefficient: {}".format(pearCr[0][1]))
+    print("    R2:                      {}".format(pearCr[0][1] * pearCr[0][1]))
 
 
 # Two classes, bins to closest of {-1, 1}
+# TODO: return imports, removed because of cluster runs
 def classify(model, nnInput, label):
     preRaw = model.predict(nnInput, batch_size = BATCH)
     pre = []
@@ -257,8 +264,7 @@ def run(source):
                 fullIn, labels[LABEL_IDX])
     model = setup(alphaSize, nomiSize)
     train(model, trainIn, trainLabel)
-
-    print model.layers[2].get_weights()
+    model.save_weights('savedweights.hdf5')
 
     """
     print("\n  Visualisation test:")

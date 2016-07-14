@@ -7,9 +7,9 @@ import utility
 from math import floor, log, isnan, sqrt
 
 # Number of label columns to prepare
-INPUT_COUNT = 1
+INPUT_COUNT = 3
 LABEL_COUNT = 1
-USE_TEST_FLAGS = False
+USE_TEST_FLAGS = True
 
 # Fixed alphasize options
 ALPHA_FIXED = False
@@ -227,7 +227,7 @@ def prepareData(source = 'chembl', table = ''):
     alphaSize, timesteps, formattedWords = formatSMILES(data, 0)
     # Nominal data columns
     nomiSize = 0
-    """ Not needed in this setup
+    """ Not needed in this setup """
     n, formattedNominals = formatNominal(data, timesteps, 1)
     formattedWords = np.concatenate((formattedWords, formattedNominals),
             axis = 2)
@@ -236,7 +236,7 @@ def prepareData(source = 'chembl', table = ''):
     formattedWords = np.concatenate((formattedWords, formattedNominals),
             axis = 2)
     nomiSize += n
-    """
+    """ """
 
     """ DEBUG: print sample row
     print formattedWords[30]
