@@ -9,7 +9,7 @@ from math import floor, log, isnan, sqrt
 # Number of label columns to prepare
 INPUT_COUNT = 1
 LABEL_COUNT = 1
-USE_TEST_FLAGS = True
+USE_TEST_FLAGS = False
 
 # Fixed alphasize options
 ALPHA_FIXED = False

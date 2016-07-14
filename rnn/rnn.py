@@ -11,18 +11,22 @@ from keras.models import Sequential
 from keras.layers import Activation, Dense, Dropout, LSTM, AveragePooling1D
 from keras.layers import TimeDistributed, SimpleRNN, GRU, Flatten
 from keras.optimizers import Adam, RMSprop
-from keras.regularizers import l1l2, l2
+from keras.regularizers import l1
+
+from keras import backend as K
 
 # RNN parameters
-LAYER_MULTIPLIER = 1
-EPOCHS = 10
+GRU_LAYER_MULTIPLIER = 2
+TD_LAYER_MULTIPLIER = 0.5
+EPOCHS = 150
 BATCH = 160 # metacentrum recommended: 128 - 160
-LEARNING_RATE = 0.01
+LEARNING_RATE = 0.001
 EARLY_STOP = 10
 
 # Holdout settings
-FLAG_BASED_HOLD = True
+FLAG_BASED_HOLD = False
 HOLDOUT_RATIO = 0.8
+CLASSIFY = True
 
 # Input settings
 LABEL_IDX = 0
@@ -30,7 +34,7 @@ PREDICT_PRINT_SAMPLES = 15
 
 # Preprocessing switches
 ZSCORE_NORM = False
-LOGARITHM = True
+LOGARITHM = False
 
 
 def configureModel(alphaSize, nomiSize = 0):
@@ -41,15 +45,16 @@ def configureModel(alphaSize, nomiSize = 0):
     model.add(LSTM(LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid',
         input_shape = (None, alphaSize), return_sequences = True))
     """
-    model.add(TimeDistributed(Dense(int(LAYER_MULTIPLIER * (alphaSize +
+    model.add(TimeDistributed(Dense(int(TD_LAYER_MULTIPLIER * (alphaSize +
         nomiSize))), input_shape = (None, alphaSize + nomiSize)))
     # model.add(TimeDistributed(Dense(1), input_shape = (None, alphaSize + nomiSize)))
     # model.add(TimeDistributed(Dense(LAYER_MULTIPLIER * alphaSize)))
-    model.add(GRU(int(LAYER_MULTIPLIER * alphaSize), activation = 'sigmoid'))
+    model.add(GRU(int(GRU_LAYER_MULTIPLIER * alphaSize), activation = 'sigmoid'))
     # model.add(SimpleRNN(2 * LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid'))
     # model.add(AveragePooling1D(pool_length = alphaSize, border_mode='valid'))
     # model.add(Dropout(0.5))
-    model.add(Dense(1))
+    model.add(Dense(1, W_regularizer = l1(0.01)))
+    model.add(Activation('tanh'))
 
     # default learning rate 0.001
     model.compile(loss = 'mse', optimizer = Adam(lr = LEARNING_RATE))
@@ -132,7 +137,7 @@ def predict(model, nnInput, rawLabel):
     errDev = sqrt(errDev / len(pre))
 
     print("    prediction mean:         {}".format(preAvg))
-    print("    reference mean:          {}".format(refAvg))
+    print("    label mean:              {}".format(refAvg))
     print("    mean absolute error:     {}".format(errAvg))
     print("    error std. deviation:    {}".format(errDev))
     print("    root mean square error:  {}".format(errSqr))
@@ -147,14 +152,24 @@ def classify(model, nnInput, label):
     for i in range(len(preRaw)):
         pre.append(preRaw[i][0])
 
-    errors = 0.0
+    falseNegative = 0.0
+    falsePositive = 0.0
+    truePositive  = 0.0
+    trueNegative  = 0.0
+
     for i in range(len(pre)):
         if i < PREDICT_PRINT_SAMPLES:
             print "    Predicted: {} Label: {}".format(pre[i], label[i])
-        if pre[i] <= 0 and label[i] == 1:
-            errors += 1
-        if pre[i] >= 0 and label[i] == -1:
-            errors += 1
+        if pre[i] < 0 and label[i] == 1:
+            falseNegative += 1
+        elif pre[i] > 0 and label[i] == -1:
+            falsePositive += 1
+        elif pre[i] > 0 and label[i] == 1:
+            truePositive += 1
+        elif pre[i] < 0 and label[i] == -1:
+            trueNegative += 1
+
+    errors = falseNegative + falsePositive
 
     # array of errors
     error = []
@@ -180,8 +195,17 @@ def classify(model, nnInput, label):
         errDev += (error[i] - errAvg) * (error[i] - errAvg)
     errDev = sqrt(errDev / len(pre))
 
+    sensitivity = truePositive / (truePositive + falseNegative)
+    specificity = trueNegative / (trueNegative + falsePositive)
+    precision   = truePositive / (truePositive + trueNegative)
+    accuracy    = (1 - (errors / len(pre)))
+    if precision + sensitivity != 0:
+        fmeasure = (2 * precision * sensitivity) / (precision + sensitivity)
+    else:
+        fmeasure = float('nan')
+
     print("    prediction mean:         {}".format(preAvg))
-    print("    reference mean:          {}".format(refAvg))
+    print("    label mean:              {}".format(refAvg))
     print("    mean absolute error:     {}".format(errAvg))
     print("    error std. deviation:    {}".format(errDev))
     print("    root mean square error:  {}".format(errSqr))
@@ -189,10 +213,13 @@ def classify(model, nnInput, label):
     print("    R2:                      {}".format(pearCr[0] * pearCr[0]))
 
     print("    Classification accuracy: {}%"
-            .format((1 - errors / len(pre)) * 100))
+            .format(accuracy * 100))
     print("    ROC AUC score:           {}"
             .format(roc_auc_score(label, pre)))
-
+    print("    Sensitivity:             {}".format(sensitivity))
+    print("    Specificity:             {}".format(specificity))
+    print("    Precision:               {}".format(precision))
+    print("    F-measure:               {}".format(fmeasure))
 
 
 def test(model, nnInput, refOutput):
@@ -231,12 +258,29 @@ def run(source):
     model = setup(alphaSize, nomiSize)
     train(model, trainIn, trainLabel)
 
+    print model.layers[2].get_weights()
+
+    """
+    print("\n  Visualisation test:")
+    vlayer = K.function([model.layers[0].input], [model.layers[1].output])
+    result = vlayer([testIn])[0]
+    print "\n  Len of layer: {} Len of data: {}".format(len(result),
+            len(testIn))
+    for line in result:
+        for val in line:
+            print '{0:.20f}'.format(val)
+    """
+
     print("\n  Prediction of training data:")
-    predict(model, trainIn, trainLabel)
-    # classify(model, trainIn, trainLabel)
+    if CLASSIFY:
+        classify(model, trainIn, trainLabel)
+    else:
+        predict(model, trainIn, trainLabel)
     print("\n  Prediction of testing data:")
-    predict(model, testIn, testLabel)
-    # classify(model, testIn, testLabel)
+    if CLASSIFY:
+        classify(model, testIn, testLabel)
+    else:
+        predict(model, testIn, testLabel)
 
     # test(model, testIn, testLabel)
     """ """
