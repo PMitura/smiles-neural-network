@@ -89,7 +89,7 @@ def predict(model, nnInput, rawLabel):
     for i in range(len(preRaw)):
         pre.append(preRaw[i][0])
         if LOGARITHM:
-            label.append(exp(rawLabel[i]) - 1)
+            label.append(exp(-rawLabel[i]))
         else:
             label.append(rawLabel[i])
 
@@ -100,7 +100,7 @@ def predict(model, nnInput, rawLabel):
 
     if LOGARITHM:
         for i in range(len(pre)):
-            pre[i] = exp(pre[i]) - 1
+            pre[i] = exp(-pre[i])
 
     # print samples of predictions
     for i in range(min(PREDICT_PRINT_SAMPLES, len(pre))):

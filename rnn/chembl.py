@@ -38,8 +38,8 @@ def getData(dbCols = DB_COLS, dbTable = DB_TABLE):
     # care, this is still fixed at certain number of cols
     # TODO: generalize
 
-    for a, b in cursor:
-        array.append((a, b))
+    for a, b, c in cursor:
+        array.append((a, b, c))
     cursor.close()
     cnx.close()
 

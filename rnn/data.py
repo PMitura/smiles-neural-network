@@ -136,14 +136,19 @@ def holdout(ratio, words, label):
 
 
 # Bases holdout on column of dataset
+# 1 - use in testing
+# 0 - use in training
+# null (None) - don't use
 def holdoutBased(testFlags, words, label):
     testSize = 0
     trainSize = 0
     for i in range(len(testFlags)):
         if testFlags[i] == 1:
             testSize += 1
-        else:
+        elif testFlags[i] == 0:
             trainSize += 1
+        elif testFlags[i] != None:
+            raise ValueError("Unknown value in test flags")
 
     trainWords = np.zeros((trainSize, len(words[0]), len(words[0][0])))
     trainLabel = np.zeros((trainSize))
@@ -157,7 +162,7 @@ def holdoutBased(testFlags, words, label):
             testWords[testIdx] = words[i]
             testLabel[testIdx] = label[i]
             testIdx += 1
-        else:
+        elif testFlags[i] == 0:
             trainWords[trainIdx] = words[i]
             trainLabel[trainIdx] = label[i]
             trainIdx += 1
@@ -165,11 +170,12 @@ def holdoutBased(testFlags, words, label):
 
 
 # Preprocess data using logarithm
+# NOTE: -log(x) apparently works better than log(x + 1)
 def logarithm(array):
     loged = np.zeros(len(array))
     for i in range(len(array)):
         if array[i] > EPS:
-            loged[i] = log(array[i] + 1)
+            loged[i] = -log(array[i])
     return loged
 
 
