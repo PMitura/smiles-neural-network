@@ -14,8 +14,8 @@ from keras.optimizers import Adam, RMSprop
 from keras.regularizers import l1l2, l2
 
 # RNN parameters
-LAYER_MULTIPLIER = 0.5
-EPOCHS = 150
+LAYER_MULTIPLIER = 1
+EPOCHS = 10
 BATCH = 160 # metacentrum recommended: 128 - 160
 LEARNING_RATE = 0.01
 EARLY_STOP = 10
@@ -41,9 +41,9 @@ def configureModel(alphaSize, nomiSize = 0):
     model.add(LSTM(LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid',
         input_shape = (None, alphaSize), return_sequences = True))
     """
-    # model.add(TimeDistributed(Dense(int(LAYER_MULTIPLIER * (alphaSize +
-    #     nomiSize))), input_shape = (None, alphaSize + nomiSize)))
-    model.add(TimeDistributed(Dense(1), input_shape = (None, alphaSize + nomiSize)))
+    model.add(TimeDistributed(Dense(int(LAYER_MULTIPLIER * (alphaSize +
+        nomiSize))), input_shape = (None, alphaSize + nomiSize)))
+    # model.add(TimeDistributed(Dense(1), input_shape = (None, alphaSize + nomiSize)))
     # model.add(TimeDistributed(Dense(LAYER_MULTIPLIER * alphaSize)))
     model.add(GRU(int(LAYER_MULTIPLIER * alphaSize), activation = 'sigmoid'))
     # model.add(SimpleRNN(2 * LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid'))
