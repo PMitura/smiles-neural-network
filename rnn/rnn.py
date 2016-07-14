@@ -264,7 +264,8 @@ def run(source):
                 fullIn, labels[LABEL_IDX])
     model = setup(alphaSize, nomiSize)
     train(model, trainIn, trainLabel)
-    model.save_weights('savedweights.hdf5')
+
+    print model.get_weights()
 
     """
     print("\n  Visualisation test:")
