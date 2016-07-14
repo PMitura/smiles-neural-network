@@ -9,6 +9,7 @@ from math import floor, log, isnan, sqrt
 # Number of label columns to prepare
 INPUT_COUNT = 1
 LABEL_COUNT = 1
+USE_TEST_FLAGS = True
 
 # Fixed alphasize options
 ALPHA_FIXED = False
@@ -111,27 +112,56 @@ def randomSelection(n, words, ref):
 
 
 # Splits the data into training and testing set
-def holdout(ratio, words, ref):
+def holdout(ratio, words, label):
     if ratio >= 1 or ratio <= 0:
         raise ValueError('Ratio must be in (0, 1) interval')
 
     # Prepare training set
     trainSize = int(floor(len(words) * ratio))
     trainWords = np.zeros((trainSize, len(words[0]), len(words[0][0])))
-    trainRef = np.zeros((trainSize))
+    trainLabel = np.zeros((trainSize))
     for i in range(trainSize):
         trainWords[i] = words[i]
-        trainRef[i] = ref[i]
+        trainLabel[i] = label[i]
 
     # Prepare testing set
     testSize = int(floor(len(words) - (len(words) * ratio)))
     testWords = np.zeros((testSize, len(words[0]), len(words[0][0])))
-    testRef = np.zeros((testSize))
+    testLabel = np.zeros((testSize))
     for i in range(testSize):
         testWords[i] = words[i + testSize]
-        testRef[i] = ref[i + testSize]
+        testLabel[i] = label[i + testSize]
 
-    return trainWords, trainRef, testWords, testRef
+    return trainWords, trainLabel, testWords, testLabel
+
+
+# Bases holdout on column of dataset
+def holdoutBased(testFlags, words, label):
+    testSize = 0
+    trainSize = 0
+    for i in range(len(testFlags)):
+        if testFlags[i] == 1:
+            testSize += 1
+        else:
+            trainSize += 1
+
+    trainWords = np.zeros((trainSize, len(words[0]), len(words[0][0])))
+    trainLabel = np.zeros((trainSize))
+    trainIdx = 0
+    testWords = np.zeros((testSize, len(words[0]), len(words[0][0])))
+    testLabel = np.zeros((testSize))
+    testIdx = 0
+
+    for i in range(len(words)):
+        if testFlags[i] == 1:
+            testWords[testIdx] = words[i]
+            testLabel[testIdx] = label[i]
+            testIdx += 1
+        else:
+            trainWords[trainIdx] = words[i]
+            trainLabel[trainIdx] = label[i]
+            trainIdx += 1
+    return trainWords, trainLabel, testWords, testLabel
 
 
 # Preprocess data using logarithm
@@ -139,7 +169,7 @@ def logarithm(array):
     loged = np.zeros(len(array))
     for i in range(len(array)):
         if array[i] > EPS:
-            loged[i] = log(array[i])
+            loged[i] = log(array[i] + 1)
     return loged
 
 
@@ -206,6 +236,7 @@ def prepareData(source = 'chembl', table = ''):
     print formattedWords[30]
     """
 
+    # put labels into array
     labels = []
     for i in range(LABEL_COUNT):
         labels.append(np.zeros((len(data))))
@@ -216,5 +247,11 @@ def prepareData(source = 'chembl', table = ''):
         i += 1
     resolveMissingLabels(labels)
 
-    return formattedWords, labels, alphaSize, nomiSize
+    # put test flags into array - test flags are expected in last column
+    testFlags = []
+    if USE_TEST_FLAGS:
+        for item in data:
+            testFlags.append(item[LABEL_COUNT + INPUT_COUNT])
+
+    return formattedWords, labels, alphaSize, nomiSize, testFlags
 

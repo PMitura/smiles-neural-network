@@ -1,7 +1,9 @@
 import data, utility
 import numpy as np
+import keras.callbacks
 
 from scipy.stats.stats import pearsonr
+from sklearn.metrics import roc_auc_score
 from math import sqrt, exp
 
 # TODO: Remove unused imports after experiments are done
@@ -14,9 +16,13 @@ from keras.regularizers import l1l2, l2
 # RNN parameters
 LAYER_MULTIPLIER = 0.5
 EPOCHS = 150
-BATCH = 64 # metacentrum recommended: 128 - 160
-HOLDOUT_RATIO = 0.8
+BATCH = 160 # metacentrum recommended: 128 - 160
 LEARNING_RATE = 0.01
+EARLY_STOP = 10
+
+# Holdout settings
+FLAG_BASED_HOLD = True
+HOLDOUT_RATIO = 0.8
 
 # Input settings
 LABEL_IDX = 0
@@ -24,7 +30,7 @@ PREDICT_PRINT_SAMPLES = 15
 
 # Preprocessing switches
 ZSCORE_NORM = False
-LOGARITHM = False
+LOGARITHM = True
 
 
 def configureModel(alphaSize, nomiSize = 0):
@@ -44,7 +50,6 @@ def configureModel(alphaSize, nomiSize = 0):
     # model.add(AveragePooling1D(pool_length = alphaSize, border_mode='valid'))
     # model.add(Dropout(0.5))
     model.add(Dense(1))
-    model.add(Activation('tanh'))
 
     # default learning rate 0.001
     model.compile(loss = 'mse', optimizer = Adam(lr = LEARNING_RATE))
@@ -66,7 +71,9 @@ def setupInitialized(alphaSize, weights):
 
 def train(model, nnInput, refOutput):
     print('  Training model...')
-    model.fit(nnInput, refOutput, nb_epoch = EPOCHS, batch_size = BATCH)
+    early = keras.callbacks.EarlyStopping(monitor = 'loss', patience = EARLY_STOP)
+    model.fit(nnInput, refOutput, nb_epoch = EPOCHS, batch_size = BATCH,
+            callbacks = [early])
     print('    Model weights:')
     print(model.summary())
     # print(model.get_weights())
@@ -78,45 +85,45 @@ def train(model, nnInput, refOutput):
 def predict(model, nnInput, rawLabel):
     preRaw = model.predict(nnInput, batch_size = BATCH)
     pre = []
-    refOutput = []
+    label = []
     for i in range(len(preRaw)):
         pre.append(preRaw[i][0])
         if LOGARITHM:
-            refOutput.append(exp(rawLabel[i]))
+            label.append(exp(rawLabel[i]) - 1)
         else:
-            refOutput.append(rawLabel[i])
+            label.append(rawLabel[i])
 
     # temporarily undo z-score normalization, if applied
     if ZSCORE_NORM:
         pre = data.zScoreDenormalize(pre, zMean, zDev)
-        refOutput = data.zScoreDenormalize(refOutput, zMean, zDev)
+        refOutput = data.zScoreDenormalize(label, zMean, zDev)
 
     if LOGARITHM:
         for i in range(len(pre)):
-            pre[i] = exp(pre[i])
+            pre[i] = exp(pre[i]) - 1
 
     # print samples of predictions
     for i in range(min(PREDICT_PRINT_SAMPLES, len(pre))):
         print("    prediction: {}, reference: {}".format(pre[i],
-            refOutput[i]))
+            label[i]))
 
     # array of errors
     error = []
     errorSqr = []
     for i in range(len(pre)):
-        e = abs(pre[i] - refOutput[i])
+        e = abs(pre[i] - label[i])
         error.append(e)
         errorSqr.append(e * e)
 
     # averages of everything
     preAvg = utility.mean(pre, len(pre))
-    refAvg = utility.mean(refOutput, len(pre))
+    refAvg = utility.mean(label, len(pre))
     errAvg = utility.mean(error, len(pre))
     errSqr = 0.0
     for i in range(len(pre)):
         errSqr += errorSqr[i]
     errSqr = sqrt(errSqr / len(pre))
-    pearCr = pearsonr(pre, refOutput)
+    pearCr = pearsonr(pre, label)
 
     # std. deviation of error
     errDev = 0.0
@@ -130,7 +137,7 @@ def predict(model, nnInput, rawLabel):
     print("    error std. deviation:    {}".format(errDev))
     print("    root mean square error:  {}".format(errSqr))
     print("    correlation coefficient: {}".format(pearCr[0]))
-    print("    correlation squared:     {}".format(pearCr[0] * pearCr[0]))
+    print("    R2:                      {}".format(pearCr[0] * pearCr[0]))
 
 
 # Two classes, bins to closest of {-1, 1}
@@ -143,13 +150,49 @@ def classify(model, nnInput, label):
     errors = 0.0
     for i in range(len(pre)):
         if i < PREDICT_PRINT_SAMPLES:
-            print "Predicted: {} Label: {}".format(pre[i], label[i])
+            print "    Predicted: {} Label: {}".format(pre[i], label[i])
         if pre[i] <= 0 and label[i] == 1:
             errors += 1
         if pre[i] >= 0 and label[i] == -1:
             errors += 1
+
+    # array of errors
+    error = []
+    errorSqr = []
+    for i in range(len(pre)):
+        e = abs(pre[i] - label[i])
+        error.append(e)
+        errorSqr.append(e * e)
+
+    # averages of everything
+    preAvg = utility.mean(pre, len(pre))
+    refAvg = utility.mean(label, len(pre))
+    errAvg = utility.mean(error, len(pre))
+    errSqr = 0.0
+    for i in range(len(pre)):
+        errSqr += errorSqr[i]
+    errSqr = sqrt(errSqr / len(pre))
+    pearCr = pearsonr(pre, label)
+
+    # std. deviation of error
+    errDev = 0.0
+    for i in range(len(pre)):
+        errDev += (error[i] - errAvg) * (error[i] - errAvg)
+    errDev = sqrt(errDev / len(pre))
+
+    print("    prediction mean:         {}".format(preAvg))
+    print("    reference mean:          {}".format(refAvg))
+    print("    mean absolute error:     {}".format(errAvg))
+    print("    error std. deviation:    {}".format(errDev))
+    print("    root mean square error:  {}".format(errSqr))
+    print("    correlation coefficient: {}".format(pearCr[0]))
+    print("    R2:                      {}".format(pearCr[0] * pearCr[0]))
+
     print("    Classification accuracy: {}%"
             .format((1 - errors / len(pre)) * 100))
+    print("    ROC AUC score:           {}"
+            .format(roc_auc_score(label, pre)))
+
 
 
 def test(model, nnInput, refOutput):
@@ -170,7 +213,7 @@ def run(source):
               'target_protein_p03372_ic50']
 
     """ Single model setup """
-    fullIn, labels, alphaSize, nomiSize = data.prepareData(source)
+    fullIn, labels, alphaSize, nomiSize, testFlags = data.prepareData(source)
 
     if LOGARITHM:
         labels[LABEL_IDX] = data.logarithm(labels[LABEL_IDX])
@@ -179,16 +222,22 @@ def run(source):
     if ZSCORE_NORM:
         labels[LABEL_IDX], zMean, zDev = data.zScoreNormalize(labels[LABEL_IDX])
 
-    trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,
-            fullIn, labels[LABEL_IDX])
+    if FLAG_BASED_HOLD:
+        trainIn, trainLabel, testIn, testLabel = data.holdoutBased(testFlags,
+                fullIn, labels[LABEL_IDX])
+    else:
+        trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,
+                fullIn, labels[LABEL_IDX])
     model = setup(alphaSize, nomiSize)
     train(model, trainIn, trainLabel)
 
     print("\n  Prediction of training data:")
-    # predict(model, trainIn, trainLabel)
-    classify(model, trainIn, trainLabel)
+    predict(model, trainIn, trainLabel)
+    # classify(model, trainIn, trainLabel)
     print("\n  Prediction of testing data:")
-    classify(model, testIn, testLabel)
+    predict(model, testIn, testLabel)
+    # classify(model, testIn, testLabel)
+
     # test(model, testIn, testLabel)
     """ """
 
