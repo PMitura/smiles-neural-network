@@ -19,7 +19,7 @@ from keras import backend as K
 GRU_LAYER_MULTIPLIER = 1
 TD_LAYER_MULTIPLIER = 0.25
 EPOCHS = 150
-25ATCH = 160 # metacentrum recommended: 128 - 160
+BATCH = 160 # metacentrum recommended: 128 - 160
 LEARNING_RATE = 0.005
 EARLY_STOP = 10
 
@@ -48,7 +48,7 @@ def configureModel(alphaSize, nomiSize = 0):
     model.add(TimeDistributed(Dense(int(TD_LAYER_MULTIPLIER * (alphaSize +
         nomiSize))), input_shape = (None, alphaSize + nomiSize)))
     model.add(TimeDistributed(Dense(int(TD_LAYER_MULTIPLIER * (alphaSize +
-        nomiSize))), input_shape = (None, alphaSize + nomiSize)))
+        nomiSize)))))
     # model.add(TimeDistributed(Dense(1), input_shape = (None, alphaSize + nomiSize)))
     # model.add(TimeDistributed(Dense(LAYER_MULTIPLIER * alphaSize)))
     model.add(GRU(int(GRU_LAYER_MULTIPLIER * alphaSize), activation = 'sigmoid'))
