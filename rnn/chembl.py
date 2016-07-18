@@ -23,7 +23,7 @@ DB_COLS = 'canonical_smiles, standard_type, protein_accession, standard_value,\
 # DB_COLS = 'canonical_smiles, standard_value_50'
 # DB_COLS = 'canonical_smiles, standard_value, is_testing'
 
-CAP_SIZE = 10000
+CAP_SIZE = 200
 
 # Connects to remote DB, reads input data into array.
 def getData(dbCols = DB_COLS, dbTable = DB_TABLE):

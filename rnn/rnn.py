@@ -19,7 +19,7 @@ from keras import backend as K
 # RNN parameters
 TD_LAYER_MULTIPLIER = 0.5   # Time-distributed layer modifier of neuron count
 GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
-EPOCHS = 150
+EPOCHS = 3
 BATCH = 160                 # metacentrum.cz recommended: 128 - 160
 LEARNING_RATE = 0.005
 EARLY_STOP = 10             # Number of tolerated epochs without improvement
@@ -47,16 +47,16 @@ def configureModel(alphaSize, nomiSize = 0):
         input_shape = (None, alphaSize), return_sequences = True))
     """
     model.add(GRU(int(GRU_LAYER_MULTIPLIER * alphaSize), activation =
-        'sigmoid'), input_shape = (None, alphaSize + nomiSize))
+        'sigmoid', input_shape = (None, alphaSize + nomiSize),
+        return_sequences = True))
     model.add(TimeDistributed(Dense(int(TD_LAYER_MULTIPLIER * (alphaSize +
         nomiSize)))))
     # model.add(TimeDistributed(Dense(1), input_shape = (None, alphaSize + nomiSize)))
-    # model.add(TimeDistributed(Dense(LAYER_MULTIPLIER * alphaSize)))
     # model.add(SimpleRNN(2 * LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid'))
     # model.add(AveragePooling1D(pool_length = alphaSize, border_mode='valid'))
     # model.add(Dropout(0.5))
     # model.add(Dense(1, W_regularizer = l1(0.01)))
-    model.add(Dense(1))
+    model.add(LSTM(1))
     # model.add(Activation('tanh'))
 
     # default learning rate 0.001
