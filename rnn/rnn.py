@@ -16,25 +16,25 @@ from keras.optimizers import Adam, RMSprop
 from keras import backend as K
 
 # RNN parameters
-GRU_LAYER_MULTIPLIER = 1
-TD_LAYER_MULTIPLIER = 0.25
+TD_LAYER_MULTIPLIER = 0.25  # Time-distributed layer modifier of neuron count
+GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
 EPOCHS = 150
-BATCH = 160 # metacentrum recommended: 128 - 160
+BATCH = 160                 # metacentrum.cz recommended: 128 - 160
 LEARNING_RATE = 0.005
-EARLY_STOP = 10
-
-# Holdout settings
-FLAG_BASED_HOLD = True
-HOLDOUT_RATIO = 0.8
-CLASSIFY = False
-
-# Input settings
-LABEL_IDX = 0
-PREDICT_PRINT_SAMPLES = 15
+EARLY_STOP = 10             # Number of tolerated epochs without improvement
 
 # Preprocessing switches
-ZSCORE_NORM = False
-LOGARITHM = True
+LABEL_IDX = 0               # Index of column to use as label
+ZSCORE_NORM = False         # Undone after testing
+LOGARITHM = True            # Dtto, sets all values (x) to -log(x) 
+
+# Holdout settings
+FLAG_BASED_HOLD = True      # Bases holdout on col called 'is_testing'
+HOLDOUT_RATIO = 0.8         # Used if flag based holdout is disabled
+
+# Testing settings
+PREDICT_PRINT_SAMPLES = 15  # Samples printed to stdout
+CLASSIFY = False            # Regression if False
 
 
 def configureModel(alphaSize, nomiSize = 0):
@@ -240,7 +240,7 @@ def test(model, nnInput, refOutput):
 
 
 def run(source):
-    # Initialize using same seed (to get stable results on comparisons)
+    # Initialize using the same seed (to get stable results on comparisons)
     np.random.seed(12345)
 
     tables = ['target_protein_p00734_ec50',
