@@ -17,10 +17,10 @@ from keras import backend as K
 
 # RNN parameters
 GRU_LAYER_MULTIPLIER = 1
-TD_LAYER_MULTIPLIER = 0.5
+TD_LAYER_MULTIPLIER = 0.25
 EPOCHS = 150
-BATCH = 160 # metacentrum recommended: 128 - 160
-LEARNING_RATE = 0.01
+25ATCH = 160 # metacentrum recommended: 128 - 160
+LEARNING_RATE = 0.005
 EARLY_STOP = 10
 
 # Holdout settings
@@ -45,6 +45,8 @@ def configureModel(alphaSize, nomiSize = 0):
     model.add(LSTM(LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid',
         input_shape = (None, alphaSize), return_sequences = True))
     """
+    model.add(TimeDistributed(Dense(int(TD_LAYER_MULTIPLIER * (alphaSize +
+        nomiSize))), input_shape = (None, alphaSize + nomiSize)))
     model.add(TimeDistributed(Dense(int(TD_LAYER_MULTIPLIER * (alphaSize +
         nomiSize))), input_shape = (None, alphaSize + nomiSize)))
     # model.add(TimeDistributed(Dense(1), input_shape = (None, alphaSize + nomiSize)))
