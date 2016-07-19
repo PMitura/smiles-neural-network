@@ -10,7 +10,9 @@ from math import sqrt, exp
 # TODO: Remove unused imports after experiments are done
 from keras.models import Sequential
 from keras.layers import Activation, Dense, Dropout, LSTM, AveragePooling1D
-from keras.layers import TimeDistributed, SimpleRNN, GRU, Flatten
+from keras.layers import TimeDistributed, SimpleRNN, GRU, Flatten, Merge
+from keras.layers import BatchNormalization
+from keras.layers.advanced_activations import PReLU
 from keras.optimizers import Adam, RMSprop
 # from keras.regularizers import l1
 
@@ -19,15 +21,15 @@ from keras import backend as K
 # RNN parameters
 TD_LAYER_MULTIPLIER = 0.5   # Time-distributed layer modifier of neuron count
 GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
-EPOCHS = 3
+EPOCHS = 150
 BATCH = 160                 # metacentrum.cz recommended: 128 - 160
-LEARNING_RATE = 0.005
+LEARNING_RATE = 0.01
 EARLY_STOP = 10             # Number of tolerated epochs without improvement
 
 # Preprocessing switches
 LABEL_IDX = 0               # Index of column to use as label
 ZSCORE_NORM = False         # Undone after testing
-LOGARITHM = True            # Dtto, sets all values (x) to -log(x) 
+LOGARITHM = False           # Dtto, sets all values (x) to -log(x) 
 
 # Holdout settings
 FLAG_BASED_HOLD = True      # Bases holdout on col called 'is_testing'
@@ -36,28 +38,46 @@ HOLDOUT_RATIO = 0.8         # Used if flag based holdout is disabled
 # Testing settings
 PREDICT_PRINT_SAMPLES = 15  # Samples printed to stdout
 CLASSIFY = False            # Regression if False
+DISTRIB_BINS = 15           # Bins form visualising output distribution
 
 
 def configureModel(alphaSize, nomiSize = 0):
     print('  Initializing and compiling...')
 
     model = Sequential()
-    """
-    model.add(LSTM(LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid',
-        input_shape = (None, alphaSize), return_sequences = True))
-    """
-    model.add(GRU(int(GRU_LAYER_MULTIPLIER * alphaSize), activation =
-        'sigmoid', input_shape = (None, alphaSize + nomiSize),
-        return_sequences = True))
+    
+    # TD - GRU - out setup
+    # model.add(TimeDistributed(Dense(int(TD_LAYER_MULTIPLIER * (alphaSize +
+    #     nomiSize)), activation = 'tanh'),
+    #     input_shape = (None, alphaSize + nomiSize)))
     model.add(TimeDistributed(Dense(int(TD_LAYER_MULTIPLIER * (alphaSize +
-        nomiSize)))))
-    # model.add(TimeDistributed(Dense(1), input_shape = (None, alphaSize + nomiSize)))
-    # model.add(SimpleRNN(2 * LAYER_MULTIPLIER * alphaSize, activation = 'sigmoid'))
-    # model.add(AveragePooling1D(pool_length = alphaSize, border_mode='valid'))
-    # model.add(Dropout(0.5))
-    # model.add(Dense(1, W_regularizer = l1(0.01)))
-    model.add(LSTM(1))
-    # model.add(Activation('tanh'))
+        nomiSize)), activation = 'tanh'),
+        input_shape = (None, alphaSize + nomiSize)))
+    model.add(GRU(int(GRU_LAYER_MULTIPLIER * alphaSize), activation = 'tanh'))
+    model.add(Activation('relu'))
+    model.add(Dense(1))
+    model.add(Activation(PReLU()))
+
+    """ Bidirectional version, submitted as issue at
+        https://github.com/fchollet/keras/issues/2646
+
+    model.add(TimeDistributed(Dense(int(TD_LAYER_MULTIPLIER * (alphaSize +
+        nomiSize)), activation = 'tanh'),
+        input_shape = (None, alphaSize + nomiSize)))
+
+    fwModel = Sequential()
+    fwModel.add(GRU(int(GRU_LAYER_MULTIPLIER * alphaSize),
+            activation = 'sigmoid',
+            input_shape = (None, alphaSize + nomiSize)))
+
+    bwModel = Sequential()
+    bwModel.add(GRU(int(GRU_LAYER_MULTIPLIER * alphaSize), 
+            activation = 'sigmoid', go_backwards = True,
+            input_shape = (None, alphaSize + nomiSize)))
+
+    model.add(Merge([fwModel, bwModel], mode = 'sum'))
+    model.add(Dense(1))
+    """
 
     # default learning rate 0.001
     model.compile(loss = 'mse', optimizer = Adam(lr = LEARNING_RATE))
@@ -240,6 +260,31 @@ def test(model, nnInput, refOutput):
     print("  ...done")
 
 
+# Time distributed layers require additional nesting
+def outputDistribution(model, layerID, testIn, withtime = False):
+    print("\n  Generating output distribution for layer {}".format(layerID))
+    vlayer = K.function([model.layers[0].input], [model.layers[layerID].output])
+    result = vlayer([testIn])
+
+    # divide into bins
+    array = []
+    for instance in result:
+        for line in instance:
+            for val in line:
+                if withtime:
+                    for deepval in val:
+                        array.append(deepval)
+                else:
+                    array.append(val)
+    bins = np.histogram(array)
+
+    # print bins
+    print bins[1]
+    for i in range(len(bins[0])):
+        print "({}, {})".format(bins[1][i], bins[0][i])
+    print("  ...done")
+
+
 def run(source):
     # Initialize using the same seed (to get stable results on comparisons)
     np.random.seed(12345)
@@ -268,7 +313,10 @@ def run(source):
     model = setup(alphaSize, nomiSize)
     train(model, trainIn, trainLabel)
 
-    print model.get_weights()
+    # print model.get_weights()
+    # outputDistribution(model, 0, testIn, withtime = True)
+    # outputDistribution(model, 1, testIn)
+    # outputDistribution(model, 2, testIn)
 
     """
     print("\n  Visualisation test:")
