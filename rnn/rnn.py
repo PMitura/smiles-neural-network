@@ -50,13 +50,12 @@ def configureModel(alphaSize, nomiSize = 0):
     # model.add(TimeDistributed(Dense(int(TD_LAYER_MULTIPLIER * (alphaSize +
     #     nomiSize)), activation = 'tanh'),
     #     input_shape = (None, alphaSize + nomiSize)))
+    model.add(Dropout(0.1, input_shape = (None, alphaSize + nomiSize)))
     model.add(TimeDistributed(Dense(int(TD_LAYER_MULTIPLIER * (alphaSize +
-        nomiSize)), activation = 'tanh'),
-        input_shape = (None, alphaSize + nomiSize)))
+        nomiSize)), activation = 'tanh')))
     model.add(GRU(int(GRU_LAYER_MULTIPLIER * alphaSize), activation = 'tanh'))
     model.add(Activation('relu'))
     model.add(Dense(1))
-    model.add(Activation(PReLU()))
 
     """ Bidirectional version, submitted as issue at
         https://github.com/fchollet/keras/issues/2646
@@ -80,7 +79,8 @@ def configureModel(alphaSize, nomiSize = 0):
     """
 
     # default learning rate 0.001
-    model.compile(loss = 'mse', optimizer = Adam(lr = LEARNING_RATE))
+    opt = Adam(lr = LEARNING_RATE)
+    model.compile(loss = 'mse', optimizer = opt)
 
     print('  ...done')
     return model
