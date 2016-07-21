@@ -93,6 +93,8 @@ def formatNominal(rawData, timesteps, col):
     return size, output
 
 
+# Use 2D format, containing indexes of one hot bit, suitable for usage in
+# Embedding layers
 def formatSMILESEmbedded(rawData, col):
     print('  Formatting SMILES data column...')
 
@@ -134,7 +136,9 @@ def formatSMILESEmbedded(rawData, col):
     return size, maxLen, output
 
 
-def formatNominalEmbedded(rawData, timesteps, output, col, shift):
+# Same as formatSmilesEmbedded, but uses words instead of characters
+# Shift parameter us used to encode multiple columns in one value for Embedding
+def formatNominalEmbedded(rawData, timesteps, output, col, shift = 0):
     print('  Formatting nominal data column...')
 
     # Get a set of all possible values
