@@ -60,15 +60,8 @@ def formatSMILES(rawData, col):
             output[itemCtr][i][0] = 1
         itemCtr += 1
 
-    """ DEBUG: print whole data
-    np.set_printoptions(threshold='nan')
-    print output[0]
-    print output
-    """
-
     print('  ...done')
     return size, maxLen, output
-
 
 def formatNominal(rawData, timesteps, col):
     print('  Formatting nominal data column...')
@@ -94,6 +87,77 @@ def formatNominal(rawData, timesteps, col):
         valIdx = colMapping[item[col]]
         for step in range(timesteps):
             output[itemCtr][step][valIdx] = 1
+        itemCtr += 1
+
+    print('  ...done')
+    return size, output
+
+
+def formatSMILESEmbedded(rawData, col):
+    print('  Formatting SMILES data column...')
+
+    # Get a set of all used characters
+    alphabet = set()
+    for item in rawData:
+        for char in item[col]:
+            alphabet.add(char)
+
+    # Map columns to letters
+    colMapping = {}
+    size = 1
+    for char in alphabet:
+        colMapping[char] = size
+        size += 1
+
+    maxLen = 0
+    for item in rawData:
+        maxLen = max(maxLen, len(item[col]))
+
+    # DEBUG, data properties
+    print("    Number of samples: {}".format(len(rawData)))
+    print("    Maximum length of sample: {}".format(maxLen))
+
+    output = np.zeros((len(rawData), maxLen))
+
+    itemCtr = 0
+    for item in rawData:
+        charCtr = 0
+        for char in item[col]:
+            charIdx = colMapping[char]
+            output[itemCtr][charCtr] = charIdx
+            charCtr += 1
+        for i in range(charCtr, maxLen):
+            output[itemCtr][i] = 0
+        itemCtr += 1
+
+    print('  ...done')
+    return size, maxLen, output
+
+
+def formatNominalEmbedded(rawData, timesteps, output, col, shift):
+    print('  Formatting nominal data column...')
+
+    # Get a set of all possible values
+    nominals = set()
+    for item in rawData:
+        nominals.add(item[col])
+
+    # Map columns to nominals
+    colMapping = {}
+    size = 1
+    for value in nominals:
+        colMapping[value] = size
+        size += 1
+
+    print("    Number of samples: {}".format(len(rawData)))
+    print("    Number of unique values: {}".format(size))
+
+    itemCtr = 0
+    for item in rawData:
+        valIdx = colMapping[item[col]]
+        valIdx <<= shift
+        for step in range(timesteps):
+            output[itemCtr][step] += valIdx
         itemCtr += 1
 
     print('  ...done')
@@ -150,10 +214,10 @@ def holdoutBased(testFlags, words, label):
         elif testFlags[i] != None:
             raise ValueError("Unknown value in test flags")
 
-    trainWords = np.zeros((trainSize, len(words[0]), len(words[0][0])))
+    trainWords = np.zeros((trainSize, len(words[0])))
     trainLabel = np.zeros((trainSize))
     trainIdx = 0
-    testWords = np.zeros((testSize, len(words[0]), len(words[0][0])))
+    testWords = np.zeros((testSize, len(words[0])))
     testLabel = np.zeros((testSize))
     testIdx = 0
 
@@ -223,11 +287,11 @@ def prepareData(source = 'chembl', table = ''):
     else:
         raise ValueError('Unknown data source.')
 
+    """ One Hot
     # SMILES column
     alphaSize, timesteps, formattedWords = formatSMILES(data, 0)
     # Nominal data columns
     nomiSize = 0
-    """ Not needed in this setup """
     n, formattedNominals = formatNominal(data, timesteps, 1)
     formattedWords = np.concatenate((formattedWords, formattedNominals),
             axis = 2)
@@ -236,11 +300,20 @@ def prepareData(source = 'chembl', table = ''):
     formattedWords = np.concatenate((formattedWords, formattedNominals),
             axis = 2)
     nomiSize += n
-    """ """
+    """
 
     """ DEBUG: print sample row
     print formattedWords[30]
     """
+
+    nomiSize = 0
+    alphaSize, timesteps, formattedWords = formatSMILESEmbedded(data, 0)
+    n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
+            1, 9)
+    nomiSize += n
+    n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
+            2, 11)
+    nomiSize += n
 
     # put labels into array
     labels = []

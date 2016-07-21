@@ -1,6 +1,8 @@
 import data, utility
+import time
 import numpy as np
 import keras.callbacks
+import chembl as ch
 
 # from scipy.stats.stats import pearsonr
 # from sklearn.metrics import roc_auc_score
@@ -11,7 +13,7 @@ from math import sqrt, exp
 from keras.models import Sequential
 from keras.layers import Activation, Dense, Dropout, LSTM, AveragePooling1D
 from keras.layers import TimeDistributed, SimpleRNN, GRU, Flatten, Merge
-from keras.layers import BatchNormalization
+from keras.layers import BatchNormalization, Embedding
 from keras.layers.advanced_activations import PReLU
 from keras.optimizers import Adam, RMSprop
 # from keras.regularizers import l1
@@ -21,7 +23,7 @@ from keras import backend as K
 # RNN parameters
 TD_LAYER_MULTIPLIER = 0.5   # Time-distributed layer modifier of neuron count
 GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
-EPOCHS = 150
+EPOCHS = 1
 BATCH = 160                 # metacentrum.cz recommended: 128 - 160
 LEARNING_RATE = 0.01
 EARLY_STOP = 10             # Number of tolerated epochs without improvement
@@ -50,7 +52,8 @@ def configureModel(alphaSize, nomiSize = 0):
     # model.add(TimeDistributed(Dense(int(TD_LAYER_MULTIPLIER * (alphaSize +
     #     nomiSize)), activation = 'tanh'),
     #     input_shape = (None, alphaSize + nomiSize)))
-    model.add(Dropout(0.1, input_shape = (None, alphaSize + nomiSize)))
+
+    model.add(Embedding(1 << 19, 30))
     model.add(TimeDistributed(Dense(int(TD_LAYER_MULTIPLIER * (alphaSize +
         nomiSize)), activation = 'tanh')))
     model.add(GRU(int(GRU_LAYER_MULTIPLIER * alphaSize), activation = 'tanh'))
@@ -172,6 +175,8 @@ def predict(model, nnInput, rawLabel):
     print("    correlation coefficient: {}".format(pearCr[0][1]))
     print("    R2:                      {}".format(pearCr[0][1] * pearCr[0][1]))
 
+    return pearCr[0][1] * pearCr[0][1]
+
 
 # Two classes, bins to closest of {-1, 1}
 # TODO: return imports, removed because of cluster runs
@@ -286,6 +291,8 @@ def outputDistribution(model, layerID, testIn, withtime = False):
 
 
 def run(source):
+    startTime = time.time()
+
     # Initialize using the same seed (to get stable results on comparisons)
     np.random.seed(12345)
 
@@ -333,12 +340,12 @@ def run(source):
     if CLASSIFY:
         classify(model, trainIn, trainLabel)
     else:
-        predict(model, trainIn, trainLabel)
+        relevanceTrain = predict(model, trainIn, trainLabel)
     print("\n  Prediction of testing data:")
     if CLASSIFY:
         classify(model, testIn, testLabel)
     else:
-        predict(model, testIn, testLabel)
+        relevanceTest = predict(model, testIn, testLabel)
 
     # test(model, testIn, testLabel)
     """ """
@@ -395,4 +402,25 @@ def run(source):
     predict(modelCol2, testIn, testLabel)
     test(modelCol2, testIn, testLabel)
     """
+
+    endTime = time.time()
+    deltaTime = endTime - startTime
+
+    if CLASSIFY:
+        taskType = 'classification'
+    else:
+        taskType = 'regression'
+
+    ch.sendStatistics(
+        training_row_count = len(trainLabel),
+        task = '',
+        relevance_training = relevanceTrain,
+        relevance_testing = relevanceTest,
+        epoch_count = EPOCHS,
+        runtime_second = deltaTime,
+        parameter_count = model.count_params(),
+        learning_rate = LEARNING_RATE,
+        optimization_method = 'Adam',
+        batch_size = BATCH,
+        comment = 'testing of statistics sending')
 
