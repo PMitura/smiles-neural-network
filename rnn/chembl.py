@@ -18,8 +18,9 @@ DB_TABLE = 'target_protein_big_cleaned_log'
 # DB_COLS = 'canonical_smiles, mw_freebase, alogp'
 # DB_COLS = 'canonical_smiles, hba, hbd'
 # DB_COLS = 'canonical_smiles, log_value, standard_value'
+LABELNAME = 'standard_value_log_avg'
 DB_COLS = 'canonical_smiles, standard_type, protein_accession,\
-    standard_value_log_avg, is_testing'
+        {}, is_testing'.format(LABELNAME)
 #     standard_value_log_median_centered, is_testing'
 # DB_COLS = 'canonical_smiles, standard_value_50'
 # DB_COLS = 'canonical_smiles, standard_value, is_testing'
@@ -64,21 +65,25 @@ def sendStatistics(dataset_name = DB_TABLE,
         parameter_count = None,
         learning_rate = None,
         optimization_method = None,
-        batch_size = None):
+        batch_size = None,
+        label_name = None):
     print('  Sending statistics...')
 
     cnx = mysql.connector.connect(user = DB_USER, password = DB_PASS,
             host = DB_HOST, database = DB_NAME)
 
     query = ('INSERT INTO {}\
-            (training_row_count, task, relevance_testing,\
+            (dataset_name, training_row_count, task, relevance_testing,\
             relevance_training, comment, epoch_count, runtime_second,\
-            parameter_count, learning_rate, optimization_method, batch_size)\
+            parameter_count, learning_rate, optimization_method, batch_size,\
+            label_name)\
             VALUES\
-            ({}, \'{}\', {}, {}, \'{}\', {}, {}, {}, {}, \'{}\', {})'.format(SEND_TABLE,
-            training_row_count, task, relevance_testing,
-            relevance_training, comment, epoch_count, runtime_second,
-            parameter_count, learning_rate, optimization_method, batch_size))
+            (\'{}\', {}, \'{}\', {}, {}, \'{}\', {}, {}, {}, {}, \'{}\', {},\
+            \'{}\')'
+            .format(SEND_TABLE, dataset_name, training_row_count, task,
+            relevance_testing, relevance_training, comment, epoch_count,
+            runtime_second, parameter_count, learning_rate,
+            optimization_method, batch_size, label_name))
     cursor = cnx.cursor()
     try:
         cursor.execute(query)

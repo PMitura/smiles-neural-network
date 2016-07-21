@@ -4,7 +4,9 @@ import pubchem as pc
 import chembl as ch
 import utility
 
-from math import floor, log, isnan, sqrt
+from math import floor, log, isnan, sqrt, ceil
+
+USE_EMBEDDING = True
 
 # Number of label columns to prepare
 INPUT_COUNT = 3
@@ -291,33 +293,29 @@ def prepareData(source = 'chembl', table = ''):
     else:
         raise ValueError('Unknown data source.')
 
-    """ One Hot
-    # SMILES column
-    alphaSize, timesteps, formattedWords = formatSMILES(data, 0)
-    # Nominal data columns
-    nomiSize = 0
-    n, formattedNominals = formatNominal(data, timesteps, 1)
-    formattedWords = np.concatenate((formattedWords, formattedNominals),
-            axis = 2)
-    nomiSize += n
-    n, formattedNominals = formatNominal(data, timesteps, 2)
-    formattedWords = np.concatenate((formattedWords, formattedNominals),
-            axis = 2)
-    nomiSize += n
-    """
-
-    """ DEBUG: print sample row
-    print formattedWords[30]
-    """
-
-    nomiSize = 0
-    alphaSize, timesteps, formattedWords = formatSMILESEmbedded(data, 0)
-    n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
-            1, 9)
-    nomiSize += n
-    n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
-            2, 11)
-    nomiSize += n
+    if not USE_EMBEDDING:
+        # SMILES column
+        alphaSize, timesteps, formattedWords = formatSMILES(data, 0)
+        # Nominal data columns
+        nomiSize = 0
+        n, formattedNominals = formatNominal(data, timesteps, 1)
+        formattedWords = np.concatenate((formattedWords, formattedNominals),
+                axis = 2)
+        nomiSize += n
+        n, formattedNominals = formatNominal(data, timesteps, 2)
+        formattedWords = np.concatenate((formattedWords, formattedNominals),
+                axis = 2)
+        nomiSize += n
+    else:
+        nomiSize = 0
+        alphaSize, timesteps, formattedWords = formatSMILESEmbedded(data, 0)
+        # TODO: use log2 to get shift value automatically
+        n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
+                1, int(ceil(log(alphaSize, 2))))
+        nomiSize += n
+        n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
+                2, int(ceil(log(alphaSize + nomiSize, 2))))
+        nomiSize += n
 
     # put labels into array
     labels = []

@@ -27,6 +27,7 @@ EPOCHS = 1
 BATCH = 160                 # metacentrum.cz recommended: 128 - 160
 LEARNING_RATE = 0.01
 EARLY_STOP = 10             # Number of tolerated epochs without improvement
+OPTIMIZER = Adam(lr = LEARNING_RATE)
 
 # Preprocessing switches
 LABEL_IDX = 0               # Index of column to use as label
@@ -82,8 +83,7 @@ def configureModel(alphaSize, nomiSize = 0):
     """
 
     # default learning rate 0.001
-    opt = Adam(lr = LEARNING_RATE)
-    model.compile(loss = 'mse', optimizer = opt)
+    model.compile(loss = 'mse', optimizer = OPTIMIZER)
 
     print('  ...done')
     return model
@@ -413,14 +413,15 @@ def run(source):
 
     ch.sendStatistics(
         training_row_count = len(trainLabel),
-        task = '',
+        task = taskType,
         relevance_training = relevanceTrain,
         relevance_testing = relevanceTest,
         epoch_count = EPOCHS,
         runtime_second = deltaTime,
         parameter_count = model.count_params(),
         learning_rate = LEARNING_RATE,
-        optimization_method = 'Adam',
+        optimization_method = OPTIMIZER.__class__.__name__,
         batch_size = BATCH,
-        comment = 'testing of statistics sending')
+        comment = 'testing of statistics sending',
+        label_name = ch.LABELNAME)
 
