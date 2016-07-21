@@ -113,8 +113,6 @@ def formatSMILESEmbedded(rawData, col):
         colMapping[char] = size
         size += 1
 
-    print size
-
     maxLen = 0
     for item in rawData:
         maxLen = max(maxLen, len(item[col]))
@@ -122,6 +120,7 @@ def formatSMILESEmbedded(rawData, col):
     # DEBUG, data properties
     print("    Number of samples: {}".format(len(rawData)))
     print("    Maximum length of sample: {}".format(maxLen))
+    print("    Size of alphabet: {}".format(size))
 
     output = np.zeros((len(rawData), maxLen))
 
@@ -311,15 +310,17 @@ def prepareData(source = 'chembl', table = ''):
     else:
         nomiSize = 0
         alphaSize, timesteps, formattedWords = formatSMILESEmbedded(data, 0)
-        print alphaSize
-        shift = int(log(alphaSize, 2) + 1)
+        shift = int(log(alphaSize, 2) + 5)
+        print shift
         n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
                 1, shift)
-        shift += int(log(n, 2) + 1)
+        shift += int(log(n, 2) + 2)
+        print shift
         nomiSize += n
         n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
                 2, shift)
-        shift += int(log(n, 2) + 1)
+        shift += int(log(n, 2) + 2)
+        print shift
         nomiSize += n
 
     # put labels into array
