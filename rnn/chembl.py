@@ -60,13 +60,15 @@ def sendStatistics(dataset_name = DB_TABLE,
         relevance_training = None,      # R2 or AUC
         relevance_testing = None,       # -||-
         comment = None,
+        epoch_max = None,
         epoch_count = None,
         runtime_second = None,
         parameter_count = None,
         learning_rate = None,
         optimization_method = None,
         batch_size = None,
-        label_name = None):
+        label_name = None,
+        model = None):
     print('  Sending statistics...')
 
     cnx = mysql.connector.connect(user = DB_USER, password = DB_PASS,
@@ -74,23 +76,24 @@ def sendStatistics(dataset_name = DB_TABLE,
 
     query = ('INSERT INTO {}\
             (dataset_name, training_row_count, task, relevance_testing,\
-            relevance_training, comment, epoch_count, runtime_second,\
+            relevance_training, comment, epoch_max, epoch_count, runtime_second,\
             parameter_count, learning_rate, optimization_method, batch_size,\
-            label_name)\
+            label_name, model)\
             VALUES\
-            (\'{}\', {}, \'{}\', {}, {}, \'{}\', {}, {}, {}, {}, \'{}\', {},\
-            \'{}\')'
+            (\'{}\', {}, \'{}\', {}, {}, \'{}\', {}, {}, {}, {}, {}, \'{}\', {},\
+            \'{}\', \"{}\")'
             .format(SEND_TABLE, dataset_name, training_row_count, task,
-            relevance_testing, relevance_training, comment, epoch_count,
+            relevance_testing, relevance_training, comment, epoch_max, epoch_count,
             runtime_second, parameter_count, learning_rate,
-            optimization_method, batch_size, label_name))
+            optimization_method, batch_size, label_name, model))
     cursor = cnx.cursor()
     try:
         cursor.execute(query)
         cnx.commit()
-    except:
+    except Exception as e:
         cnx.rollback()
-        print '    EXCEPTED'
+        print '    EXCEPTED:'
+        print e
 
     cursor.close()
     cnx.close()

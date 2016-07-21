@@ -113,6 +113,8 @@ def formatSMILESEmbedded(rawData, col):
         colMapping[char] = size
         size += 1
 
+    print size
+
     maxLen = 0
     for item in rawData:
         maxLen = max(maxLen, len(item[col]))
@@ -309,12 +311,15 @@ def prepareData(source = 'chembl', table = ''):
     else:
         nomiSize = 0
         alphaSize, timesteps, formattedWords = formatSMILESEmbedded(data, 0)
-        # TODO: use log2 to get shift value automatically
+        print alphaSize
+        shift = int(log(alphaSize, 2) + 1)
         n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
-                1, int(ceil(log(alphaSize, 2))))
+                1, shift)
+        shift += int(log(n, 2) + 1)
         nomiSize += n
         n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
-                2, int(ceil(log(alphaSize + nomiSize, 2))))
+                2, shift)
+        shift += int(log(n, 2) + 1)
         nomiSize += n
 
     # put labels into array
@@ -334,5 +339,9 @@ def prepareData(source = 'chembl', table = ''):
         for item in data:
             testFlags.append(item[LABEL_COUNT + INPUT_COUNT])
 
-    return formattedWords, labels, alphaSize, nomiSize, testFlags
+    # include shift value to nomiSize if embedding is used
+    if USE_EMBEDDING:
+        return formattedWords, labels, alphaSize, (nomiSize, shift), testFlags
+    else:
+        return formattedWords, labels, alphaSize, nomiSize, testFlags
 

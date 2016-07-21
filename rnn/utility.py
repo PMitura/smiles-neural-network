@@ -28,3 +28,24 @@ def rms(array, size):
     for i in range(size):
         sqrSum += array[i] * array[i]
     return sqrt(sqrSum / size)
+
+
+def modelToString(model):
+    string = ''
+    for layer in model.layers:
+        modelDict = {}
+        config = layer.get_config()
+        # Restrict to 'interesting' attributes
+        if 'name' in config:
+            modelDict['name'] = config['name']
+        if 'input_dim' in config:
+            modelDict['input_dim'] = config['input_dim']
+        if 'output_dim' in config:
+            modelDict['output_dim'] = config['output_dim']
+        if 'activation' in config:
+            modelDict['activation'] = config['activation']
+        modelDict['parameters_num'] = layer.count_params()
+        string += str(modelDict)
+    return string
+
+
