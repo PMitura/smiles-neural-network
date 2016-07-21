@@ -6,7 +6,7 @@ import utility
 
 from math import floor, log, isnan, sqrt, ceil
 
-USE_EMBEDDING = True
+USE_EMBEDDING = False
 
 # Number of label columns to prepare
 INPUT_COUNT = 3
@@ -40,6 +40,9 @@ def formatSMILES(rawData, col):
 
     maxLen = 0
     for item in rawData:
+        tstat = item[LABEL_COUNT + INPUT_COUNT]
+        if USE_TEST_FLAGS and not (tstat == 0 or tstat == 1):
+            continue
         maxLen = max(maxLen, len(item[col]))
 
     # DEBUG, data properties
@@ -55,6 +58,8 @@ def formatSMILES(rawData, col):
     for item in rawData:
         charCtr = 0
         for char in item[col]:
+            if charCtr >= maxLen:
+                break
             charIdx = colMapping[char]
             output[itemCtr][charCtr][charIdx] = 1
             charCtr += 1
@@ -221,12 +226,20 @@ def holdoutBased(testFlags, words, label):
         elif testFlags[i] != None:
             raise ValueError("Unknown value in test flags")
 
-    trainWords = np.zeros((trainSize, len(words[0])))
-    trainLabel = np.zeros((trainSize))
-    trainIdx = 0
-    testWords = np.zeros((testSize, len(words[0])))
-    testLabel = np.zeros((testSize))
-    testIdx = 0
+    if USE_EMBEDDING:
+        trainWords = np.zeros((trainSize, len(words[0])))
+        trainLabel = np.zeros((trainSize))
+        trainIdx = 0
+        testWords = np.zeros((testSize, len(words[0])))
+        testLabel = np.zeros((testSize))
+        testIdx = 0
+    else:
+        trainWords = np.zeros((trainSize, len(words[0]), len(words[0][0])))
+        trainLabel = np.zeros((trainSize))
+        trainIdx = 0
+        testWords = np.zeros((testSize, len(words[0]), len(words[0][0])))
+        testLabel = np.zeros((testSize))
+        testIdx = 0
 
     for i in range(len(words)):
         if testFlags[i] == 1:
@@ -310,16 +323,16 @@ def prepareData(source = 'chembl', table = ''):
     else:
         nomiSize = 0
         alphaSize, timesteps, formattedWords = formatSMILESEmbedded(data, 0)
-        shift = int(log(alphaSize, 2) + 5)
+        shift = int(log(alphaSize, 2) + 1)
         print shift
         n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
                 1, shift)
-        shift += int(log(n, 2) + 2)
+        shift += int(log(n, 2) + 1)
         print shift
         nomiSize += n
         n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
                 2, shift)
-        shift += int(log(n, 2) + 2)
+        shift += int(log(n, 2) + 1)
         print shift
         nomiSize += n
 
