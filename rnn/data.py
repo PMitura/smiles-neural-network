@@ -70,6 +70,7 @@ def formatSMILES(rawData, col):
     print('  ...done')
     return size, maxLen, output
 
+
 def formatNominal(rawData, timesteps, col):
     print('  Formatting nominal data column...')
 
@@ -293,10 +294,8 @@ def resolveMissingLabels(labels):
     print('  ...done')
 
 
-# Call all routines to prepare data for neural network
-def prepareData(source = 'chembl', table = ''):
-    np.set_printoptions(threshold = 'nan')
 
+def getRawData(source = 'chembl', table = ''):
     if source == 'pubchem':
         data = pc.getData()
     elif source == 'chembl':
@@ -306,6 +305,12 @@ def prepareData(source = 'chembl', table = ''):
             data = ch.getData(dbTable = table)
     else:
         raise ValueError('Unknown data source.')
+    return data
+
+# Call all routines to prepare data for neural network
+def prepareData(source = 'chembl', table = ''):
+    np.set_printoptions(threshold = 'nan')
+    data = getRawData(source, table)
 
     if not USE_EMBEDDING:
         # SMILES column

@@ -1,4 +1,4 @@
-import data, utility
+import data, utility, baseline
 import time
 import numpy as np
 import keras.callbacks
@@ -323,14 +323,6 @@ def classify(model, nnInput, label):
     print("    F-measure:               {}".format(fmeasure))
 
 
-def test(model, nnInput, refOutput):
-    print("\n  Scoring using evaluate...")
-    score = model.evaluate(nnInput, refOutput, batch_size = BATCH,
-            verbose = False)
-    print("    Score on traning data: {}".format(score))
-    print("  ...done")
-
-
 # Time distributed layers require additional nesting
 def outputDistribution(model, layerID, testIn, withtime = False):
     print("\n  Generating output distribution for layer {}".format(layerID))
@@ -360,17 +352,12 @@ def run(source):
     startTime = time.time()
 
     # Initialize using the same seed (to get stable results on comparisons)
-    # np.random.seed(12345)
     np.random.seed(SEED)
-
-    tables = ['target_protein_p00734_ec50',
-              'target_protein_p00734_ic50',
-              'target_protein_p03372_ec50',
-              'target_protein_p03372_ic50']
 
     """ Single model setup """
     fullIn, labels, alphaSize, nomiSize, testFlags = data.prepareData(source)
 
+    # Do preprocessing and train/test data division
     if LOGARITHM:
         labels[LABEL_IDX] = data.logarithm(labels[LABEL_IDX])
 
@@ -384,6 +371,7 @@ def run(source):
     else:
         trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,
                 fullIn, labels[LABEL_IDX])
+
     model = setup(alphaSize, nomiSize)
 
     epochsDone = train(model, trainIn, trainLabel)
@@ -392,17 +380,6 @@ def run(source):
     # outputDistribution(model, 0, testIn, withtime = True)
     # outputDistribution(model, 1, testIn)
     # outputDistribution(model, 2, testIn)
-
-    """
-    print("\n  Visualisation test:")
-    vlayer = K.function([model.layers[0].input], [model.layers[1].output])
-    result = vlayer([testIn])[0]
-    print "\n  Len of layer: {} Len of data: {}".format(len(result),
-            len(testIn))
-    for line in result:
-        for val in line:
-            print '{0:.20f}'.format(val)
-    """
 
     print("\n  Prediction of training data:")
     if CLASSIFY:
@@ -418,7 +395,6 @@ def run(source):
         else:
             relevanceTest = predict(model, testIn, testLabel)
 
-    # test(model, testIn, testLabel)
     """ """
 
     """ Chained models setup

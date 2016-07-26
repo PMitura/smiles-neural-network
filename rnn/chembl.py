@@ -19,14 +19,14 @@ DB_TABLE = 'target_protein_big_cleaned_deduplicated'
 # DB_COLS = 'canonical_smiles, hba, hbd'
 # DB_COLS = 'canonical_smiles, log_value, standard_value'
 LABELNAME = 'standard_value_log_median_centered'
-TESTNAME = 'is_testing_90_short'
+TESTNAME = 'is_testing_99_short'
 DB_COLS = 'canonical_smiles, standard_type, protein_accession,\
         {}, {}'.format(LABELNAME, TESTNAME)
 # DB_COLS = 'canonical_smiles, standard_value_50'
 # DB_COLS = 'canonical_smiles, standard_value, is_testing'
 
 # maximum number of downloaded rows
-CAP_SIZE = 30000
+CAP_SIZE = 5000
 
 # sending options
 SEND_TABLE = 'journal'
