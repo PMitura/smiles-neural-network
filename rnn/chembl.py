@@ -20,7 +20,7 @@ DB_TABLE = 'target_molweight'
 # DB_COLS = 'canonical_smiles, mw_freebase, alogp'
 # DB_COLS = 'canonical_smiles, hba, hbd'
 # DB_COLS = 'canonical_smiles, log_value, standard_value'
-LABELNAME = 'molweight'
+LABELNAME = 'molweight, alogp'
 TESTNAME = 'is_testing'
 # DB_COLS = 'canonical_smiles, standard_type, protein_accession,\
 DB_COLS = 'canonical_smiles,\
@@ -48,8 +48,8 @@ def getData(dbCols = DB_COLS, dbTable = DB_TABLE):
     # care, this is still fixed at certain number of cols
     # TODO: generalize
 
-    for a, b, c in cursor:
-        array.append((a, b, c))
+    for a, b, c, d in cursor:
+        array.append((a, b, c, d))
     cursor.close()
     cnx.close()
 

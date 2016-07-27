@@ -11,7 +11,7 @@ USE_EMBEDDING = False
 # Number of label columns to prepare
 INPUT_COUNT = 1
 EXTRA_NOMINALS = 0
-LABEL_COUNT = 1
+LABEL_COUNT = 2
 USE_TEST_FLAGS = True
 
 # Fixed alphasize options
@@ -197,18 +197,20 @@ def holdout(ratio, words, label):
     # Prepare training set
     trainSize = int(floor(len(words) * ratio))
     trainWords = np.zeros((trainSize, len(words[0]), len(words[0][0])))
-    trainLabel = np.zeros((trainSize))
+    trainLabel = np.zeros((len(label), trainSize))
     for i in range(trainSize):
         trainWords[i] = words[i]
-        trainLabel[i] = label[i]
+        for j in range(len(label)):
+            trainLabel[j][i] = label[j][i + trainSize]
 
     # Prepare testing set
     testSize = int(floor(len(words) - (len(words) * ratio)))
     testWords = np.zeros((testSize, len(words[0]), len(words[0][0])))
-    testLabel = np.zeros((testSize))
+    testLabel = np.zeros((len(label), testSize))
     for i in range(testSize):
         testWords[i] = words[i + testSize]
-        testLabel[i] = label[i + testSize]
+        for j in range(len(label)):
+            testLabel[j][i] = label[j][i + testSize]
 
     return trainWords, trainLabel, testWords, testLabel
 
@@ -230,27 +232,29 @@ def holdoutBased(testFlags, words, label):
 
     if USE_EMBEDDING:
         trainWords = np.zeros((trainSize, len(words[0])))
-        trainLabel = np.zeros((trainSize))
+        trainLabel = np.zeros((len(label), trainSize))
         trainIdx = 0
         testWords = np.zeros((testSize, len(words[0])))
-        testLabel = np.zeros((testSize))
+        testLabel = np.zeros((len(label), testSize))
         testIdx = 0
     else:
         trainWords = np.zeros((trainSize, len(words[0]), len(words[0][0])))
-        trainLabel = np.zeros((trainSize))
+        trainLabel = np.zeros((len(label), trainSize))
         trainIdx = 0
         testWords = np.zeros((testSize, len(words[0]), len(words[0][0])))
-        testLabel = np.zeros((testSize))
+        testLabel = np.zeros((len(label), testSize))
         testIdx = 0
 
     for i in range(len(words)):
         if testFlags[i] == 1:
             testWords[testIdx] = words[i]
-            testLabel[testIdx] = label[i]
+            for j in range(len(label)):
+                testLabel[j][testIdx] = label[j][i]
             testIdx += 1
         elif testFlags[i] == 0:
             trainWords[trainIdx] = words[i]
-            trainLabel[trainIdx] = label[i]
+            for j in range(len(label)):
+                trainLabel[j][trainIdx] = label[j][i]
             trainIdx += 1
     return trainWords, trainLabel, testWords, testLabel
 
