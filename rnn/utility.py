@@ -1,4 +1,10 @@
+import numpy as np
+import pandas as pd
+import matplotlib
+import matplotlib.pyplot as pltib
+
 from math import sqrt
+
 
 # Mean of given values
 def mean(array, size):
@@ -47,5 +53,18 @@ def modelToString(model):
         modelDict['parameters_num'] = layer.count_params()
         string += str(modelDict)
     return string
+
+
+def plotLoss(values):
+    print '  Plotting...'
+    matplotlib.style.use('ggplot')
+    print values
+    dframe = pd.DataFrame(values, columns = ['loss'])
+    dframe['epoch'] = pd.Series(list(range(len(values))))
+    plot = dframe.plot(x = 'epoch', y = 'loss')
+    fig = plot.get_figure()
+    fig.savefig('plots/loss_plot.pdf')
+
+    print '  ...done'
 
 

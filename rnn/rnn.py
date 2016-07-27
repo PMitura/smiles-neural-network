@@ -27,7 +27,7 @@ TD_LAYER_MULTIPLIER = 0.5   # Time-distributed layer modifier of neuron count
 GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
 EPOCHS = 150
 BATCH = 96                  # metacentrum.cz: 128 - 160, optimum by grid: 96
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.01
 EARLY_STOP = 10             # Number of tolerated epochs without improvement
 OPTIMIZER = Adam(lr = LEARNING_RATE)
 USE_EMBEDDING = data.USE_EMBEDDING
@@ -50,8 +50,9 @@ USE_PARTITIONS = True       # Partition test set and compute averages
 NUM_PARTITIONS = 5
 
 # Statistics settings
-SEND_STATISTICS = False
+SEND_STATISTICS = True
 COMMENT = 'solo alogp'
+CREATE_LOSS_PLOT = True
 
 
 def configureModel(alphaSize, nomiSize = (0, 0)):
@@ -122,6 +123,8 @@ def train(model, nnInput, labels):
             patience = EARLY_STOP)
     history = model.fit(nnInput, formattedLabels, nb_epoch = EPOCHS,
             batch_size = BATCH, callbacks = [early])
+    if CREATE_LOSS_PLOT:
+        utility.plotLoss(history.history['loss'])
     print('    Model weights:')
     print(model.summary())
     # print(model.get_weights())
