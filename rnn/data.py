@@ -9,7 +9,8 @@ from math import floor, log, isnan, sqrt, ceil
 USE_EMBEDDING = False
 
 # Number of label columns to prepare
-INPUT_COUNT = 3
+INPUT_COUNT = 1
+EXTRA_NOMINALS = 0
 LABEL_COUNT = 1
 USE_TEST_FLAGS = True
 
@@ -307,6 +308,7 @@ def getRawData(source = 'chembl', table = ''):
         raise ValueError('Unknown data source.')
     return data
 
+
 # Call all routines to prepare data for neural network
 def prepareData(source = 'chembl', table = ''):
     np.set_printoptions(threshold = 'nan')
@@ -317,29 +319,28 @@ def prepareData(source = 'chembl', table = ''):
         alphaSize, timesteps, formattedWords = formatSMILES(data, 0)
         # Nominal data columns
         nomiSize = 0
-        n, formattedNominals = formatNominal(data, timesteps, 1)
-        formattedWords = np.concatenate((formattedWords, formattedNominals),
-                axis = 2)
-        nomiSize += n
-        n, formattedNominals = formatNominal(data, timesteps, 2)
-        formattedWords = np.concatenate((formattedWords, formattedNominals),
-                axis = 2)
-        nomiSize += n
+        if EXTRA_NOMINALS > 0:
+            n, formattedNominals = formatNominal(data, timesteps, 1)
+            formattedWords = np.concatenate((formattedWords, formattedNominals),
+                    axis = 2)
+            nomiSize += n
+            n, formattedNominals = formatNominal(data, timesteps, 2)
+            formattedWords = np.concatenate((formattedWords, formattedNominals),
+                    axis = 2)
+            nomiSize += n
     else:
         nomiSize = 0
         alphaSize, timesteps, formattedWords = formatSMILESEmbedded(data, 0)
         shift = int(log(alphaSize, 2) + 1)
-        print shift
-        n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
-                1, shift)
-        shift += int(log(n, 2) + 1)
-        print shift
-        nomiSize += n
-        n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
-                2, shift)
-        shift += int(log(n, 2) + 1)
-        print shift
-        nomiSize += n
+        if EXTRA_NOMINALS > 0:
+            n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
+                    1, shift)
+            shift += int(log(n, 2) + 1)
+            nomiSize += n
+            n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
+                    2, shift)
+            shift += int(log(n, 2) + 1)
+            nomiSize += n
 
     # put labels into array
     labels = []

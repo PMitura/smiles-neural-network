@@ -11,22 +11,25 @@ DB_NAME = 'ctu_qsar'
 # DB_TABLE = 'target_206_1683'
 # DB_TABLE = 'target_206_1977'
 # DB_TABLE = 'target_protein_big_cleaned_log'
-DB_TABLE = 'target_protein_big_cleaned_deduplicated'
+# DB_TABLE = 'target_protein_big_cleaned_deduplicated'
+DB_TABLE = 'target_molweight'
 # DB_TABLE = 'target_protein_p03372_ic50_binary'
+# DB_TABLE = 'target_protein_bcd_best5'
 
 # DB_COLS = 'canonical_smiles, molweight'
 # DB_COLS = 'canonical_smiles, mw_freebase, alogp'
 # DB_COLS = 'canonical_smiles, hba, hbd'
 # DB_COLS = 'canonical_smiles, log_value, standard_value'
-LABELNAME = 'standard_value_log_median_centered'
-TESTNAME = 'is_testing_99_short'
-DB_COLS = 'canonical_smiles, standard_type, protein_accession,\
+LABELNAME = 'molweight'
+TESTNAME = 'is_testing'
+# DB_COLS = 'canonical_smiles, standard_type, protein_accession,\
+DB_COLS = 'canonical_smiles,\
         {}, {}'.format(LABELNAME, TESTNAME)
 # DB_COLS = 'canonical_smiles, standard_value_50'
 # DB_COLS = 'canonical_smiles, standard_value, is_testing'
 
 # maximum number of downloaded rows
-CAP_SIZE = 5
+CAP_SIZE = 20000
 
 # sending options
 SEND_TABLE = 'journal'
@@ -45,8 +48,8 @@ def getData(dbCols = DB_COLS, dbTable = DB_TABLE):
     # care, this is still fixed at certain number of cols
     # TODO: generalize
 
-    for a, b, c, d, e in cursor:
-        array.append((a, b, c, d, e))
+    for a, b, c in cursor:
+        array.append((a, b, c))
     cursor.close()
     cnx.close()
 
