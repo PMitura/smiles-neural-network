@@ -23,12 +23,18 @@ def getTargetProteinBcdBest5():
     DB_TABLE = 'target_protein_bcd_best5'
     DB_COLS = 'canonical_smiles,Chi3v,Chi4v,SlogP_VSA10,NumAromaticCarbocycles,fr_benzene,standard_value_log_median_centered,is_testing_99_short_NP_705927'
     CAP_SIZE = 1887
-    return fetchData('SELECT {} FROM {} LIMIT {}'.format(DB_COLS, DB_TABLE, CAP_SIZE))
-
+    return fetchData('SELECT {} FROM {} LIMIT {}'.format(DB_COLS, DB_TABLE, CAP_SIZE))    
 
 def getTargetProteinBcdRdkitFeatureSelection():
     DB_TABLE = 'target_protein_big_cleaned_deduplicated'
     DB_COLS = 'canonical_smiles,standard_value_log_median_centered,is_testing_99_short_NP_705927'
-    CAP_SIZE = 1000
+    CAP_SIZE = 1887
     return fetchData('SELECT {} FROM {} WHERE is_testing_99_short_NP_705927 IS NOT NULL LIMIT {}'.format(DB_COLS, DB_TABLE, CAP_SIZE))
     
+
+def getTarget_206_1977():
+    DB_TABLE = 'target_206_1977'
+    DB_COLS = 'canonical_smiles,standard_value'
+    CAP_SIZE = 1976 
+    # CAP_SIZE = 10 
+    return fetchData('SELECT {} FROM {} LIMIT {}'.format(DB_COLS, DB_TABLE, CAP_SIZE))
