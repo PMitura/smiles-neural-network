@@ -3,6 +3,7 @@ import time
 import numpy as np
 import keras.callbacks
 import chembl as ch
+import psutil
 
 # from scipy.stats.stats import pearsonr
 # from sklearn.metrics import roc_auc_score
@@ -25,7 +26,7 @@ SEED = 12345
 TD_LAYER_MULTIPLIER = 0.5   # Time-distributed layer modifier of neuron count
 GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
 EPOCHS = 100
-BATCH = 64                  # metacentrum.cz recommended: 128 - 160
+BATCH = 96                  # metacentrum.cz: 128 - 160, optimum by grid: 96
 LEARNING_RATE = 0.01
 EARLY_STOP = 10             # Number of tolerated epochs without improvement
 OPTIMIZER = Adam(lr = LEARNING_RATE)
@@ -50,7 +51,7 @@ NUM_PARTITIONS = 5
 
 # Statistics settings
 SEND_STATISTICS = True
-COMMENT = 'molweight check'
+COMMENT = 'memory logging test - molweight check'
 
 
 def configureModel(alphaSize, nomiSize = (0, 0)):
@@ -192,6 +193,7 @@ def predictSplit(model, nnInput, rawLabel):
     partSize = len(nnInput) / NUM_PARTITIONS
     rsqrs = []
     for i in range(NUM_PARTITIONS):
+        print '    Partition {}'.format(i)
         if USE_EMBEDDING:
             partInput = np.zeros([partSize, len(nnInput[0])])
         else:
@@ -217,6 +219,10 @@ def predictSplit(model, nnInput, rawLabel):
                 pre[i] = exp(-pre[i])
                 label[i] = exp(-label[i])
 
+        # print samples of predictions
+        for i in range(min(PREDICT_PRINT_SAMPLES / NUM_PARTITIONS, len(pre))):
+            print("      prediction: {}, reference: {}".format(pre[i],
+                label[i]))
 
         merged = np.zeros((2, len(pre)))
         for i in range(len(pre)):
@@ -225,7 +231,7 @@ def predictSplit(model, nnInput, rawLabel):
         pearCr = np.corrcoef(merged)
         rsqr = pearCr[0][1] * pearCr[0][1]
         rsqrs.append(rsqr)
-        print '    R2 Value:     {}'.format(rsqr)
+        print '      R2 Value:     {}'.format(rsqr)
 
     rsqrSum = 0.0
     for sqr in rsqrs:
@@ -346,7 +352,7 @@ def outputDistribution(model, layerID, testIn, withtime = False):
     print("  ...done")
 
 
-def run(source):
+def run(source, grid = None):
     startTime = time.time()
 
     # Initialize using the same seed (to get stable results on comparisons)
@@ -457,6 +463,15 @@ def run(source):
         taskType = 'regression'
     modelSummary = utility.modelToString(model)
 
+    # get memory usage
+    thisProc = psutil.Process()
+    memRss = thisProc.memory_info().rss / 1000000.0
+    memVms = thisProc.memory_info().vms / 1000000.0
+    print '  Memory usage:'
+    print '    Physical: {} MB'.format(memRss)
+    print '    Virtual:  {} MB'.format(memVms)
+
+    # TODO: add memory_pm_mb, memory_vm_bm
     if SEND_STATISTICS:
         ch.sendStatistics(
             training_row_count = len(trainLabel),
@@ -475,5 +490,7 @@ def run(source):
             comment = COMMENT,
             label_name = ch.LABELNAME,
             model = modelSummary,
-            seed = SEED)
+            seed = SEED,
+            memory_pm_mb = memRss,
+            memory_vm_mb = memVms)
 

@@ -16,7 +16,7 @@ def main(argv):
         if opt == '-s':
             source = arg
 
-    run(source)
+    run(source, val)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

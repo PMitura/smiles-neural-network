@@ -63,7 +63,7 @@ def sendStatistics(dataset_name = DB_TABLE,
         task = None,                    # classification / regression
         relevance_training = None,      # R2 or AUC
         relevance_testing = None,       # -||-
-        relevance_testing_std = None,       # -||-
+        relevance_testing_std = None,   # -||-
         comment = None,
         epoch_max = None,
         epoch_count = None,
@@ -75,7 +75,9 @@ def sendStatistics(dataset_name = DB_TABLE,
         label_name = None,
         model = None,
         seed = None,
-        split_name = TESTNAME):
+        split_name = TESTNAME,
+        memory_pm_mb = None,
+        memory_vm_mb = None):
     print('  Sending statistics...')
 
     cnx = mysql.connector.connect(user = DB_USER, password = DB_PASS,
@@ -87,16 +89,16 @@ def sendStatistics(dataset_name = DB_TABLE,
             comment, epoch_max,\
             epoch_count ,runtime_second, parameter_count, learning_rate,\
             optimization_method, batch_size, label_name, model, seed,\
-            split_name)\
+            split_name, memory_pm_mb, memory_vm_mb)\
             VALUES\
             (\'{}\', {}, {}, \'{}\', {}, {}, {}, \'{}\', {}, {}, {}, {}, {},\
-            \'{}\', {}, \'{}\', \"{}\", {}, \"{}\")'.format(SEND_TABLE,
+            \'{}\', {}, \'{}\', \"{}\", {}, \"{}\", {}, {})'.format(SEND_TABLE,
             dataset_name, training_row_count, testing_row_count, task,
             relevance_testing, relevance_training, relevance_testing_std,
             comment, epoch_max, epoch_count,
             runtime_second, parameter_count, learning_rate,
             optimization_method, batch_size, label_name, model, seed,
-            split_name)
+            split_name, memory_pm_mb, memory_vm_mb)
     cursor = cnx.cursor()
     try:
         cursor.execute(query)
