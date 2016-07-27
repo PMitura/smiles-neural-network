@@ -26,7 +26,7 @@ DB_COLS = 'canonical_smiles, standard_type, protein_accession,\
 # DB_COLS = 'canonical_smiles, standard_value, is_testing'
 
 # maximum number of downloaded rows
-CAP_SIZE = 5000
+CAP_SIZE = 5
 
 # sending options
 SEND_TABLE = 'journal'

@@ -349,6 +349,8 @@ def outputDistribution(model, layerID, testIn, withtime = False):
 
 
 def run(source):
+    baseline.regression(data.getRawData(source))
+
     startTime = time.time()
 
     # Initialize using the same seed (to get stable results on comparisons)
