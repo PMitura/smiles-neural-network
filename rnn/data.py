@@ -315,7 +315,7 @@ def getRawData(source = 'chembl', table = ''):
 
 # Call all routines to prepare data for neural network
 def prepareData(source = 'chembl', table = ''):
-    np.set_printoptions(threshold = 'nan')
+    np.set_printoptions(threshold = 'nan', suppress = True)
     data = getRawData(source, table)
 
     if not USE_EMBEDDING:

@@ -4,9 +4,12 @@ import matplotlib
 import matplotlib.pyplot as pltib
 
 from math import sqrt
+from sklearn.manifold import TSNE
 
 PLOT_NAME = 'loss_plot.pdf'
+SCATTER_NAME = 'scatter.pdf'
 
+from keras import backend as K
 
 # Mean of given values
 def mean(array, size):
@@ -68,5 +71,39 @@ def plotLoss(values):
     plot.set_ylabel('loss')
     fig = plot.get_figure()
     fig.savefig('plots/{}'.format(PLOT_NAME))
+
+
+# PCA-like visualisation of layer output
+def visualize2D(model, layerID, inputData, labels, withtime = False):
+    print("\n  Generating output distribution for layer {}".format(layerID))
+    vlayer = K.function([model.layers[0].input], [model.layers[layerID].output])
+    result = vlayer([inputData])
+
+    values = []
+    for instance in result:
+        for line in instance:
+            array = []
+            for val in line:
+                if withtime:
+                    for deepval in val:
+                        array.append(deepval)
+                else:
+                    array.append(val)
+            values.append(array)
+    npvalues = np.array(values)
+
+    model = TSNE(n_components = 2, random_state = 0)
+    scatterValues = model.fit_transform(npvalues)
+    labels2D = np.zeros((len(labels), 1))
+    for i in range(len(labels)):
+        labels2D[i][0] = labels[i]
+    scatterValues = np.hstack((scatterValues, labels2D))
+
+    dframe = pd.DataFrame(scatterValues, columns = ('a', 'b', 'c'))
+    plot = dframe.plot.scatter(x = 'a', y = 'b', c = 'c', cmap = 'plasma')
+    fig = plot.get_figure()
+    fig.savefig('plots/{}'.format(SCATTER_NAME))
+
+    print("  ...done")
 
 
