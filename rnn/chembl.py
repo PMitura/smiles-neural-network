@@ -29,7 +29,7 @@ DB_COLS = 'canonical_smiles,\
 # DB_COLS = 'canonical_smiles, standard_value, is_testing'
 
 # maximum number of downloaded rows
-CAP_SIZE = 20000
+CAP_SIZE = 1000
 
 # sending options
 SEND_TABLE = 'journal'
@@ -77,7 +77,8 @@ def sendStatistics(dataset_name = DB_TABLE,
         seed = None,
         split_name = TESTNAME,
         memory_pm_mb = None,
-        memory_vm_mb = None):
+        memory_vm_mb = None,
+        learning_curve = None):
     print('  Sending statistics...')
 
     cnx = mysql.connector.connect(user = DB_USER, password = DB_PASS,
@@ -89,10 +90,10 @@ def sendStatistics(dataset_name = DB_TABLE,
             comment, epoch_max,\
             epoch_count ,runtime_second, parameter_count, learning_rate,\
             optimization_method, batch_size, label_name, model, seed,\
-            split_name, memory_pm_mb, memory_vm_mb)\
+            split_name, memory_pm_mb, memory_vm_mb, learning_curve)\
             VALUES\
             (\'{}\', {}, {}, \'{}\', {}, {}, {}, \'{}\', {}, {}, {}, {}, {},\
-            \'{}\', {}, \'{}\', \"{}\", {}, \"{}\", {}, {})'.format(SEND_TABLE,
+            \'{}\', {}, \'{}\', \"{}\", {}, \"{}\", {}, {}, (%s))'.format(SEND_TABLE,
             dataset_name, training_row_count, testing_row_count, task,
             relevance_testing, relevance_training, relevance_testing_std,
             comment, epoch_max, epoch_count,
@@ -101,7 +102,7 @@ def sendStatistics(dataset_name = DB_TABLE,
             split_name, memory_pm_mb, memory_vm_mb)
     cursor = cnx.cursor()
     try:
-        cursor.execute(query)
+        cursor.execute(query, (learning_curve,))
         cnx.commit()
     except Exception as e:
         cnx.rollback()

@@ -5,6 +5,8 @@ import matplotlib.pyplot as pltib
 
 from math import sqrt
 
+PLOT_NAME = 'loss_plot.pdf'
+
 
 # Mean of given values
 def mean(array, size):
@@ -56,15 +58,15 @@ def modelToString(model):
 
 
 def plotLoss(values):
-    print '  Plotting...'
-    matplotlib.style.use('ggplot')
-    print values
-    dframe = pd.DataFrame(values, columns = ['loss'])
-    dframe['epoch'] = pd.Series(list(range(len(values))))
-    plot = dframe.plot(x = 'epoch', y = 'loss')
-    fig = plot.get_figure()
-    fig.savefig('plots/loss_plot.pdf')
+    print '    Plotting results'
 
-    print '  ...done'
+    matplotlib.style.use('ggplot')
+    dframe = pd.DataFrame(values, index = pd.Series(list(range(len(values)))),
+        columns = ['training', 'validation'])
+    plot = dframe.plot()
+    plot.set_xlabel('epoch')
+    plot.set_ylabel('loss')
+    fig = plot.get_figure()
+    fig.savefig('plots/{}'.format(PLOT_NAME))
 
 

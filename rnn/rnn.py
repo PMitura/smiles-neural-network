@@ -22,10 +22,10 @@ from keras.optimizers import Adam, RMSprop
 from keras import backend as K
 
 # RNN parameters
-SEED = 12345
+SEED = 12346
 TD_LAYER_MULTIPLIER = 0.5   # Time-distributed layer modifier of neuron count
 GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
-EPOCHS = 150
+EPOCHS = 5
 BATCH = 96                  # metacentrum.cz: 128 - 160, optimum by grid: 96
 LEARNING_RATE = 0.01
 EARLY_STOP = 10             # Number of tolerated epochs without improvement
@@ -51,8 +51,7 @@ NUM_PARTITIONS = 5
 
 # Statistics settings
 SEND_STATISTICS = True
-COMMENT = 'solo alogp'
-CREATE_LOSS_PLOT = True
+COMMENT = 'plot sending test'
 
 
 def configureModel(alphaSize, nomiSize = (0, 0)):
@@ -112,19 +111,31 @@ def setupInitialized(alphaSize, weights):
     return model
 
 
-def train(model, nnInput, labels):
-    # needed format is orthogonal
+def train(model, nnInput, labels, validation):
+    print('  Training model...')
+
+    # needed format is orthogonal to ours
     formattedLabels = np.zeros((len(labels[0]), len(LABEL_IDXS)))
+    formattedValid = np.zeros((len(validation[1][LABEL_IDXS[0]]), 
+        len(LABEL_IDXS)))
     for i in range(len(LABEL_IDXS)):
         for j in range(len(labels[0])):
             formattedLabels[j][i] = labels[LABEL_IDXS[i]][j]
-    print('  Training model...')
+        for j in range(len(validation[1][LABEL_IDXS[i]])):
+            formattedValid[j][i] = validation[1][LABEL_IDXS[i]][j]
+
     early = keras.callbacks.EarlyStopping(monitor = 'loss',
             patience = EARLY_STOP)
     history = model.fit(nnInput, formattedLabels, nb_epoch = EPOCHS,
-            batch_size = BATCH, callbacks = [early])
-    if CREATE_LOSS_PLOT:
-        utility.plotLoss(history.history['loss'])
+            batch_size = BATCH, callbacks = [early],
+            validation_data = (validation[0], formattedValid))
+
+    values = np.zeros((len(history.history['loss']), 2))
+    for i in range(len(history.history['loss'])):
+        values[i][0] = history.history['loss'][i]
+        values[i][1] = history.history['val_loss'][i]
+    utility.plotLoss(values)
+
     print('    Model weights:')
     print(model.summary())
     # print(model.get_weights())
@@ -411,7 +422,7 @@ def run(source, grid = None):
 
     model = setup(alphaSize, nomiSize)
 
-    epochsDone = train(model, trainIn, trainLabel)
+    epochsDone = train(model, trainIn, trainLabel, (testIn, testLabel))
 
     # print model.get_weights()
     # outputDistribution(model, 0, testIn, withtime = True)
@@ -525,5 +536,7 @@ def run(source, grid = None):
             model = modelSummary,
             seed = SEED,
             memory_pm_mb = memRss,
-            memory_vm_mb = memVms)
+            memory_vm_mb = memVms,
+            learning_curve = open('plots/{}'.format(utility.PLOT_NAME),
+                'rb').read())
 
