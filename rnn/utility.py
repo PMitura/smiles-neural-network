@@ -5,6 +5,7 @@ import matplotlib.pyplot as pltib
 
 from math import sqrt
 from sklearn.manifold import TSNE
+from sklearn.decomposition import PCA
 
 PLOT_NAME = 'loss_plot.pdf'
 SCATTER_NAME = 'scatter.pdf'
@@ -92,7 +93,8 @@ def visualize2D(model, layerID, inputData, labels, withtime = False):
             values.append(array)
     npvalues = np.array(values)
 
-    model = TSNE(n_components = 2, random_state = 0)
+    # model = TSNE(n_components = 2, random_state = 0)
+    model = PCA(n_components = 2)
     scatterValues = model.fit_transform(npvalues)
     labels2D = np.zeros((len(labels), 1))
     for i in range(len(labels)):
