@@ -93,8 +93,8 @@ def visualize2D(model, layerID, inputData, labels, withtime = False):
             values.append(array)
     npvalues = np.array(values)
 
-    # model = TSNE(n_components = 2, random_state = 0)
-    model = PCA(n_components = 2)
+    model = TSNE(n_components = 2, random_state = 0)
+    # model = PCA(n_components = 2)
     scatterValues = model.fit_transform(npvalues)
     labels2D = np.zeros((len(labels), 1))
     for i in range(len(labels)):
