@@ -62,7 +62,7 @@ def modelToString(model):
 
 
 def plotLoss(values):
-    print '    Plotting results'
+    print '    Plotting losses'
 
     matplotlib.style.use('ggplot')
     dframe = pd.DataFrame(values, index = pd.Series(list(range(len(values)))),

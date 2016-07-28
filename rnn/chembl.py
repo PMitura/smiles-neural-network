@@ -9,10 +9,10 @@ DB_NAME = 'ctu_qsar'
 # DB_TABLE = 'target_molweight_1000'
 # DB_TABLE = 'target_protein_1000'
 # DB_TABLE = 'target_206_1683'
-# DB_TABLE = 'target_206_1977'
+DB_TABLE = 'target_206_1977'
 # DB_TABLE = 'target_protein_big_cleaned_log'
 # DB_TABLE = 'target_protein_big_cleaned_deduplicated'
-DB_TABLE = 'target_molweight'
+# DB_TABLE = 'target_molweight'
 # DB_TABLE = 'target_protein_p03372_ic50_binary'
 # DB_TABLE = 'target_protein_bcd_best5'
 
@@ -20,16 +20,16 @@ DB_TABLE = 'target_molweight'
 # DB_COLS = 'canonical_smiles, mw_freebase, alogp'
 # DB_COLS = 'canonical_smiles, hba, hbd'
 # DB_COLS = 'canonical_smiles, log_value, standard_value'
-LABELNAME = 'molweight, hba'
+LABELNAME = 'MOLWEIGHT, ALOGP, STANDARD_VALUE'
 TESTNAME = 'is_testing'
 # DB_COLS = 'canonical_smiles, standard_type, protein_accession,\
-DB_COLS = 'canonical_smiles,\
+DB_COLS = 'CANONICAL_SMILES,\
         {}, {}'.format(LABELNAME, TESTNAME)
 # DB_COLS = 'canonical_smiles, standard_value_50'
 # DB_COLS = 'canonical_smiles, standard_value, is_testing'
 
 # maximum number of downloaded rows
-CAP_SIZE = 20000
+CAP_SIZE = 5000
 
 # sending options
 SEND_TABLE = 'journal'
@@ -48,8 +48,8 @@ def getData(dbCols = DB_COLS, dbTable = DB_TABLE):
     # care, this is still fixed at certain number of cols
     # TODO: generalize
 
-    for a, b, c, d in cursor:
-        array.append((a, b, c, d))
+    for a, b, c, d, e in cursor:
+        array.append((a, b, c, d, e))
     cursor.close()
     cnx.close()
 
