@@ -2,9 +2,11 @@ import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as pltib
+import psutil
 
 from math import sqrt
 from sklearn.manifold import TSNE
+from sklearn.decomposition import PCA
 
 PLOT_NAME = 'loss_plot.pdf'
 SCATTER_NAME = 'scatter.pdf'
@@ -61,7 +63,7 @@ def modelToString(model):
 
 
 def plotLoss(values):
-    print '    Plotting results'
+    print '    Plotting losses'
 
     matplotlib.style.use('ggplot')
     dframe = pd.DataFrame(values, index = pd.Series(list(range(len(values)))),
@@ -93,6 +95,7 @@ def visualize2D(model, layerID, inputData, labels, withtime = False):
     npvalues = np.array(values)
 
     model = TSNE(n_components = 2, random_state = 0)
+    # model = PCA(n_components = 2)
     scatterValues = model.fit_transform(npvalues)
     labels2D = np.zeros((len(labels), 1))
     for i in range(len(labels)):
@@ -105,5 +108,14 @@ def visualize2D(model, layerID, inputData, labels, withtime = False):
     fig.savefig('plots/{}'.format(SCATTER_NAME))
 
     print("  ...done")
+
+def getMemoryUsage():
+    thisProc = psutil.Process()
+    memRss = thisProc.memory_info().rss / 1000000.0
+    memVms = thisProc.memory_info().vms / 1000000.0
+    print '  Memory usage:'
+    print '    Physical: {} MB'.format(memRss)
+    print '    Virtual:  {} MB'.format(memVms)
+    return memRss, memVms
 
 

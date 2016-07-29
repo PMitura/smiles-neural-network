@@ -11,7 +11,7 @@ USE_EMBEDDING = False
 # Number of label columns to prepare
 INPUT_COUNT = 1
 EXTRA_NOMINALS = 0
-LABEL_COUNT = 2
+LABEL_COUNT = 54
 USE_TEST_FLAGS = True
 
 # Fixed alphasize options
@@ -297,7 +297,6 @@ def resolveMissingLabels(labels):
             if isnan(labels[col][i]):
                 labels[col][i] = 0
     print('  ...done')
-
 
 
 def getRawData(source = 'chembl', table = ''):

@@ -1,4 +1,10 @@
 Keras == 1.0.5
+matplotlib == 1.5.1
 numpy == 1.11.0
+pandas == 0.18.1
+psutil == 4.3.0
 PubChemPy == 1.0.3
+matplotlib == 1.5.1
 mysql_connector_repackaged == 0.3.1
+pylab == 0.1.3
+scikit_learn == 0.17.1
