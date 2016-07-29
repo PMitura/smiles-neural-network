@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as pltib
+import psutil
 
 from math import sqrt
 from sklearn.manifold import TSNE
@@ -107,5 +108,14 @@ def visualize2D(model, layerID, inputData, labels, withtime = False):
     fig.savefig('plots/{}'.format(SCATTER_NAME))
 
     print("  ...done")
+
+def getMemoryUsage():
+    thisProc = psutil.Process()
+    memRss = thisProc.memory_info().rss / 1000000.0
+    memVms = thisProc.memory_info().vms / 1000000.0
+    print '  Memory usage:'
+    print '    Physical: {} MB'.format(memRss)
+    print '    Virtual:  {} MB'.format(memVms)
+    return memRss, memVms
 
 
