@@ -11,8 +11,8 @@ USE_EMBEDDING = False
 # Number of label columns to prepare
 INPUT_COUNT = 1
 EXTRA_NOMINALS = 0
-LABEL_COUNT = 1
-USE_TEST_FLAGS = False
+LABEL_COUNT = 52
+USE_TEST_FLAGS = True
 
 # Fixed alphasize options
 ALPHA_FIXED = False
