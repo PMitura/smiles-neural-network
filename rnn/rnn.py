@@ -25,7 +25,7 @@ SEED = 12346
 TD_LAYER_MULTIPLIER = 0.5   # Time-distributed layer modifier of neuron count
 GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
 EPOCHS = 150
-BATCH = 96                  # metacentrum.cz: 128 - 160, optimum by grid: 96
+BATCH = 160                 # metacentrum.cz: 128 - 160, optimum by grid: 96
 LEARNING_RATE = 0.01
 EARLY_STOP = 10             # Number of tolerated epochs without improvement
 OPTIMIZER = Adam(lr = LEARNING_RATE)
