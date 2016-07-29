@@ -37,7 +37,7 @@ FREEZE_IDXS = set([2])
 TRAINABLE_INNER = True
 
 # Preprocessing switches
-LABEL_IDXS = range(40)      # Indexes of columns to use as label
+LABEL_IDXS = range(40)       # Indexes of columns to use as label
 ZSCORE_NORM = True          # Undone after testing
 LOGARITHM = False           # Dtto, sets all values (x) to -log(x) 
 
@@ -370,6 +370,12 @@ def modelOnLabels(trainIn, trainLabel, testIn, testLabel, alphaSize, nomiSize,
         indexes, weights = None):
     if weights == None:
         model = configureModel(alphaSize, nomiSize, outputLen = len(indexes))
+        w = model.get_weights()
+        # zero output layer weights
+        for i in range(len(w[11])):
+            for j in range(len(w[11][i])):
+                w[11][i][j] = 0.1
+        model.set_weights(w)
     else:
         model = configureModel(alphaSize, nomiSize, outputLen = len(indexes))
         model.set_weights(weights)
