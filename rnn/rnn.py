@@ -39,7 +39,7 @@ TRAINABLE_INNER = True
 # Preprocessing switches
 LABEL_IDXS = range(40)       # Indexes of columns to use as label
 ZSCORE_NORM = True          # Undone after testing
-LOGARITHM = False           # Dtto, sets all values (x) to -log(x) 
+LOGARITHM = False           # Dtto, sets all values (x) to -log(x)
 
 # Holdout settings
 FLAG_BASED_HOLD = True      # Bases holdout on col called 'is_testing'
@@ -61,10 +61,10 @@ def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(LABEL_IDXS)):
     print('  Initializing and compiling...')
 
     model = Sequential()
-    
+
     if USE_EMBEDDING:
         # second value in nomiSize tuple is shift while using embedding
-        model.add(Embedding(1 << nomiSize[1], EMBEDDING_OUTPUTS)) 
+        model.add(Embedding(1 << nomiSize[1], EMBEDDING_OUTPUTS))
         model.add(TimeDistributed(Dense(int(TD_LAYER_MULTIPLIER * (alphaSize +
             nomiSize[0])), activation = 'tanh', trainable = TRAINABLE_INNER)))
     else:
@@ -89,7 +89,7 @@ def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(LABEL_IDXS)):
             input_shape = (None, alphaSize + nomiSize)))
 
     bwModel = Sequential()
-    bwModel.add(GRU(int(GRU_LAYER_MULTIPLIER * alphaSize), 
+    bwModel.add(GRU(int(GRU_LAYER_MULTIPLIER * alphaSize),
             activation = 'sigmoid', go_backwards = True,
             input_shape = (None, alphaSize + nomiSize)))
 
@@ -109,7 +109,7 @@ def train(model, nnInput, labels, validation, makePlot = True,
 
     # needed format is orthogonal to ours
     formattedLabels = np.zeros((len(labels[0]), len(labelIndexes)))
-    formattedValid = np.zeros((len(validation[1][labelIndexes[0]]), 
+    formattedValid = np.zeros((len(validation[1][labelIndexes[0]]),
         len(labelIndexes)))
     for i in range(len(labelIndexes)):
         for j in range(len(labels[0])):
@@ -366,7 +366,7 @@ def classify(model, nnInput, label):
 
 
 # TODO: encapsulate training rnn on a label to a function, not working yet
-def modelOnLabels(trainIn, trainLabel, testIn, testLabel, alphaSize, nomiSize, 
+def modelOnLabels(trainIn, trainLabel, testIn, testLabel, alphaSize, nomiSize,
         indexes, weights = None):
     if weights == None:
         model = configureModel(alphaSize, nomiSize, outputLen = len(indexes))
@@ -390,6 +390,7 @@ def modelOnLabels(trainIn, trainLabel, testIn, testLabel, alphaSize, nomiSize,
 
 # Do preprocessing and train/test data division
 def preprocess(fullIn, labels, testFlags):
+
     if LOGARITHM:
         for idx in LABEL_IDXS:
             labels[idx] = data.logarithm(labels[idx])
@@ -404,12 +405,20 @@ def preprocess(fullIn, labels, testFlags):
             zDev[idx] = d
 
 
+    # check for NaN or inf values, which break our RNN
+    for idx in LABEL_IDXS:
+        for label in labels[idx]:
+            if np.isnan(label) or np.isinf(label):
+                raise ValueError('Preprocess error: bad value in data: {}'.format(label))
+
+
     if FLAG_BASED_HOLD:
         trainIn, trainLabel, testIn, testLabel = data.holdoutBased(testFlags,
                 fullIn, labels)
     else:
         trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,
                 fullIn, labels)
+
 
     return trainIn, trainLabel, testIn, testLabel
 
@@ -449,34 +458,6 @@ def run(source, grid = None):
             else:
                 relevanceTest = predict(model, testIn, testLabel)
     else:
-        """
-        # Chained setup
-        model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
-                alphaSize, nomiSize, CHAINED_LABELS[0])
-
-        # BEGIN TEMP
-
-        print("\n  Prediction of training data:")
-        if CLASSIFY:
-            raise NotImplementedError('Classifications are TODO')
-            classify(model, trainIn, trainLabel)
-        else:
-            relevanceTrain = predict(model, trainIn, trainLabel, 
-                    labelIndexes = CHAINED_LABELS[0])
-
-        print("\n  Prediction of testing data:")
-        if CLASSIFY:
-            classify(model, testIn, testLabel)
-        else:
-            if USE_PARTITIONS:
-                relevanceTest, stdTest = predictSplit(model, testIn, testLabel,
-                    labelIndexes = CHAINED_LABELS[0])
-            else:
-                relevanceTest = predict(model, testIn, testLabel, labelIndexes
-                    = CHAINED_LABELS[0])
-        # END TEMP
-        """
-
         for idx in range(len(CHAINED_LABELS)):
             if idx in FREEZE_IDXS:
                 print '    Freezing inner layers.'
@@ -488,7 +469,6 @@ def run(source, grid = None):
                 model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, 
                     testLabel, alphaSize, nomiSize, CHAINED_LABELS[idx],
                     model.get_weights())
-
 
             print("\n  Prediction of training data:")
             if CLASSIFY:
@@ -547,4 +527,3 @@ def run(source, grid = None):
         memory_vm_mb = memVms,
         learning_curve = open('plots/{}'.format(utility.PLOT_NAME),
             'rb').read())
-
