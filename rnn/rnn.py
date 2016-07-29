@@ -24,7 +24,7 @@ from keras.optimizers import Adam, RMSprop
 SEED = 12346
 TD_LAYER_MULTIPLIER = 0.5   # Time-distributed layer modifier of neuron count
 GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
-EPOCHS = 3
+EPOCHS = 150
 BATCH = 96                  # metacentrum.cz: 128 - 160, optimum by grid: 96
 LEARNING_RATE = 0.05
 EARLY_STOP = 10             # Number of tolerated epochs without improvement
@@ -384,7 +384,7 @@ def classify(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
         print("    Precision:               {}".format(precision))
         print("    F-measure:               {}".format(fmeasure))\
 
-        return logloss
+        return accuracy
 
 def classifySplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
     partSize = len(nnInput) / NUM_PARTITIONS
@@ -448,7 +448,7 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
                     trueNegative += 1
 
             loglosses[metricidx][i] = utility.logloss(pre,label)
-            accuracies[metricidx][i] = (falseNegative + falsePositive) / len(label)
+            accuracies[metricidx][i] = 1 - (falseNegative + falsePositive) / len(label)
 
             print '      Logloss Value: {}'.format(loglosses[metricidx][i])
             print '      Accuracy: {}'.format(accuracies[metricidx][i])
