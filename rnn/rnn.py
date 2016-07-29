@@ -23,10 +23,10 @@ from keras.optimizers import Adam, RMSprop
 # RNN parameters
 SEED = 12346
 TD_LAYER_MULTIPLIER = 0.5   # Time-distributed layer modifier of neuron count
-GRU_LAYER_MULTIPLIER = 2    # -||- for GRU
+GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
 EPOCHS = 150
 BATCH = 96                  # metacentrum.cz: 128 - 160, optimum by grid: 96
-LEARNING_RATE = 0.05
+LEARNING_RATE = 0.01
 EARLY_STOP = 10             # Number of tolerated epochs without improvement
 OPTIMIZER = Adam(lr = LEARNING_RATE)
 USE_EMBEDDING = data.USE_EMBEDDING
@@ -513,6 +513,13 @@ def run(source, grid = None):
     modelSummary = utility.modelToString(model)
 
     memRss, memVms = utility.getMemoryUsage()
+
+    if np.isnan(relevance_testing):
+        relevance_testing = None
+    if np.isnan(relevance_training):
+        relevance_training = None
+    if np.isnan(relevance_testing_std):
+        relevance_testing_std = None
 
     # TODO: add memory_pm_mb, memory_vm_bm
     ch.sendStatistics(
