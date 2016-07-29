@@ -42,6 +42,22 @@ def rms(array, size):
         sqrSum += array[i] * array[i]
     return sqrt(sqrSum / size)
 
+# Logloss
+def logloss(predictions, labels):
+    if len(predictions) != len(labels):
+        raise RuntimeError('logloss: lengths of arrays differ: preds: %d, labels: %d'.format(len(predictions), len(labels)))
+
+    N = len(predictions)
+
+    p = np.array(predictions)
+    y = np.array(labels)
+
+    # avoid NaN and Inf
+    eps = 1e-15
+    p = np.maximum(eps, p)
+    p = np.minimum(1-eps, p)
+
+    return -np.sum(y*np.log(p)+(1-y)*np.log(1-p))/N
 
 def modelToString(model):
     string = ''
