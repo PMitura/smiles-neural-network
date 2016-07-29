@@ -211,7 +211,7 @@ def holdout(ratio, words, label):
     testWords = np.zeros((testSize, len(words[0]), len(words[0][0])))
     testLabel = np.zeros((len(label), testSize))
     for i in range(testSize):
-        testWords[i] = words[i + testSize]
+        testWords[i] = words[i + trainSize]
         for j in range(len(label)):
             testLabel[j][i] = label[j][i + trainSize]
 
