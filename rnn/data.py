@@ -11,8 +11,8 @@ USE_EMBEDDING = False
 # Number of label columns to prepare
 INPUT_COUNT = 1
 EXTRA_NOMINALS = 0
-LABEL_COUNT = 54
-USE_TEST_FLAGS = True
+LABEL_COUNT = 1
+USE_TEST_FLAGS = False
 
 # Fixed alphasize options
 ALPHA_FIXED = False
@@ -41,9 +41,10 @@ def formatSMILES(rawData, col):
 
     maxLen = 0
     for item in rawData:
-        tstat = item[LABEL_COUNT + INPUT_COUNT]
-        if USE_TEST_FLAGS and not (tstat == 0 or tstat == 1):
-            continue
+        if USE_TEST_FLAGS:
+            tstat = item[LABEL_COUNT + INPUT_COUNT]
+            if not (tstat == 0 or tstat == 1):
+                continue
         maxLen = max(maxLen, len(item[col]))
 
     # DEBUG, data properties
@@ -194,6 +195,7 @@ def holdout(ratio, words, label):
     if ratio >= 1 or ratio <= 0:
         raise ValueError('Ratio must be in (0, 1) interval')
 
+
     # Prepare training set
     trainSize = int(floor(len(words) * ratio))
     trainWords = np.zeros((trainSize, len(words[0]), len(words[0][0])))
@@ -201,7 +203,8 @@ def holdout(ratio, words, label):
     for i in range(trainSize):
         trainWords[i] = words[i]
         for j in range(len(label)):
-            trainLabel[j][i] = label[j][i + trainSize]
+            trainLabel[j][i] = label[j][i]
+
 
     # Prepare testing set
     testSize = int(floor(len(words) - (len(words) * ratio)))
@@ -210,7 +213,7 @@ def holdout(ratio, words, label):
     for i in range(testSize):
         testWords[i] = words[i + testSize]
         for j in range(len(label)):
-            testLabel[j][i] = label[j][i + testSize]
+            testLabel[j][i] = label[j][i + trainSize]
 
     return trainWords, trainLabel, testWords, testLabel
 
