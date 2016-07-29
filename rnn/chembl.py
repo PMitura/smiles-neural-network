@@ -81,7 +81,8 @@ def sendStatistics(dataset_name = DB_TABLE,
         split_name = TESTNAME,
         memory_pm_mb = None,
         memory_vm_mb = None,
-        learning_curve = None):
+        learning_curve = None,
+        hostname = None):
     print('  Sending statistics...')
 
     cnx = mysql.connector.connect(user = DB_USER, password = DB_PASS,
@@ -93,16 +94,16 @@ def sendStatistics(dataset_name = DB_TABLE,
             comment, epoch_max,\
             epoch_count ,runtime_second, parameter_count, learning_rate,\
             optimization_method, batch_size, label_name, model, seed,\
-            split_name, memory_pm_mb, memory_vm_mb, learning_curve)\
+            split_name, memory_pm_mb, memory_vm_mb, learning_curve, hostname)\
             VALUES\
             (\'{}\', {}, {}, \'{}\', {}, {}, {}, \'{}\', {}, {}, {}, {}, {},\
-            \'{}\', {}, \'{}\', \"{}\", {}, \"{}\", {}, {}, (%s))'.format(SEND_TABLE,
+            \'{}\', {}, \'{}\', \"{}\", {}, \"{}\", {}, {}, (%s), \"{}\")'.format(SEND_TABLE,
             dataset_name, training_row_count, testing_row_count, task,
             relevance_testing, relevance_training, relevance_testing_std,
             comment, epoch_max, epoch_count,
             runtime_second, parameter_count, learning_rate,
             optimization_method, batch_size, label_name, model, seed,
-            split_name, memory_pm_mb, memory_vm_mb)
+            split_name, memory_pm_mb, memory_vm_mb, hostname)
     cursor = cnx.cursor()
     try:
         cursor.execute(query, (learning_curve,))

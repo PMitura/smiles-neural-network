@@ -3,6 +3,7 @@ import time
 import numpy as np
 import keras.callbacks
 import chembl as ch
+import socket
 
 # from scipy.stats.stats import pearsonr
 # from sklearn.metrics import roc_auc_score
@@ -22,8 +23,8 @@ from keras.optimizers import Adam, RMSprop
 # RNN parameters
 SEED = 12346
 TD_LAYER_MULTIPLIER = 0.5   # Time-distributed layer modifier of neuron count
-GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
-EPOCHS = 3
+GRU_LAYER_MULTIPLIER = 2    # -||- for GRU
+EPOCHS = 150
 BATCH = 96                  # metacentrum.cz: 128 - 160, optimum by grid: 96
 LEARNING_RATE = 0.05
 EARLY_STOP = 10             # Number of tolerated epochs without improvement
@@ -53,7 +54,7 @@ USE_PARTITIONS = True       # Partition test set and compute averages
 NUM_PARTITIONS = 5
 
 # Statistics settings
-COMMENT = 'Test'
+COMMENT = 'Hostname sending check'
 SCATTER_VISUALIZE = True
 
 
@@ -515,8 +516,8 @@ def run(source, grid = None):
 
     # TODO: add memory_pm_mb, memory_vm_bm
     ch.sendStatistics(
-        training_row_count = len(trainLabel),
-        testing_row_count = len(testLabel),
+        training_row_count = len(trainLabel[0]),
+        testing_row_count = len(testLabel[0]),
         task = taskType,
         relevance_training = relevanceTrain,
         relevance_testing = relevanceTest,
@@ -535,4 +536,5 @@ def run(source, grid = None):
         memory_pm_mb = memRss,
         memory_vm_mb = memVms,
         learning_curve = open('plots/{}'.format(utility.PLOT_NAME),
-            'rb').read())
+            'rb').read(),
+        hostname = socket.gethostname())
