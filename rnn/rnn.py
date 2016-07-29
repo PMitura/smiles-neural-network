@@ -37,6 +37,12 @@ CHAINED_PREDICT = [0]
 FREEZE_IDXS = set([6])
 TRAINABLE_INNER = True
 
+# Learning rate decay settings
+LEARNING_RATE_DECAY = True
+LEARNING_RATE_DECAY_TYPE = 'step' # step,time
+LEARNING_RATE_DECAY_STEP_CONFIG_STEPS = 20
+LEARNING_RATE_DECAY_STEP_CONFIG_RATIO = 0.5
+
 # Classification settings
 CLASSIFY_THRESHOLD = 0
 CLASSIFY_LABEL_POS = 1
@@ -60,7 +66,7 @@ USE_PARTITIONS = True       # Partition test set and compute averages
 NUM_PARTITIONS = 5
 
 # Statistics settings
-COMMENT = 'Classify test'
+COMMENT = 'Classify with learning rate decay, step drop mode'
 SCATTER_VISUALIZE = True
 
 
@@ -113,6 +119,23 @@ def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(LABEL_IDXS)):
     print('  ...done')
     return model
 
+def learningRateDecayer(epoch):
+    if not LEARNING_RATE_DECAY:
+        return LEARNING_RATE
+
+    if LEARNING_RATE_DECAY_TYPE == 'step':
+        drop = np.floor((epoch)/LEARNING_RATE_DECAY_STEP_CONFIG_STEPS)
+        new_lr = float(LEARNING_RATE * np.power(LEARNING_RATE_DECAY_STEP_CONFIG_RATIO,drop))
+        print('lr',epoch,new_lr)
+        return new_lr
+    elif LEARNING_RATE_DECAY_TYPE == 'time':
+        raise NotImplementedError('learning rate decay: time')
+    elif LEARNING_RATE_DECAY_TYPE == 'peter':
+        raise NotImplementedError('learning rate decay: peter')
+    else:
+        raise RuntimeError('learning rate decat: unknown type {}'.format(LEARNING_RATE_DECAY_TYPE))
+
+
 def train(model, nnInput, labels, validation, makePlot = True,
         labelIndexes = LABEL_IDXS):
     print('  Training model...')
@@ -129,8 +152,11 @@ def train(model, nnInput, labels, validation, makePlot = True,
 
     early = keras.callbacks.EarlyStopping(monitor = 'loss',
             patience = EARLY_STOP)
+
+    learningRateScheduler = keras.callbacks.LearningRateScheduler(learningRateDecayer)
+
     history = model.fit(nnInput, formattedLabels, nb_epoch = EPOCHS,
-            batch_size = BATCH, callbacks = [early],
+            batch_size = BATCH, callbacks = [early,learningRateScheduler],
             validation_data = (validation[0], formattedValid))
 
     if makePlot:
