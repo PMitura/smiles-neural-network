@@ -53,7 +53,7 @@ USE_PARTITIONS = True       # Partition test set and compute averages
 NUM_PARTITIONS = 5
 
 # Statistics settings
-COMMENT = 'Train on one, then on 40, then predict'
+COMMENT = 'Random last layer weights in chaining'
 SCATTER_VISUALIZE = True
 
 
@@ -371,13 +371,16 @@ def modelOnLabels(trainIn, trainLabel, testIn, testLabel, alphaSize, nomiSize,
     if weights == None:
         model = configureModel(alphaSize, nomiSize, outputLen = len(indexes))
         w = model.get_weights()
-        # zero output layer weights
+        # uniform output layer weights
         for i in range(len(w[11])):
             for j in range(len(w[11][i])):
                 w[11][i][j] = 0.1
         model.set_weights(w)
     else:
         model = configureModel(alphaSize, nomiSize, outputLen = len(indexes))
+        # preserve randomized weights
+        oriW = model.get_weights()
+        weights[11] = oriW[11]
         model.set_weights(weights)
 
     epochsDone = train(model, trainIn, trainLabel, (testIn, testLabel),
@@ -446,6 +449,7 @@ def run(source, grid = None):
             else:
                 relevanceTest = predict(model, testIn, testLabel)
     else:
+        """
         # Chained setup
         model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
                 alphaSize, nomiSize, CHAINED_LABELS[0])
@@ -471,41 +475,43 @@ def run(source, grid = None):
                 relevanceTest = predict(model, testIn, testLabel, labelIndexes
                     = CHAINED_LABELS[0])
         # END TEMP
+        """
 
-        for idx in range(1, len(CHAINED_LABELS)):
+        for idx in range(len(CHAINED_LABELS)):
             if idx in FREEZE_IDXS:
                 print '    Freezing inner layers.'
                 TRAINABLE_INNER = False
-            model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, 
-                testLabel, alphaSize, nomiSize, CHAINED_LABELS[idx],
-                model.get_weights())
-            """
-            if not TRAINABLE_INNER:
-                print '    Unfreezing inner layers.'
-                TRAINABLE_INNER = True
-            """
+            if idx == 0:
+                model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
+                        alphaSize, nomiSize, CHAINED_LABELS[idx])
+            else:
+                model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, 
+                    testLabel, alphaSize, nomiSize, CHAINED_LABELS[idx],
+                    model.get_weights())
+
+
+            print("\n  Prediction of training data:")
+            if CLASSIFY:
+                raise NotImplementedError('Classifications are TODO')
+                classify(model, trainIn, trainLabel)
+            else:
+                relevanceTrain = predict(model, trainIn, trainLabel, 
+                        labelIndexes = CHAINED_LABELS[idx])
+
+            print("\n  Prediction of testing data:")
+            if CLASSIFY:
+                classify(model, testIn, testLabel)
+            else:
+                if USE_PARTITIONS:
+                    relevanceTest, stdTest = predictSplit(model, testIn, testLabel,
+                        labelIndexes = CHAINED_LABELS[idx])
+                else:
+                    relevanceTest = predict(model, testIn, testLabel, labelIndexes
+                        = CHAINED_LABELS[idx])
 
         if SCATTER_VISUALIZE:
-            utility.visualize2D(model, 1, testIn, testLabel[CHAINED_PREDICT[0]])
-
-        print("\n  Prediction of training data:")
-        if CLASSIFY:
-            raise NotImplementedError('Classifications are TODO')
-            classify(model, trainIn, trainLabel)
-        else:
-            relevanceTrain = predict(model, trainIn, trainLabel, 
-                    labelIndexes = CHAINED_PREDICT)
-
-        print("\n  Prediction of testing data:")
-        if CLASSIFY:
-            classify(model, testIn, testLabel)
-        else:
-            if USE_PARTITIONS:
-                relevanceTest, stdTest = predictSplit(model, testIn, testLabel,
-                    labelIndexes = CHAINED_PREDICT)
-            else:
-                relevanceTest = predict(model, testIn, testLabel, labelIndexes
-                    = CHAINED_PREDICT)
+            utility.visualize2D(model, 1, testIn,
+                    testLabel[CHAINED_PREDICT[0]])
 
     endTime = time.time()
     deltaTime = endTime - startTime
