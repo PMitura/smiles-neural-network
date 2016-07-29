@@ -514,12 +514,12 @@ def run(source, grid = None):
 
     memRss, memVms = utility.getMemoryUsage()
 
-    if np.isnan(relevance_testing):
-        relevance_testing = None
-    if np.isnan(relevance_training):
-        relevance_training = None
-    if np.isnan(relevance_testing_std):
-        relevance_testing_std = None
+    if np.isnan(relevanceTest):
+        relevanceTest = None
+    if np.isnan(relevanceTrain):
+        relevanceTrain = None
+    if np.isnan(stdTest):
+        stdTest = None
 
     # TODO: add memory_pm_mb, memory_vm_bm
     ch.sendStatistics(
