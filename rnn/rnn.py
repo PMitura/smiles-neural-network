@@ -23,7 +23,7 @@ from keras.optimizers import Adam, RMSprop
 SEED = 12346
 TD_LAYER_MULTIPLIER = 0.5   # Time-distributed layer modifier of neuron count
 GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
-EPOCHS = 150
+EPOCHS = 3
 BATCH = 96                  # metacentrum.cz: 128 - 160, optimum by grid: 96
 LEARNING_RATE = 0.05
 EARLY_STOP = 10             # Number of tolerated epochs without improvement
@@ -53,7 +53,7 @@ USE_PARTITIONS = True       # Partition test set and compute averages
 NUM_PARTITIONS = 5
 
 # Statistics settings
-COMMENT = 'Random last layer weights in chaining'
+COMMENT = 'Test'
 SCATTER_VISUALIZE = True
 
 
@@ -274,8 +274,10 @@ def predictSplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
                     rsqrAvg[lab])
         rsqrDev[lab] = sqrt(rsqrDev[lab] / NUM_PARTITIONS)
 
-        print '      label {} R2 Average:   {}'.format(lab, rsqrAvg[lab])
-        print '      label {} R2 Deviation: {}'.format(lab, rsqrDev[lab])
+        print '      label {} R2 Average:   {}'.format(labelIndexes[lab],
+                rsqrAvg[lab])
+        print '      label {} R2 Deviation: {}'.format(labelIndexes[lab],
+                rsqrDev[lab])
 
     rsqrAvgOverall = utility.mean(rsqrAvg, len(rsqrAvg))
     rsqrDevOverall = utility.mean(rsqrDev, len(rsqrDev))
@@ -367,17 +369,18 @@ def classify(model, nnInput, label):
 
 # TODO: encapsulate training rnn on a label to a function, not working yet
 def modelOnLabels(trainIn, trainLabel, testIn, testLabel, alphaSize, nomiSize,
-        indexes, weights = None):
-    if weights == None:
-        model = configureModel(alphaSize, nomiSize, outputLen = len(indexes))
-        w = model.get_weights()
+        indexes, weights = None, uniOutput = False):
+    model = configureModel(alphaSize, nomiSize, outputLen = len(indexes))
+
+    if uniOutput:
+        if weights == None:
+            weights = model.get_weights()
         # uniform output layer weights
-        for i in range(len(w[11])):
-            for j in range(len(w[11][i])):
-                w[11][i][j] = 0.1
-        model.set_weights(w)
-    else:
-        model = configureModel(alphaSize, nomiSize, outputLen = len(indexes))
+        for i in range(len(weights[11])):
+            for j in range(len(weights[11][i])):
+                weights[11][i][j] = 0.1
+        model.set_weights(weights)
+    elif weights != None:
         # preserve randomized weights
         oriW = model.get_weights()
         weights[11] = oriW[11]
@@ -462,13 +465,19 @@ def run(source, grid = None):
             if idx in FREEZE_IDXS:
                 print '    Freezing inner layers.'
                 TRAINABLE_INNER = False
+
             if idx == 0:
                 model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
-                        alphaSize, nomiSize, CHAINED_LABELS[idx])
-            else:
+                        alphaSize, nomiSize, CHAINED_LABELS[idx], uniOutput =
+                        True)
+            elif idx == 1:
                 model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, 
                     testLabel, alphaSize, nomiSize, CHAINED_LABELS[idx],
                     model.get_weights())
+            else:
+                model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, 
+                    testLabel, alphaSize, nomiSize, CHAINED_LABELS[idx],
+                    model.get_weights(), uniOutput = True)
 
             print("\n  Prediction of training data:")
             if CLASSIFY:
