@@ -42,8 +42,8 @@ def formatSMILES(rawData, col):
     maxLen = 0
     for item in rawData:
         if USE_TEST_FLAGS:
-            tstat = item[LABEL_COUNT + INPUT_COUNT]
-            if not (tstat == 0 or tstat == 1):
+            tStat = item[LABEL_COUNT + INPUT_COUNT]
+            if not (tStat == 0 or tStat == 1):
                 continue
         maxLen = max(maxLen, len(item[col]))
 
@@ -182,7 +182,7 @@ def formatNominalEmbedded(rawData, timesteps, output, col, shift = 0):
 # Randomly choose n samples, with repetition
 def randomSelection(n, words, ref):
     rWords = np.zeros((n, len(words[0]), len(words[0][0])))
-    rRef = np.zeros((n))
+    rRef = np.zeros(n)
     for i in range(n):
         rng = random.randint(0, len(words) - 1)
         rWords[i] = words[rng]
@@ -317,7 +317,7 @@ def getRawData(source = 'chembl', table = ''):
 
 # Call all routines to prepare data for neural network
 def prepareData(source = 'chembl', table = ''):
-    np.set_printoptions(threshold = 'nan', suppress = True)
+    np.set_printoptions(threshold = 'nan', suppress = True)     # Jan: is this the right way to assign nan? See: http://stackoverflow.com/questions/19374254/assigning-a-variable-nan-in-python-without-numpy
     data = getRawData(source, table)
 
     if not USE_EMBEDDING:
@@ -367,7 +367,7 @@ def prepareData(source = 'chembl', table = ''):
 
     # include shift value to nomiSize if embedding is used
     if USE_EMBEDDING:
-        return formattedWords, labels, alphaSize, (nomiSize, shift), testFlags
+        return formattedWords, labels, alphaSize, (nomiSize, shift), testFlags      # Jan: where is shift defined?
     else:
         return formattedWords, labels, alphaSize, nomiSize, testFlags
 

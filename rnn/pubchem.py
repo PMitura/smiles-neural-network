@@ -52,7 +52,6 @@ def play():
         print "{} has aids {}".format(compound.isomeric_smiles,
                 compound.aids)
     """
-    array = []
 
     assayCID = pcp.request(1, domain = 'assay', namespace = 'aid', assay_type =
             'all', operation = 'cids')

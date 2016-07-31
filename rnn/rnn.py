@@ -7,7 +7,7 @@ import socket
 
 from scipy.stats.stats import pearsonr
 from sklearn.metrics import roc_auc_score
-# not used to relieve metacentrum of some dependecies
+# not used to relieve MetaCentrum of some dependencies
 from math import sqrt, exp, log, ceil
 
 # TODO: Remove unused imports after experiments are done
@@ -696,7 +696,7 @@ def run(source, grid = None):
         optimization_method = OPTIMIZER.__class__.__name__,
         batch_size = BATCH,
         comment = COMMENT,
-        label_name = ch.LABELNAME,
+        label_name = ch.LABEL_NAME,
         model = modelSummary,
         seed = SEED,
         memory_pm_mb = memRss,
