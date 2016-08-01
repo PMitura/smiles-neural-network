@@ -23,7 +23,7 @@ from keras.optimizers import Adam, RMSprop
 SEED = 12346
 TD_LAYER_MULTIPLIER = 0.5   # Time-distributed layer modifier of neuron count
 GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
-EPOCHS = 150
+EPOCHS = 3
 BATCH = 160                 # metacentrum.cz: 128 - 160, optimum by grid: 96
 LEARNING_RATE = 0.003
 EARLY_STOP = 50             # Number of tolerated epochs without improvement
@@ -69,7 +69,7 @@ USE_PARTITIONS = True       # Partition test set and compute averages
 NUM_PARTITIONS = 5
 
 # Statistics settings
-COMMENT = 'Classify run - trained on continuous data, predicted on binned'
+COMMENT = 'Classify run - test'
 SCATTER_VISUALIZE = True
 
 
@@ -332,13 +332,17 @@ def classify(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
         for i in range(len(pre)):
             if i < PREDICT_PRINT_SAMPLES:
                 print "    Predicted: {} Label: {}".format(pre[i], label[i])
-            if pre[i] < CLASSIFY_THRESHOLD and label[i] == CLASSIFY_LABEL_POS:
+            if pre[i] < CLASSIFY_THRESHOLD and utility.equals(label[i],
+                    CLASSIFY_LABEL_POS):
                 falseNegative += 1
-            elif pre[i] > CLASSIFY_THRESHOLD and label[i] == CLASSIFY_LABEL_NEG:
+            elif pre[i] > CLASSIFY_THRESHOLD and utility.equals(label[i],
+                    CLASSIFY_LABEL_NEG):
                 falsePositive += 1
-            elif pre[i] > CLASSIFY_THRESHOLD and label[i] == CLASSIFY_LABEL_POS:
+            elif pre[i] > CLASSIFY_THRESHOLD and utility.equals(label[i],
+                    CLASSIFY_LABEL_POS):
                 truePositive += 1
-            elif pre[i] < CLASSIFY_THRESHOLD and label[i] == CLASSIFY_LABEL_NEG:
+            elif pre[i] < CLASSIFY_THRESHOLD and utility.equals(label[i],
+                    CLASSIFY_LABEL_NEG):
                 trueNegative += 1
 
         errors = falseNegative + falsePositive
@@ -449,13 +453,17 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
             for j in range(len(pre)):
                 if j < PREDICT_PRINT_SAMPLES:
                     print "    Predicted: {} Label: {}".format(pre[j], label[j])
-                if pre[j] < CLASSIFY_THRESHOLD and label[j] == CLASSIFY_LABEL_POS:
+                if pre[j] < CLASSIFY_THRESHOLD and utility.equals(label[j],
+                        CLASSIFY_LABEL_POS):
                     falseNegative += 1
-                elif pre[j] > CLASSIFY_THRESHOLD and label[j] == CLASSIFY_LABEL_NEG:
+                elif pre[j] > CLASSIFY_THRESHOLD and utility.equals(label[j],
+                        CLASSIFY_LABEL_NEG):
                     falsePositive += 1
-                elif pre[j] > CLASSIFY_THRESHOLD and label[j] == CLASSIFY_LABEL_POS:
+                elif pre[j] > CLASSIFY_THRESHOLD and utility.equals(label[j],
+                        CLASSIFY_LABEL_POS):
                     truePositive += 1
-                elif pre[j] < CLASSIFY_THRESHOLD and label[j] == CLASSIFY_LABEL_NEG:
+                elif pre[j] < CLASSIFY_THRESHOLD and utility.equals(label[j],
+                        CLASSIFY_LABEL_NEG):
                     trueNegative += 1
 
             loglosses[metricidx][i] = utility.logloss(pre,label)
@@ -584,10 +592,9 @@ def run(source, grid = None):
 
         if LABEL_BINNING_AFTER_TRAIN and not LABEL_BINNING:
             for idx in LABEL_IDXS:
-                labels[idx] = utility.bin(labels[idx], LABEL_BINNING_RATIO,
+                testLabel[idx] = utility.bin(testLabel[idx], LABEL_BINNING_RATIO,
                         classA = CLASSIFY_LABEL_NEG, 
                         classB = CLASSIFY_LABEL_POS)
-
 
         if SCATTER_VISUALIZE:
             utility.visualize2D(model, 1, testIn, testLabel[LABEL_IDXS[0]])

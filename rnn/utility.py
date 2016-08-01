@@ -11,7 +11,14 @@ from sklearn.decomposition import PCA
 PLOT_NAME = 'loss_plot.pdf'
 SCATTER_NAME = 'scatter.pdf'
 
+EPS = 0.00001
+
 from keras import backend as K
+
+def equals(a, b):
+    if abs(a - b) < EPS:
+        return True
+    return False
 
 # Mean of given values
 def mean(array, size):
