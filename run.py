@@ -17,7 +17,7 @@ def main(argv):
             source = arg
 
     sdValues = range(12346, 12355)
-    for lr in lrValues:
+    for sd in sdValues:
         rnn.rnn.SEED = sd
         rnn.rnn.run(source)
 
