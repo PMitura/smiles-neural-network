@@ -23,7 +23,7 @@ from keras.optimizers import Adam, RMSprop
 SEED = 12346
 TD_LAYER_MULTIPLIER = 0.5   # Time-distributed layer modifier of neuron count
 GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
-EPOCHS = 3
+EPOCHS = 150
 BATCH = 160                 # metacentrum.cz: 128 - 160, optimum by grid: 96
 LEARNING_RATE = 0.003
 EARLY_STOP = 50             # Number of tolerated epochs without improvement
@@ -45,7 +45,8 @@ LEARNING_RATE_DECAY_STEP_CONFIG_RATIO = 0.5
 
 # Classification settings
 CLASSIFY = True             # Regression if False
-LABEL_BINNING = True
+LABEL_BINNING = False
+LABEL_BINNING_AFTER_TRAIN = True
 LABEL_BINNING_RATIO = 0.5
 CLASSIFY_THRESHOLD = 0
 CLASSIFY_LABEL_POS = 1
@@ -54,8 +55,8 @@ CLASSIFY_ACTIVATION = 'tanh'
 
 # Preprocessing switches
 LABEL_IDXS = [0]            # Indexes of columns to use as label
-ZSCORE_NORM = False         # Undone after testing
-LOGARITHM = False           # Dtto, sets all values (x) to -log(x)
+ZSCORE_NORM = True          # Undone after testing
+LOGARITHM = True            # Dtto, sets all values (x) to -log(x)
 
 # Holdout settings
 FLAG_BASED_HOLD = False     # Bases holdout on col called 'is_testing'
@@ -68,7 +69,7 @@ USE_PARTITIONS = True       # Partition test set and compute averages
 NUM_PARTITIONS = 5
 
 # Statistics settings
-COMMENT = 'Classify test run'
+COMMENT = 'Classify run - trained on continuous data, predicted on binned'
 SCATTER_VISUALIZE = True
 
 
@@ -309,6 +310,7 @@ def predictSplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
 # decision threshold defined by CLASSIFY_THRESHOLD
 # activation function defined by CLASSIFY_ACTIVATION
 def classify(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
+
     preRaw = model.predict(nnInput, batch_size = BATCH)
 
     for labCtr, labidx in enumerate(labelIndexes):
@@ -319,6 +321,8 @@ def classify(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
         for i in range(len(preRaw)):
             pre.append(preRaw[i][0])
             label.append(rawLabel[labidx][i])
+        if len(pre) <= 0:
+            raise ValueError('Cannot predict on zero or negative size set')
 
         falseNegative = 0.0
         falsePositive = 0.0
@@ -363,14 +367,23 @@ def classify(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
             errDev += (error[i] - errAvg) * (error[i] - errAvg)
         errDev = sqrt(errDev / len(pre))
 
-        sensitivity = truePositive / (truePositive + falseNegative)
-        specificity = trueNegative / (trueNegative + falsePositive)
-        precision   = truePositive / (truePositive + trueNegative)
-        accuracy    = (1 - (errors / len(pre)))
+        if truePositive + falseNegative != 0:
+            sensitivity = truePositive / (truePositive + falseNegative)
+        else:
+            sensitivity = np.nan
+        if trueNegative + falsePositive != 0:
+            specificity = trueNegative / (trueNegative + falsePositive)
+        else:
+            specificity = np.nan
+        if truePositive + trueNegative != 0:
+            precision = truePositive / (truePositive + trueNegative)
+        else:
+            precision = np.nan
+        accuracy = (1 - (errors / len(pre))) # sanitized earlier
         if precision + sensitivity != 0:
             fmeasure = (2 * precision * sensitivity) / (precision + sensitivity)
         else:
-            fmeasure = float('nan')
+            fmeasure = np.nan
 
         logloss = utility.logloss(pre,label)
 
@@ -385,9 +398,8 @@ def classify(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
 
         print("    Classification accuracy: {}%"
                 .format(accuracy * 100))
-        # Care! Doesn't work on metacentrum.cz (cause: dependencies)
-        print("    ROC AUC score:           {}"
-                .format(roc_auc_score(label, pre)))
+        # Temporarily disabled, not working because of wrong label format
+        # print("    ROC AUC score:           {}".format(roc_auc_score(label, pre)))
         print("    Sensitivity:             {}".format(sensitivity))
         print("    Specificity:             {}".format(specificity))
         print("    Precision:               {}".format(precision))
@@ -425,19 +437,9 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
                 label.append(rawLabel[labidx][base + j])
             labCtr += 1
 
-            if ZSCORE_NORM:
-                pre = data.zScoreDenormalize(pre, zMean[labidx], zDev[labidx])
-                label = data.zScoreDenormalize(label, zMean[labidx], zDev[labidx])
-
-            if LOGARITHM:
-                for j in range(len(pre)):
-                    pre[j] = exp(-pre[j])
-                    label[j] = exp(-label[j])
-
             # print samples of predictions
             for j in range(min(PREDICT_PRINT_SAMPLES / NUM_PARTITIONS, len(pre))):
                 print("        prediction: {}, label: {}".format(pre[j],label[j]))
-
 
             falseNegative = 0.0
             falsePositive = 0.0
@@ -579,6 +581,13 @@ def run(source, grid = None):
         model = configureModel(alphaSize, nomiSize)
 
         epochsDone = train(model, trainIn, trainLabel, (testIn, testLabel))
+
+        if LABEL_BINNING_AFTER_TRAIN and not LABEL_BINNING:
+            for idx in LABEL_IDXS:
+                labels[idx] = utility.bin(labels[idx], LABEL_BINNING_RATIO,
+                        classA = CLASSIFY_LABEL_NEG, 
+                        classB = CLASSIFY_LABEL_POS)
+
 
         if SCATTER_VISUALIZE:
             utility.visualize2D(model, 1, testIn, testLabel[LABEL_IDXS[0]])
