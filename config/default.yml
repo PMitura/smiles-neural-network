@@ -11,10 +11,24 @@ db:
   host: 'relational.fit.cvut.cz'
   name: 'ctu_qsar'
 
-# Data fetching
-fetch:
-  table: 'target_molweight_1000'
-  cols: ['canonical_smiles']
-  index_col: ~
-  limit: ~
-  where: ~
+# Experiment setup to use
+experiment: 'default'
+
+# Experiment setups
+experiment_setups:
+  default:
+    fetch: 'default'
+    params: 'default'
+
+# Fetch setups
+fetch_setups:
+  default:
+    table: 'target_molweight_1000'
+    cols: ['canonical_smiles']
+    index_col: ~
+    limit: ~
+    where: ~
+
+# Params setups
+params_setups:
+  default: ~

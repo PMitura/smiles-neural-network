@@ -12,20 +12,20 @@ def getData():
         database= cc.config['db']['name'])
 
     query = 'SELECT {} FROM {}'.format(
-        ','.join(cc.config['fetch']['cols']),
-        cc.config['fetch']['table'])
+        ','.join(cc.fetch['cols']),
+        cc.fetch['table'])
 
-    if cc.config['fetch']['where']:
-        query += ' WHERE {}'.format(cc.config['fetch']['where'])
-    if cc.config['fetch']['limit']:
-        query += ' LIMIT {}'.format(cc.config['fetch']['limit'])
+    if cc.fetch['where']:
+        query += ' WHERE {}'.format(cc.fetch['where'])
+    if cc.fetch['limit']:
+        query += ' LIMIT {}'.format(cc.fetch['limit'])
 
     print(query)
 
     df = pd.read_sql(
         sql = query,
         con = con,
-        index_col = cc.config['fetch']['index_col'])
+        index_col = cc.fetch['index_col'])
 
     con.close()
 
