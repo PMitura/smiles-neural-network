@@ -25,7 +25,7 @@ TD_LAYER_MULTIPLIER = 0.5   # Time-distributed layer modifier of neuron count
 GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
 EPOCHS = 150
 BATCH = 160                 # metacentrum.cz: 128 - 160, optimum by grid: 96
-LEARNING_RATE = 0.003
+LEARNING_RATE = 0.001
 EARLY_STOP = 50             # Number of tolerated epochs without improvement
 OPTIMIZER = Adam(lr = LEARNING_RATE)
 USE_EMBEDDING = data.USE_EMBEDDING
@@ -69,8 +69,8 @@ USE_PARTITIONS = True       # Partition test set and compute averages
 NUM_PARTITIONS = 5
 
 # Statistics settings
-COMMENT = 'Grid search for best LR - bin only'
-SCATTER_VISUALIZE = True
+COMMENT = '[ALOGP] Trying various seeds - @ best LR, bin only'
+SCATTER_VISUALIZE = False
 
 
 def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(LABEL_IDXS)):

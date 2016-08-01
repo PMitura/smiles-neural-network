@@ -16,9 +16,9 @@ def main(argv):
         if opt == '-s':
             source = arg
 
-    lrValues = [0.1, 0.05, 0.03, 0.01, 0.0075, 0.005, 0.003, 0.001]
+    sdValues = range(12346, 12355)
     for lr in lrValues:
-        rnn.rnn.LEARNING_RATE = lr
+        rnn.rnn.SEED = sd
         rnn.rnn.run(source)
 
 if __name__ == '__main__':
