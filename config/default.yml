@@ -10,3 +10,11 @@ db:
   pass: 'relational'
   host: 'relational.fit.cvut.cz'
   name: 'ctu_qsar'
+
+# Data fetching
+fetch:
+  table: 'target_molweight_1000'
+  cols: ['canonical_smiles']
+  index_col: ~
+  limit: ~
+  where: ~

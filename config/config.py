@@ -9,6 +9,7 @@ def load(path):
         config = yaml.load(f)
     try:
         with open(path,'r') as f:
-            config.update(yaml.load(f))
+            obj = yaml.load(f) or {}
+            config.update(obj)
     except:
         raise IOError('Config: error loading config from path: {}'.format(path))
