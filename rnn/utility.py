@@ -59,6 +59,21 @@ def logloss(predictions, labels):
 
     return -np.sum(y*np.log(p)+(1-y)*np.log(1-p))/N
 
+
+# Bin data into two numerical classes by given ratio of set sizes
+# Return binned copy of input array
+def bin(data, ratio, classA = -1, classB = 1):
+    sortedData = np.sort(data)
+    pivot = sortedData[int(len(data) * ratio)]
+    # reuse sortedData for result to prevent another allocation
+    for idx in range(len(data)):
+        if data[idx] < pivot:
+            sortedData[idx] = classA
+        else:
+            sortedData[idx] = classB
+    return sortedData
+
+
 def modelToString(model):
     string = ''
     for layer in model.layers:
