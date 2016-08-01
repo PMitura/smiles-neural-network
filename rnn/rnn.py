@@ -45,8 +45,8 @@ LEARNING_RATE_DECAY_STEP_CONFIG_RATIO = 0.5
 
 # Classification settings
 CLASSIFY = True             # Regression if False
-LABEL_BINNING = True
-LABEL_BINNING_AFTER_TRAIN = False
+LABEL_BINNING = False
+LABEL_BINNING_AFTER_TRAIN = True
 LABEL_BINNING_RATIO = 0.5
 CLASSIFY_THRESHOLD = 0
 CLASSIFY_LABEL_POS = 1
@@ -55,8 +55,8 @@ CLASSIFY_ACTIVATION = 'tanh'
 
 # Preprocessing switches
 LABEL_IDXS = [0]            # Indexes of columns to use as label
-ZSCORE_NORM = False         # Undone after testing
-LOGARITHM = False           # Dtto, sets all values (x) to -log(x)
+ZSCORE_NORM = True          # Undone after testing
+LOGARITHM = True            # Dtto, sets all values (x) to -log(x)
 
 # Holdout settings
 FLAG_BASED_HOLD = False     # Bases holdout on col called 'is_testing'
@@ -69,7 +69,7 @@ USE_PARTITIONS = True       # Partition test set and compute averages
 NUM_PARTITIONS = 5
 
 # Statistics settings
-COMMENT = 'Grid search for best LR'
+COMMENT = 'Grid search for best LR - cont. then bin'
 SCATTER_VISUALIZE = True
 
 
@@ -600,7 +600,6 @@ def run(source, grid = None):
                         classB = CLASSIFY_LABEL_POS)
             model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
                 alphaSize, nomiSize, [0], model.get_weights())
-
 
         if SCATTER_VISUALIZE:
             utility.visualize2D(model, 1, testIn, testLabel[LABEL_IDXS[0]])
