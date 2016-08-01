@@ -45,8 +45,8 @@ LEARNING_RATE_DECAY_STEP_CONFIG_RATIO = 0.5
 
 # Classification settings
 CLASSIFY = True             # Regression if False
-LABEL_BINNING = False
-LABEL_BINNING_AFTER_TRAIN = True
+LABEL_BINNING = True
+LABEL_BINNING_AFTER_TRAIN = False
 LABEL_BINNING_RATIO = 0.5
 CLASSIFY_THRESHOLD = 0
 CLASSIFY_LABEL_POS = 1
@@ -59,7 +59,7 @@ ZSCORE_NORM = True          # Undone after testing
 LOGARITHM = True            # Dtto, sets all values (x) to -log(x)
 
 # Holdout settings
-FLAG_BASED_HOLD = False     # Bases holdout on col called 'is_testing'
+FLAG_BASED_HOLD = True      # Bases holdout on col called 'is_testing'
 HOLDOUT_RATIO = 0.8         # Used if flag based holdout is disabled
 
 # Testing settings
@@ -69,7 +69,7 @@ USE_PARTITIONS = True       # Partition test set and compute averages
 NUM_PARTITIONS = 5
 
 # Statistics settings
-COMMENT = 'Grid search for best LR - cont. then bin'
+COMMENT = 'Grid search for best LR - bin only'
 SCATTER_VISUALIZE = True
 
 
