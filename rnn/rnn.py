@@ -592,9 +592,15 @@ def run(source, grid = None):
 
         if LABEL_BINNING_AFTER_TRAIN and not LABEL_BINNING:
             for idx in LABEL_IDXS:
+                trainLabel[idx] = utility.bin(trainLabel[idx], LABEL_BINNING_RATIO,
+                        classA = CLASSIFY_LABEL_NEG, 
+                        classB = CLASSIFY_LABEL_POS)
                 testLabel[idx] = utility.bin(testLabel[idx], LABEL_BINNING_RATIO,
                         classA = CLASSIFY_LABEL_NEG, 
                         classB = CLASSIFY_LABEL_POS)
+            model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
+                alphaSize, nomiSize, [0], model.get_weights())
+
 
         if SCATTER_VISUALIZE:
             utility.visualize2D(model, 1, testIn, testLabel[LABEL_IDXS[0]])
