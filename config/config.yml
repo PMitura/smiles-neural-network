@@ -1,4 +1,4 @@
-# Default config containing all the default values for every setting
+# Common configuration for everyone
 
 # Run
 run:
@@ -10,5 +10,9 @@ db:
   pass: 'relational'
   host: 'relational.fit.cvut.cz'
   name: 'ctu_qsar'
+
+# Statistics
+statistics:
+  table: 'journal'
 
 experiments: []

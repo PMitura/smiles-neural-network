@@ -1,3 +1,6 @@
+# Template for running rnn
+name: 'rnn'
+
 params:
   data:
     use_embedding: false
@@ -28,7 +31,7 @@ params:
     chained_models: true
     chained_labels: '[range(1, 4) * 8, range(4, 8) * 6, range(8, 14) * 4,
             range(14, 22) * 3, range(22, 46), [0] * 24]'
-    chained_predict: [0]
+    chained_predict: '[0]'
     freeze_idxs: 'set([5])'
     trainable_inner: true
 
