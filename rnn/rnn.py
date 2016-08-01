@@ -23,7 +23,7 @@ from keras.optimizers import Adam, RMSprop
 SEED = 12346
 TD_LAYER_MULTIPLIER = 0.5   # Time-distributed layer modifier of neuron count
 GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
-EPOCHS = 3
+EPOCHS = 150
 BATCH = 160                 # metacentrum.cz: 128 - 160, optimum by grid: 96
 LEARNING_RATE = 0.003
 EARLY_STOP = 50             # Number of tolerated epochs without improvement
@@ -56,10 +56,10 @@ CLASSIFY_ACTIVATION = 'tanh'
 # Preprocessing switches
 LABEL_IDXS = [0]            # Indexes of columns to use as label
 ZSCORE_NORM = True          # Undone after testing
-LOGARITHM = False           # Dtto, sets all values (x) to -log(x)
+LOGARITHM = True            # Dtto, sets all values (x) to -log(x)
 
 # Holdout settings
-FLAG_BASED_HOLD = True      # Bases holdout on col called 'is_testing'
+FLAG_BASED_HOLD = False     # Bases holdout on col called 'is_testing'
 HOLDOUT_RATIO = 0.8         # Used if flag based holdout is disabled
 
 # Testing settings
@@ -69,7 +69,7 @@ USE_PARTITIONS = True       # Partition test set and compute averages
 NUM_PARTITIONS = 5
 
 # Statistics settings
-COMMENT = '[ALOGP] Grid search for best LR - cont. then bin'
+COMMENT = 'Grid search for best LR - cont. then bin'
 SCATTER_VISUALIZE = True
 
 
