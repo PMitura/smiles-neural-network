@@ -317,7 +317,8 @@ def getRawData(source = 'chembl', table = ''):
 
 # Call all routines to prepare data for neural network
 def prepareData(source = 'chembl', table = ''):
-    np.set_printoptions(threshold = 'nan', suppress = True)     # Jan: is this the right way to assign nan? See: http://stackoverflow.com/questions/19374254/assigning-a-variable-nan-in-python-without-numpy
+    # changed from 'nan' to safer np.nan 
+    np.set_printoptions(threshold = np.nan, suppress = True)
     data = getRawData(source, table)
 
     if not USE_EMBEDDING:
@@ -337,6 +338,9 @@ def prepareData(source = 'chembl', table = ''):
     else:
         nomiSize = 0
         alphaSize, timesteps, formattedWords = formatSMILESEmbedded(data, 0)
+        
+        # Shift defines offset inside of integer, used for coding multiple
+        # small numeric values as one variable (needed in embedding)
         shift = int(log(alphaSize, 2) + 1)
         if EXTRA_NOMINALS > 0:
             n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
@@ -367,7 +371,7 @@ def prepareData(source = 'chembl', table = ''):
 
     # include shift value to nomiSize if embedding is used
     if USE_EMBEDDING:
-        return formattedWords, labels, alphaSize, (nomiSize, shift), testFlags      # Jan: where is shift defined?
+        return formattedWords, labels, alphaSize, (nomiSize, shift), testFlags
     else:
         return formattedWords, labels, alphaSize, nomiSize, testFlags
 
