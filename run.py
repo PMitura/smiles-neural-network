@@ -2,21 +2,22 @@
 
 import sys, getopt
 from rnn.rnn import run
+from config import config as cc
+
 
 def main(argv):
-    # parse arguments
-    source = 'chembl'
+
+    configPath = 'local/config.yml'
+
+    if len(argv) >= 1:
+        configPath = argv[0]
+
     try:
-        opts, args = getopt.getopt(argv, 's:')
-    except getopt.GetoptError:
-        print 'run.py -s [source]'
-        sys.exit(2)
+        cc.load(configPath)
+    except IOError as ioe:
+        print("{0}".format(ioe))
 
-    for opt, arg in opts:
-        if opt == '-s':
-            source = arg
-
-    run(source)
+    run(cc.config['run']['source'])
 
 if __name__ == '__main__':
     main(sys.argv[1:])

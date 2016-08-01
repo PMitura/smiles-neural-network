@@ -1,9 +1,8 @@
 # Project specific
 *.csv
-data/
 *.taghl
 tags
-plots/
+local/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

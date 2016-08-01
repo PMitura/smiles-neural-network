@@ -1,0 +1,12 @@
+# Default config containing all the default values for every setting
+
+# Run
+run:
+  source: 'chembl'
+
+# Database
+db:
+  user: 'guest'
+  pass: 'relational'
+  host: 'relational.fit.cvut.cz'
+  name: 'ctu_qsar'
