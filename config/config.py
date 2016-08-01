@@ -3,18 +3,30 @@ import os
 
 config = { }
 
-def load(path):
-    global config,experiment,fetch,params
+exp = { }
 
-    with open(os.path.dirname(__file__)+'/default.yml','r') as f:
-        config = yaml.load(f)
+def loadYAML(path):
+    with open(path,'r') as f:
+        return yaml.load(f) or {}
+
+def loadConfig(path):
+    global config
+
+    config = loadYAML(os.path.dirname(__file__)+'/config.yml')
+
     try:
-        with open(path,'r') as f:
-            obj = yaml.load(f) or {}
-            config.update(obj)
+        config.update(loadYAML(path))
     except:
         raise IOError('Config: error loading config from path: {}'.format(path))
 
-    experiment = config['experiment_setups'][config['experiment']]
-    fetch = config['fetch_setups'][experiment['fetch']]
-    params = config['params_setups'][experiment['params']]
+def loadExperiment(experimentPath):
+    global exp
+
+    exp = { }
+    try:
+        expObj = loadYAML(experimentPath)
+        if 'template' in expObj and expObj['template']:
+            exp = loadYAML(os.path.dirname(__file__)+'/templates/'+expObj['template'])
+        exp.update(expObj)
+    except:
+        raise IOError('Config: error loading config from path: {}'.format(experimentPath))
