@@ -23,7 +23,7 @@ from keras.optimizers import Adam, RMSprop
 SEED = 12346
 TD_LAYER_MULTIPLIER = 0.5   # Time-distributed layer modifier of neuron count
 GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
-EPOCHS = 150
+EPOCHS = 3
 BATCH = 160                 # metacentrum.cz: 128 - 160, optimum by grid: 96
 LEARNING_RATE = 0.003
 EARLY_STOP = 50             # Number of tolerated epochs without improvement
@@ -508,7 +508,7 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
     print '  Logloss mean of devs: {}'.format(loglossDevOverall)
     print '\n  Accuracy mean of avgs: {}'.format(accuracyAvgOverall)
     print '  Accuracy mean of devs: {}'.format(accuracyDevOverall)
-    return accuracyAvgOverall, accuracyDevOverall
+    return accuracyAvgOverall, accuracyDevOverall, loglossAvgOverall, loglossDevOverall
 
 
 # TODO: encapsulate training rnn on a label to a function, not working yet
@@ -585,6 +585,9 @@ def run(source, grid = None):
     trainIn, trainLabel, testIn, testLabel = preprocess(fullIn, labels,
             testFlags)
 
+    loglossTest = None
+    loglossStdTest = None
+
     if not CHAINED_MODELS:
         model = configureModel(alphaSize, nomiSize)
 
@@ -593,10 +596,10 @@ def run(source, grid = None):
         if LABEL_BINNING_AFTER_TRAIN and not LABEL_BINNING:
             for idx in LABEL_IDXS:
                 trainLabel[idx] = utility.bin(trainLabel[idx], LABEL_BINNING_RATIO,
-                        classA = CLASSIFY_LABEL_NEG, 
+                        classA = CLASSIFY_LABEL_NEG,
                         classB = CLASSIFY_LABEL_POS)
                 testLabel[idx] = utility.bin(testLabel[idx], LABEL_BINNING_RATIO,
-                        classA = CLASSIFY_LABEL_NEG, 
+                        classA = CLASSIFY_LABEL_NEG,
                         classB = CLASSIFY_LABEL_POS)
             model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
                 alphaSize, nomiSize, [0], model.get_weights())
@@ -613,7 +616,7 @@ def run(source, grid = None):
         print("\n  Prediction of testing data:")
         if CLASSIFY:
             if USE_PARTITIONS:
-                relevanceTest, stdTest = classifySplit(model, testIn, testLabel)
+                relevanceTest, stdTest, loglossTest, loglossStdTest = classifySplit(model, testIn, testLabel)
             else:
                 relevanceTest = classify(model, testIn, testLabel)
         else:
@@ -651,7 +654,7 @@ def run(source, grid = None):
             print("\n  Prediction of testing data:")
             if CLASSIFY:
                 if USE_PARTITIONS:
-                    relevanceTest, stdTest = classifySplit(model, testIn, testLabel,
+                    relevanceTest, stdTest, loglossTest, loglossStdTest = classifySplit(model, testIn, testLabel,
                         labelIndexes = CHAINED_LABELS[idx])
                 else:
                     relevanceTest = classify(model, testIn, testLabel, labelIndexes
@@ -695,6 +698,8 @@ def run(source, grid = None):
         relevance_training = relevanceTrain,
         relevance_testing = relevanceTest,
         relevance_testing_std = stdTest,
+        log_loss = loglossTest,
+        log_loss_std = loglossStdTest,
         epoch_max = EPOCHS,
         epoch_count = epochsDone,
         runtime_second = deltaTime,
