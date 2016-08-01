@@ -23,7 +23,7 @@ from keras.optimizers import Adam, RMSprop
 SEED = 12346
 TD_LAYER_MULTIPLIER = 0.5   # Time-distributed layer modifier of neuron count
 GRU_LAYER_MULTIPLIER = 1    # -||- for GRU
-EPOCHS = 3
+EPOCHS = 150
 BATCH = 160                 # metacentrum.cz: 128 - 160, optimum by grid: 96
 LEARNING_RATE = 0.003
 EARLY_STOP = 50             # Number of tolerated epochs without improvement
@@ -69,7 +69,7 @@ USE_PARTITIONS = True       # Partition test set and compute averages
 NUM_PARTITIONS = 5
 
 # Statistics settings
-COMMENT = 'Classify run - test'
+COMMENT = 'Grid search for best LR'
 SCATTER_VISUALIZE = True
 
 
@@ -134,7 +134,7 @@ def train(model, nnInput, labels, validation, makePlot = True,
         for j in range(len(validation[1][labelIndexes[i]])):
             formattedValid[j][i] = validation[1][labelIndexes[i]][j]
 
-    early = keras.callbacks.EarlyStopping(monitor = 'loss',
+    early = keras.callbacks.EarlyStopping(monitor = 'val_loss',
             patience = EARLY_STOP)
 
     learningRateScheduler = keras.callbacks.LearningRateScheduler(learningRateDecayer)

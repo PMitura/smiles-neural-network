@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import sys, getopt
-from rnn.rnn import run
+import rnn.rnn
 
 def main(argv):
     # parse arguments
@@ -16,7 +16,10 @@ def main(argv):
         if opt == '-s':
             source = arg
 
-    run(source)
+    lrValues = [0.1, 0.05, 0.03, 0.01, 0.0075, 0.005, 0.003, 0.001]
+    for lr in lrValues:
+        rnn.rnn.LEARNING_RATE = lr
+        rnn.rnn.run(source)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
