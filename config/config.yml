@@ -1,9 +1,5 @@
 # Common configuration for everyone
 
-# Run
-run:
-  source: 'chembl'
-
 # Database
 db:
   user: 'guest'

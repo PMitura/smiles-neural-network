@@ -1,25 +1,30 @@
 import numpy as np
 import random
 import pubchem as pc
-import chembl as ch
+
 import utility
+
+import db.db as db
+from config import config as cc
 
 from math import floor, log, isnan, sqrt, ceil
 
-USE_EMBEDDING = False
+print(cc.exp)
+
+USE_EMBEDDING = cc.exp['params']['data']['use_embedding']
 
 # Number of label columns to prepare
-INPUT_COUNT = 1
-EXTRA_NOMINALS = 0
-LABEL_COUNT = 52
-USE_TEST_FLAGS = True
+INPUT_COUNT = cc.exp['params']['data']['input_count']
+EXTRA_NOMINALS = cc.exp['params']['data']['extra_nominals']
+LABEL_COUNT = cc.exp['params']['data']['label_count']
+USE_TEST_FLAGS = cc.exp['params']['data']['use_test_flags']
 
 # Fixed alphasize options
-ALPHA_FIXED = False
-ALPHA_FIXED_SIZE = 42
+ALPHA_FIXED = cc.exp['params']['data']['alpha_fixed']
+ALPHA_FIXED_SIZE = cc.exp['params']['data']['alpha_fixed_size']
 
 # Epsilon for catching numbers close to zero
-EPS = 0.0001
+EPS = cc.exp['params']['data']['eps']
 
 # Transforms data into 1 of k encoding
 # Output format is 3D array of integers, representing positions of binary 1
@@ -318,7 +323,8 @@ def getRawData(source = 'chembl', table = ''):
 # Call all routines to prepare data for neural network
 def prepareData(source = 'chembl', table = ''):
     np.set_printoptions(threshold = 'nan', suppress = True)     # Jan: is this the right way to assign nan? See: http://stackoverflow.com/questions/19374254/assigning-a-variable-nan-in-python-without-numpy
-    data = getRawData(source, table)
+
+    data = db.getData().values
 
     if not USE_EMBEDDING:
         # SMILES column

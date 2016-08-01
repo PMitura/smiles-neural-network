@@ -1,13 +1,15 @@
 from config import config as cc
 import mysql.connector
 import pandas as pd
+import numpy
+
 
 def getCon():
     con = mysql.connector.connect(
-        user = cc.config['db']['user'],
-        password = cc.config['db']['pass'],
-        host = cc.config['db']['host'],
-        database= cc.config['db']['name'])
+        user = cc.cfg['db']['user'],
+        password = cc.cfg['db']['pass'],
+        host = cc.cfg['db']['host'],
+        database= cc.cfg['db']['name'])
     return con
 
 def getData():
@@ -31,8 +33,6 @@ def getData():
         con = con,
         index_col = cc.exp['fetch']['index_col'])
 
-    con.close()
-
     print('...done')
     return df
 
@@ -46,12 +46,18 @@ def sendStatistics(**kwargs):
 
     for col,val in kwargs.iteritems():
         cols.append(col)
-        vals.append(val)
+        # mysql.connector has problems with converting numpy values, we supply explicit conversion
+        if type(val) is numpy.float64:
+            vals.append(float(val))
+        elif type(val) is numpy.int64:
+            vals.append(int(val))
+        else:
+            vals.append(val)
 
     query = 'INSERT INTO {} ({}) VALUES ({})'.format(
-        cc.config['statistics']['table'],
+        cc.cfg['statistics']['table'],
         ','.join(cols),
-        ','.join(['%s']*len(cols)))1
+        ','.join(['%s']*len(cols)))
 
     print(query)
 
@@ -62,7 +68,7 @@ def sendStatistics(**kwargs):
         con.commit()
     except Exception as e:
         con.rollback()
-        print 'Exception:', e
+        print 'DB exception:', e
 
     cursor.close()
     con.close()

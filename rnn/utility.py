@@ -88,7 +88,7 @@ def plotLoss(values):
     plot.set_xlabel('epoch')
     plot.set_ylabel('loss')
     fig = plot.get_figure()
-    fig.savefig('plots/{}'.format(PLOT_NAME))
+    fig.savefig('local/plots/{}'.format(PLOT_NAME))
 
 
 # PCA-like visualisation of layer output
@@ -121,7 +121,7 @@ def visualize2D(model, layerID, inputData, labels, withTime = False):
     dFrame = pd.DataFrame(scatterValues, columns = ('a', 'b', 'c'))
     plot = dFrame.plot.scatter(x = 'a', y = 'b', c = 'c', cmap = 'plasma')
     fig = plot.get_figure()
-    fig.savefig('plots/{}'.format(SCATTER_NAME))
+    fig.savefig('local/plots/{}'.format(SCATTER_NAME))
 
     print("  ...done")
 

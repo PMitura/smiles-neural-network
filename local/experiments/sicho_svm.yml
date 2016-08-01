@@ -1,0 +1,14 @@
+# Experiment sicho_svm
+name: 'sicho_svm'
+
+# DB fetch params
+fetch:
+  table: 'target_206_1977'
+  cols: ['canonical_smiles','standard_value']
+  index_col: ~
+  limit: 1976
+  where: ~
+
+# Experiment params
+params:
+  ~

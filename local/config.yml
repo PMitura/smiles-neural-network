@@ -1,0 +1,4 @@
+# Local configuration
+
+# Experiments to run
+experiments: ['local/experiments/rnn1.yml']

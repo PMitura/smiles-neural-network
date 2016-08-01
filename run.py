@@ -1,12 +1,9 @@
 #! /usr/bin/env python
 
 import sys, getopt
-from rnn.rnn import run
 from config import config as cc
 
-
 def main(argv):
-
     path = 'local/config.yml'
 
     if len(argv) >= 1:
@@ -17,10 +14,14 @@ def main(argv):
     except IOError as ioe:
         print("{0}".format(ioe))
 
-    for experiment in cc.config['experiments']:
+    for experiment in cc.cfg['experiments']:
         # load configuration into global var and run it
         cc.loadExperiment(experiment)
-        run(cc.config['run']['source'])
+
+        import rnn.rnn
+        reload(rnn.rnn)
+
+        rnn.rnn.run()
 
 if __name__ == '__main__':
     main(sys.argv[1:])
