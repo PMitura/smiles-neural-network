@@ -1,17 +1,18 @@
 import data, utility
 import time
+
 import numpy as np
-import keras.callbacks
+from math import sqrt, exp, log, ceil
+from scipy.stats.stats import pearsonr
+from sklearn.metrics import roc_auc_score
 
 import db.db as db
 from config import config as cc
+import yaml
 
 import socket
 
-from scipy.stats.stats import pearsonr
-from sklearn.metrics import roc_auc_score
 # not used to relieve MetaCentrum of some dependencies
-from math import sqrt, exp, log, ceil
 
 # TODO: Remove unused imports after experiments are done
 from keras.models import Sequential
@@ -19,6 +20,7 @@ from keras.layers import Activation, Dense, Dropout, LSTM, AveragePooling1D
 from keras.layers import TimeDistributed, SimpleRNN, GRU
 from keras.layers import BatchNormalization, Embedding, merge
 from keras.optimizers import Adam, RMSprop
+import keras.callbacks
 # from keras.regularizers import l1
 
 # handy aliases for config
@@ -32,7 +34,6 @@ RP['freeze_idxs'] = eval(str(cc.exp['params']['rnn']['freeze_idxs']))
 RP['label_idxs'] = eval(str(cc.exp['params']['rnn']['label_idxs']))
 
 OPTIMIZER = Adam(lr = RP['learning_rate'])
-
 
 def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(RP['label_idxs'])):
     print('  Initializing and compiling...')
@@ -635,10 +636,6 @@ def run(grid = None):
     endTime = time.time()
     deltaTime = endTime - startTime
 
-    if RP['classify']:
-        taskType = 'classification'
-    else:
-        taskType = 'regression'
     modelSummary = utility.modelToString(model)
 
     memRss, memVms = utility.getMemoryUsage()
@@ -657,7 +654,7 @@ def run(grid = None):
         split_name = cc.exp['params']['data']['testing'],
         training_row_count = len(trainLabel[0]),
         testing_row_count = len(testLabel[0]),
-        task = taskType,
+        task = 'classification' if RP['classify'] else 'regression',
         relevance_training = relevanceTrain,
         relevance_testing = relevanceTest,
         relevance_testing_std = stdTest,
@@ -677,4 +674,5 @@ def run(grid = None):
         memory_pm_mb = memRss,
         memory_vm_mb = memVms,
         learning_curve = open('{}/{}'.format(cc.cfg['plots']['dir'], utility.PLOT_NAME),'rb').read(),
-        hostname = socket.gethostname())
+        hostname = socket.gethostname(),
+        experiment_config = yaml.dump(cc.exp,default_flow_style=False))
