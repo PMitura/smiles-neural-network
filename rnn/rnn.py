@@ -658,6 +658,13 @@ def run(grid = None):
     if np.isnan(stdTest):
         stdTest = -1
 
+    import subprocess
+    try:
+        gitCommit = subprocess.check_output('git rev-parse HEAD', shell=True).strip()
+    except:
+        gitCommit = None
+
+
     # TODO: add memory_pm_mb, memory_vm_bm
 
     db.sendStatistics(
@@ -688,4 +695,5 @@ def run(grid = None):
         memory_vm_mb = memVms,
         learning_curve = open('{}/{}'.format(cc.cfg['plots']['dir'], utility.PLOT_NAME),'rb').read(),
         hostname = socket.gethostname(),
-        experiment_config = yaml.dump(cc.exp,default_flow_style=False))
+        experiment_config = yaml.dump(cc.exp,default_flow_style=False),
+        git_commit = gitCommit)
