@@ -28,7 +28,7 @@ params:
   rnn:
     # RNN parameters
     learning_rate: 0.001
-    epochs: 3
+    epochs: 150
 
     classify: true            # regression if false
     label_binning: false
@@ -46,4 +46,4 @@ params:
     label_idxs: '[0]'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[TEST] grid search test'
+    comment: '[TEST] auc test'

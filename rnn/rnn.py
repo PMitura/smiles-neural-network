@@ -376,8 +376,8 @@ def classify(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
 def classifySplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
     partSize = len(nnInput) / RP['num_partitions']
     loglosses = np.zeros((len(labelIndexes), RP['num_partitions']))
-
     accuracies = np.zeros((len(labelIndexes), RP['num_partitions']))
+    aucs = np.zeros((len(labelIndexes), RP['num_partitions']))
 
     for i in range(RP['num_partitions']):
         print '\n    Partition {}'.format(i)
@@ -431,8 +431,12 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
             loglosses[metricidx][i] = utility.logloss(pre,label)
             accuracies[metricidx][i] = 1 - (falseNegative + falsePositive) / len(label)
 
+            # we need to normalize the confidences to [0,1]?
+            aucs[metricidx][i] = roc_auc_score(label, (np.array(pre)-RP['classify_label_neg'])/(RP['classify_label_pos']-RP['classify_label_neg']))
+
             print '      Logloss Value: {}'.format(loglosses[metricidx][i])
             print '      Accuracy: {}'.format(accuracies[metricidx][i])
+            print '      AUC: {}'.format(aucs[metricidx][i])
 
             metricidx += 1
 
@@ -443,34 +447,47 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
     accuracyAvg = []
     accuracyDev = []
 
+    aucAvg = []
+    aucDev = []
+
     for lab in range(len(loglosses)):
         loglossAvg.append(np.sum(loglosses[lab]) / RP['num_partitions'])
         accuracyAvg.append(np.sum(accuracies[lab]) / RP['num_partitions'])
+        aucAvg.append(np.sum(aucs[lab]) / RP['num_partitions'])
 
         loglossDev.append(0.0)
         accuracyDev.append(0.0)
+        aucDev.append(0.0)
         for i in range(RP['num_partitions']):
             loglossDev[lab] += (loglosses[lab][i] - loglossAvg[lab])**2
             accuracyDev[lab] += (accuracies[lab][i] - accuracyAvg[lab])**2
+            aucDev[lab] += (aucs[lab][i] - aucAvg[lab])**2
         loglossDev[lab] = sqrt(loglossDev[lab] / RP['num_partitions'])
         accuracyDev[lab] = sqrt(accuracyDev[lab] / RP['num_partitions'])
+        aucDev[lab] = sqrt(aucDev[lab] / RP['num_partitions'])
 
         print '      label {} Logloss Average:   {}'.format(lab, loglossAvg[lab])
         print '      label {} Logloss Deviation: {}'.format(lab, loglossDev[lab])
         print '      label {} Accuracy Average:   {}'.format(lab, accuracyAvg[lab])
         print '      label {} Accuracy Deviation: {}'.format(lab, accuracyDev[lab])
+        print '      label {} AUC Average:   {}'.format(lab, aucAvg[lab])
+        print '      label {} AUC Deviation: {}'.format(lab, aucDev[lab])
 
 
     loglossAvgOverall = utility.mean(loglossAvg, len(loglossAvg))
     loglossDevOverall = utility.mean(loglossDev, len(loglossDev))
     accuracyAvgOverall = utility.mean(accuracyAvg, len(accuracyAvg))
     accuracyDevOverall = utility.mean(accuracyDev, len(accuracyDev))
+    aucAvgOverall = utility.mean(aucAvg, len(aucAvg))
+    aucDevOverall = utility.mean(aucDev, len(aucDev))
 
     print '\n  Logloss mean of avgs: {}'.format(loglossAvgOverall)
     print '  Logloss mean of devs: {}'.format(loglossDevOverall)
     print '\n  Accuracy mean of avgs: {}'.format(accuracyAvgOverall)
     print '  Accuracy mean of devs: {}'.format(accuracyDevOverall)
-    return accuracyAvgOverall, accuracyDevOverall, loglossAvgOverall, loglossDevOverall
+    print '\n  AUC mean of avgs: {}'.format(aucAvgOverall)
+    print '  AUC mean of devs: {}'.format(aucDevOverall)
+    return accuracyAvgOverall, accuracyDevOverall, loglossAvgOverall, loglossDevOverall, aucAvgOverall, aucDevOverall
 
 
 # TODO: encapsulate training rnn on a label to a function, not working yet
@@ -543,16 +560,10 @@ def run(grid = None):
     np.random.seed(RP['seed'])
 
     fullIn, labels, alphaSize, nomiSize, testFlags = data.prepareData()
-
-    trainIn, trainLabel, testIn, testLabel = preprocess(fullIn, labels,
-            testFlags)
-
-    loglossTest = None
-    loglossStdTest = None
+    trainIn, trainLabel, testIn, testLabel = preprocess(fullIn, labels, testFlags)
 
     if not RP['chained_models']:
         model = configureModel(alphaSize, nomiSize)
-
         epochsDone = train(model, trainIn, trainLabel, (testIn, testLabel))
 
         if RP['label_binning_after_train'] and not RP['label_binning']:
@@ -572,13 +583,14 @@ def run(grid = None):
         print("\n  Prediction of training data:")
         if RP['classify']:
             relevanceTrain = classify(model, trainIn, trainLabel)
+
         else:
             relevanceTrain = predict(model, trainIn, trainLabel)
 
         print("\n  Prediction of testing data:")
         if RP['classify']:
             if RP['use_partitions']:
-                relevanceTest, stdTest, loglossTest, loglossStdTest = classifySplit(model, testIn, testLabel)
+                relevanceTest, stdTest, loglossTest, loglossStdTest, aucTest, aucStdTest = classifySplit(model, testIn, testLabel)
             else:
                 relevanceTest = classify(model, testIn, testLabel)
         else:
@@ -594,8 +606,7 @@ def run(grid = None):
 
             if idx == 0:
                 model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
-                    alphaSize, nomiSize, RP['chained_labels'][idx], uniOutput =
-                    True)
+                    alphaSize, nomiSize, RP['chained_labels'][idx], uniOutput = True)
             elif idx == len(RP['chained_labels']) - 1:
                 model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn,
                     testLabel, alphaSize, nomiSize, RP['chained_labels'][idx],
@@ -616,7 +627,7 @@ def run(grid = None):
             print("\n  Prediction of testing data:")
             if RP['classify']:
                 if RP['use_partitions']:
-                    relevanceTest, stdTest, loglossTest, loglossStdTest = classifySplit(model, testIn, testLabel,
+                    relevanceTest, stdTest, loglossTest, loglossStdTest, aucTest, aucStdTest = classifySplit(model, testIn, testLabel,
                         labelIndexes = RP['chained_labels'][idx])
                 else:
                     relevanceTest = classify(model, testIn, testLabel, labelIndexes
@@ -660,6 +671,8 @@ def run(grid = None):
         relevance_testing_std = stdTest,
         log_loss = loglossTest,
         log_loss_std = loglossStdTest,
+        auc = aucTest,
+        auc_std = aucStdTest,
         epoch_max = RP['epochs'],
         epoch_count = epochsDone,
         runtime_second = deltaTime,
