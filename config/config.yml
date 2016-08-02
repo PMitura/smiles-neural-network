@@ -15,4 +15,4 @@ statistics:
 plots:
   dir: 'local/plots'
 
-experiments: []
+experiments: ~
