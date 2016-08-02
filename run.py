@@ -24,10 +24,15 @@ def main(argv):
 
         print(cc.cfg,cc.exp)
 
+
         # Grid search hacking HERE!
-        #for sd in range(12346, 12355):
-        #    rnn.rnn.SEED = sd
+        '''
+        for sd in range(12346, 12355):
+            rnn.rnn.RP['seed'] = sd
+            rnn.rnn.run()
+        '''
         rnn.rnn.run()
+
 
 
 if __name__ == '__main__':
