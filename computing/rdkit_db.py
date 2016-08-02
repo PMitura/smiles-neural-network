@@ -87,7 +87,10 @@ def getData(con, lo):
         mol = Chem.MolFromSmiles(smiles)
         for name, function in Descriptors.descList:
             if name in sicho_descriptors:
-                df_data[name].append(function(mol))
+                try:
+                    df_data[name].append(function(mol))
+                except:
+                    df_data[name].append(None)
 
     return pd.concat([df, pd.DataFrame(df_data)], axis=1)
 
