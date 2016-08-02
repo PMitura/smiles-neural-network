@@ -8,10 +8,19 @@ from math import sqrt
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 
+from config import config as cc
+
 PLOT_NAME = 'loss_plot.pdf'
 SCATTER_NAME = 'scatter.pdf'
 
+EPS = 0.00001
+
 from keras import backend as K
+
+def equals(a, b):
+    if abs(a - b) < EPS:
+        return True
+    return False
 
 # Mean of given values
 def mean(array, size):
@@ -59,6 +68,21 @@ def logloss(predictions, labels):
 
     return -np.sum(y*np.log(p)+(1-y)*np.log(1-p))/N
 
+
+# Bin data into two numerical classes by given ratio of set sizes
+# Return binned copy of input array
+def bin(data, ratio, classA = -1, classB = 1):
+    sortedData = np.sort(data)
+    pivot = sortedData[int(len(data) * ratio)]
+    # reuse sortedData for result to prevent another allocation
+    for idx in range(len(data)):
+        if data[idx] < pivot:
+            sortedData[idx] = classA
+        else:
+            sortedData[idx] = classB
+    return sortedData
+
+
 def modelToString(model):
     string = ''
     for layer in model.layers:
@@ -88,7 +112,7 @@ def plotLoss(values):
     plot.set_xlabel('epoch')
     plot.set_ylabel('loss')
     fig = plot.get_figure()
-    fig.savefig('local/plots/{}'.format(PLOT_NAME))
+    fig.savefig('{}/{}'.format(cc.cfg['plots']['dir'],PLOT_NAME))
 
 
 # PCA-like visualisation of layer output
@@ -121,7 +145,7 @@ def visualize2D(model, layerID, inputData, labels, withTime = False):
     dFrame = pd.DataFrame(scatterValues, columns = ('a', 'b', 'c'))
     plot = dFrame.plot.scatter(x = 'a', y = 'b', c = 'c', cmap = 'plasma')
     fig = plot.get_figure()
-    fig.savefig('local/plots/{}'.format(SCATTER_NAME))
+    fig.savefig('{}/{}'.format(cc.cfg['plots']['dir'],SCATTER_NAME))
 
     print("  ...done")
 

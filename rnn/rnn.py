@@ -16,109 +16,46 @@ from math import sqrt, exp, log, ceil
 # TODO: Remove unused imports after experiments are done
 from keras.models import Sequential
 from keras.layers import Activation, Dense, Dropout, LSTM, AveragePooling1D
-from keras.layers import TimeDistributed, SimpleRNN, GRU, Flatten, Merge
-from keras.layers import BatchNormalization, Embedding
-from keras.layers.advanced_activations import PReLU
+from keras.layers import TimeDistributed, SimpleRNN, GRU
+from keras.layers import BatchNormalization, Embedding, merge
 from keras.optimizers import Adam, RMSprop
 # from keras.regularizers import l1
 
+# handy aliases for config
+RP = cc.exp['params']['rnn']
+RD = cc.exp['params']['data']
 
-# RNN parameters
-SEED = cc.exp['params']['rnn']['seed']
-TD_LAYER_MULTIPLIER = cc.exp['params']['rnn']['td_layer_multiplier']   # Time-distributed layer modifier of neuron count
-GRU_LAYER_MULTIPLIER = cc.exp['params']['rnn']['gru_layer_multiplier']    # -||- for GRU
-EPOCHS = cc.exp['params']['rnn']['epochs']
-BATCH = cc.exp['params']['rnn']['batch']                 # metacentrum.cz: 128 - 160, optimum by grid: 96
-LEARNING_RATE = cc.exp['params']['rnn']['learning_rate']
-EARLY_STOP = cc.exp['params']['rnn']['early_stop']
-OPTIMIZER = Adam(lr = LEARNING_RATE)
-USE_EMBEDDING = cc.exp['params']['data']['use_embedding']
-EMBEDDING_OUTPUTS = cc.exp['params']['rnn']['embedding_outputs']
-CHAINED_MODELS = cc.exp['params']['rnn']['chained_models']
+# manual eval where needed
+RP['chained_labels'] = eval(str(cc.exp['params']['rnn']['chained_labels']))
+RP['chained_predict'] = eval(str(cc.exp['params']['rnn']['chained_predict']))
+RP['freeze_idxs'] = eval(str(cc.exp['params']['rnn']['freeze_idxs']))
+RP['label_idxs'] = eval(str(cc.exp['params']['rnn']['label_idxs']))
 
-# need to eval!
-CHAINED_LABELS = eval(cc.exp['params']['rnn']['chained_labels'])
-CHAINED_PREDICT = eval(cc.exp['params']['rnn']['chained_predict'])
-FREEZE_IDXS = eval(cc.exp['params']['rnn']['freeze_idxs'])
-
-TRAINABLE_INNER = cc.exp['params']['rnn']['trainable_inner']
-
-# Learning rate decay settings
-LEARNING_RATE_DECAY = cc.exp['params']['rnn']['learning_rate_decay']
-LEARNING_RATE_DECAY_TYPE = cc.exp['params']['rnn']['learning_rate_decay_type']
-LEARNING_RATE_DECAY_STEP_CONFIG_STEPS = cc.exp['params']['rnn']['learning_rate_decay_step_config_steps']
-LEARNING_RATE_DECAY_STEP_CONFIG_RATIO = cc.exp['params']['rnn']['learning_rate_decay_step_config_ratio']
-
-# Classification settings
-CLASSIFY_THRESHOLD = cc.exp['params']['rnn']['classify_threshold']
-CLASSIFY_LABEL_POS = cc.exp['params']['rnn']['classify_label_pos']
-CLASSIFY_LABEL_NEG = cc.exp['params']['rnn']['classify_label_neg']
-CLASSIFY_ACTIVATION = cc.exp['params']['rnn']['classify_activation']
-
-# Preprocessing switches
-# need to eval!
-LABEL_IDXS = eval(cc.exp['params']['rnn']['label_idxs'])
-ZSCORE_NORM = cc.exp['params']['rnn']['zscore_norm']
-LOGARITHM = cc.exp['params']['rnn']['logarithm']
-
-# Holdout settings
-FLAG_BASED_HOLD = cc.exp['params']['rnn']['flag_based_hold']
-HOLDOUT_RATIO = cc.exp['params']['rnn']['holdout_ratio']
-
-# Testing settings
-PREDICT_PRINT_SAMPLES = cc.exp['params']['rnn']['predict_print_samples']
-CLASSIFY = cc.exp['params']['rnn']['classify']
-DISTRIB_BINS = cc.exp['params']['rnn']['distrib_bins']
-USE_PARTITIONS = cc.exp['params']['rnn']['use_partitions']
-NUM_PARTITIONS = cc.exp['params']['rnn']['num_partitions']
-
-# Statistics settings
-COMMENT = cc.exp['params']['rnn']['comment']
-SCATTER_VISUALIZE = cc.exp['params']['rnn']['scatter_visualize']
+OPTIMIZER = Adam(lr = RP['learning_rate'])
 
 
-def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(LABEL_IDXS)):
+def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(RP['label_idxs'])):
     print('  Initializing and compiling...')
 
     model = Sequential()
 
-    if USE_EMBEDDING:
+    if RD['use_embedding']:
         # second value in nomiSize tuple is shift while using embedding
-        model.add(Embedding(1 << nomiSize[1], EMBEDDING_OUTPUTS))
-        model.add(TimeDistributed(Dense(int(TD_LAYER_MULTIPLIER * (alphaSize +
-            nomiSize[0])), activation = 'tanh', trainable = TRAINABLE_INNER)))
+        model.add(Embedding(1 << nomiSize[1], RP['embedding_outputs']))
+        model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * (alphaSize +
+            nomiSize[0])), activation = 'tanh', trainable = RP['trainable_inner'])))
     else:
-        model.add(TimeDistributed(Dense(int(TD_LAYER_MULTIPLIER * (alphaSize +
-            nomiSize)), activation = 'tanh', trainable = TRAINABLE_INNER),
+        model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * (alphaSize +
+            nomiSize)), activation = 'tanh', trainable = RP['trainable_inner']),
             input_shape = (None, alphaSize + nomiSize)))
-    model.add(GRU(int(GRU_LAYER_MULTIPLIER * alphaSize), trainable =
-            TRAINABLE_INNER))
-    model.add(Activation('relu', trainable = TRAINABLE_INNER))
+
+    model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable =
+            RP['trainable_inner']))
+    model.add(Activation('relu', trainable = RP['trainable_inner']))
     model.add(Dense(outputLen))
 
-    if CLASSIFY:
-        model.add(Activation(CLASSIFY_ACTIVATION, trainable = TRAINABLE_INNER))
-
-    """ Bidirectional version, submitted as issue at
-        https://github.com/fchollet/keras/issues/2646
-
-    model.add(TimeDistributed(Dense(int(TD_LAYER_MULTIPLIER * (alphaSize +
-        nomiSize)), activation = 'tanh'),
-        input_shape = (None, alphaSize + nomiSize)))
-
-    fwModel = Sequential()
-    fwModel.add(GRU(int(GRU_LAYER_MULTIPLIER * alphaSize),
-            activation = 'sigmoid',
-            input_shape = (None, alphaSize + nomiSize)))
-
-    bwModel = Sequential()
-    bwModel.add(GRU(int(GRU_LAYER_MULTIPLIER * alphaSize),
-            activation = 'sigmoid', go_backwards = True,
-            input_shape = (None, alphaSize + nomiSize)))
-
-    model.add(Merge([fwModel, bwModel], mode = 'sum'))
-    model.add(Dense(1))
-    """
+    if RP['classify']:
+        model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
 
     # default learning rate 0.001
     model.compile(loss = 'mse', optimizer = OPTIMIZER)
@@ -126,25 +63,26 @@ def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(LABEL_IDXS)):
     print('  ...done')
     return model
 
-def learningRateDecayer(epoch):
-    if not LEARNING_RATE_DECAY:
-        return LEARNING_RATE
 
-    if LEARNING_RATE_DECAY_TYPE == 'step':
-        drop = np.floor((epoch)/LEARNING_RATE_DECAY_STEP_CONFIG_STEPS)
-        new_lr = float(LEARNING_RATE * np.power(LEARNING_RATE_DECAY_STEP_CONFIG_RATIO,drop))
+def learningRateDecayer(epoch):
+    if not RP['learning_rate_decay']:
+        return RP['learning_rate']
+
+    if RP['learning_rate_decay_type'] == 'step':
+        drop = np.floor((epoch)/RP['learning_rate_decay_step_config_steps'])
+        new_lr = float(RP['learning_rate'] * np.power(RP['learning_rate_decay_step_config_ratio'],drop))
         print('lr',epoch,new_lr)
         return new_lr
-    elif LEARNING_RATE_DECAY_TYPE == 'time':
+    elif RP['learning_rate_decay_type'] == 'time':
         raise NotImplementedError('learning rate decay: time')
-    elif LEARNING_RATE_DECAY_TYPE == 'peter':
+    elif RP['learning_rate_decay_type'] == 'peter':
         raise NotImplementedError('learning rate decay: peter')
     else:
-        raise RuntimeError('learning rate decat: unknown type {}'.format(LEARNING_RATE_DECAY_TYPE))
+        raise RuntimeError('learning rate decat: unknown type {}'.format(RP['learning_rate_decay_type']))
 
 
 def train(model, nnInput, labels, validation, makePlot = True,
-        labelIndexes = LABEL_IDXS):
+        labelIndexes = RP['label_idxs']):
     print('  Training model...')
 
     # needed format is orthogonal to ours
@@ -157,13 +95,13 @@ def train(model, nnInput, labels, validation, makePlot = True,
         for j in range(len(validation[1][labelIndexes[i]])):
             formattedValid[j][i] = validation[1][labelIndexes[i]][j]
 
-    early = keras.callbacks.EarlyStopping(monitor = 'loss',
-            patience = EARLY_STOP)
+    early = keras.callbacks.EarlyStopping(monitor = 'val_loss',
+            patience = RP['early_stop'])
 
     learningRateScheduler = keras.callbacks.LearningRateScheduler(learningRateDecayer)
 
-    history = model.fit(nnInput, formattedLabels, nb_epoch = EPOCHS,
-            batch_size = BATCH, callbacks = [early,learningRateScheduler],
+    history = model.fit(nnInput, formattedLabels, nb_epoch = RP['epochs'],
+            batch_size = RP['batch'], callbacks = [early,learningRateScheduler],
             validation_data = (validation[0], formattedValid))
 
     if makePlot:
@@ -181,8 +119,8 @@ def train(model, nnInput, labels, validation, makePlot = True,
 
 
 # Serves as extended version of test, gives statistics
-def predict(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
-    preRaw = model.predict(nnInput, batch_size = BATCH)
+def predict(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
+    preRaw = model.predict(nnInput, batch_size = RP['batch'])
 
     for labCtr,labidx in enumerate(labelIndexes):
         print '  Predictions for label {}'.format(labidx)
@@ -194,17 +132,17 @@ def predict(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
             label.append(rawLabel[labidx][i])
 
         # temporarily undo z-score normalization, if applied
-        if ZSCORE_NORM:
+        if RP['zscore_norm']:
             pre = data.zScoreDenormalize(pre, zMean[labidx], zDev[labidx])
             label = data.zScoreDenormalize(label, zMean[labidx], zDev[labidx])
 
-        if LOGARITHM:
+        if RP['logarithm']:
             for i in range(len(pre)):
                 pre[i] = exp(-pre[i])
                 label[i] = exp(-label[i])
 
         # print samples of predictions
-        for i in range(min(PREDICT_PRINT_SAMPLES, len(pre))):
+        for i in range(min(RP['predict_print_samples'], len(pre))):
             print("    prediction: {}, label: {}".format(pre[i],
                 label[i]))
 
@@ -249,12 +187,12 @@ def predict(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
 
 
 # Modification of predict, divides data and computes avg and dev of R2
-def predictSplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
-    partSize = len(nnInput) / NUM_PARTITIONS
-    rsqrs = np.zeros((len(labelIndexes), NUM_PARTITIONS))
-    for i in range(NUM_PARTITIONS):
+def predictSplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
+    partSize = len(nnInput) / RP['num_partitions']
+    rsqrs = np.zeros((len(labelIndexes), RP['num_partitions']))
+    for i in range(RP['num_partitions']):
         print '\n    Partition {}'.format(i)
-        if USE_EMBEDDING:
+        if RD['use_embedding']:
             partInput = np.zeros([partSize, len(nnInput[0])])
         else:
             partInput = np.zeros([partSize, len(nnInput[0]), len(nnInput[0][0])])
@@ -262,7 +200,7 @@ def predictSplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
         for j in range(base, base + partSize):
             partInput[j - base] = nnInput[j]
 
-        preRaw = model.predict(partInput, batch_size = BATCH)
+        preRaw = model.predict(partInput, batch_size = RP['batch'])
 
         ctr = 0
         labCtr = 0
@@ -276,17 +214,17 @@ def predictSplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
                 label.append(rawLabel[labidx][base + j])
             labCtr += 1
 
-            if ZSCORE_NORM:
+            if RP['zscore_norm']:
                 pre = data.zScoreDenormalize(pre, zMean[labidx], zDev[labidx])
                 label = data.zScoreDenormalize(label, zMean[labidx], zDev[labidx])
 
-            if LOGARITHM:
+            if RP['logarithm']:
                 for j in range(len(pre)):
                     pre[j] = exp(-pre[j])
                     label[j] = exp(-label[j])
 
             # print samples of predictions
-            for j in range(min(PREDICT_PRINT_SAMPLES / NUM_PARTITIONS, len(pre))):
+            for j in range(min(RP['predict_print_samples'] / RP['num_partitions'], len(pre))):
                 print("        prediction: {}, label: {}".format(pre[j],
                     label[j]))
 
@@ -307,13 +245,13 @@ def predictSplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
         rsqrSum = 0.0
         for sqr in rsqrs[lab]:
             rsqrSum += sqr
-        rsqrAvg.append(rsqrSum / NUM_PARTITIONS)
+        rsqrAvg.append(rsqrSum / RP['num_partitions'])
 
         rsqrDev.append(0.0)
-        for i in range(NUM_PARTITIONS):
+        for i in range(RP['num_partitions']):
             rsqrDev[lab] += (rsqrs[lab][i] - rsqrAvg[lab]) * (rsqrs[lab][i] -
                     rsqrAvg[lab])
-        rsqrDev[lab] = sqrt(rsqrDev[lab] / NUM_PARTITIONS)
+        rsqrDev[lab] = sqrt(rsqrDev[lab] / RP['num_partitions'])
 
         print '      label {} R2 Average:   {}'.format(labelIndexes[lab],
                 rsqrAvg[lab])
@@ -328,12 +266,13 @@ def predictSplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
 
 
 # Classification task
-# pos class defined by CLASSIFY_LABEL_POS
-# neg class defined by CLASSIFY_LABEL_NEG
-# decision threshold defined by CLASSIFY_THRESHOLD
-# activation function defined by CLASSIFY_ACTIVATION
-def classify(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
-    preRaw = model.predict(nnInput, batch_size = BATCH)
+# pos class defined by RP['classify_label_pos']
+# neg class defined by RP['classify_label_neg']
+# decision threshold defined by RP['classify_threshold']
+# activation function defined by RP['classify_activation']
+def classify(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
+
+    preRaw = model.predict(nnInput, batch_size = RP['batch'])
 
     for labCtr, labidx in enumerate(labelIndexes):
         print '  Predictions for label {}'.format(labidx)
@@ -343,6 +282,8 @@ def classify(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
         for i in range(len(preRaw)):
             pre.append(preRaw[i][0])
             label.append(rawLabel[labidx][i])
+        if len(pre) <= 0:
+            raise ValueError('Cannot predict on zero or negative size set')
 
         falseNegative = 0.0
         falsePositive = 0.0
@@ -350,15 +291,19 @@ def classify(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
         trueNegative  = 0.0
 
         for i in range(len(pre)):
-            if i < PREDICT_PRINT_SAMPLES:
+            if i < RP['predict_print_samples']:
                 print "    Predicted: {} Label: {}".format(pre[i], label[i])
-            if pre[i] < CLASSIFY_THRESHOLD and label[i] == CLASSIFY_LABEL_POS:
+            if pre[i] < RP['classify_threshold'] and utility.equals(label[i],
+                    RP['classify_label_pos']):
                 falseNegative += 1
-            elif pre[i] > CLASSIFY_THRESHOLD and label[i] == CLASSIFY_LABEL_NEG:
+            elif pre[i] > RP['classify_threshold'] and utility.equals(label[i],
+                    RP['classify_label_neg']):
                 falsePositive += 1
-            elif pre[i] > CLASSIFY_THRESHOLD and label[i] == CLASSIFY_LABEL_POS:
+            elif pre[i] > RP['classify_threshold'] and utility.equals(label[i],
+                    RP['classify_label_pos']):
                 truePositive += 1
-            elif pre[i] < CLASSIFY_THRESHOLD and label[i] == CLASSIFY_LABEL_NEG:
+            elif pre[i] < RP['classify_threshold'] and utility.equals(label[i],
+                    RP['classify_label_neg']):
                 trueNegative += 1
 
         errors = falseNegative + falsePositive
@@ -387,14 +332,23 @@ def classify(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
             errDev += (error[i] - errAvg) * (error[i] - errAvg)
         errDev = sqrt(errDev / len(pre))
 
-        sensitivity = truePositive / (truePositive + falseNegative)
-        specificity = trueNegative / (trueNegative + falsePositive)
-        precision   = truePositive / (truePositive + trueNegative)
-        accuracy    = (1 - (errors / len(pre)))
+        if truePositive + falseNegative != 0:
+            sensitivity = truePositive / (truePositive + falseNegative)
+        else:
+            sensitivity = np.nan
+        if trueNegative + falsePositive != 0:
+            specificity = trueNegative / (trueNegative + falsePositive)
+        else:
+            specificity = np.nan
+        if truePositive + trueNegative != 0:
+            precision = truePositive / (truePositive + trueNegative)
+        else:
+            precision = np.nan
+        accuracy = (1 - (errors / len(pre))) # sanitized earlier
         if precision + sensitivity != 0:
             fmeasure = (2 * precision * sensitivity) / (precision + sensitivity)
         else:
-            fmeasure = float('nan')
+            fmeasure = np.nan
 
         logloss = utility.logloss(pre,label)
 
@@ -409,9 +363,8 @@ def classify(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
 
         print("    Classification accuracy: {}%"
                 .format(accuracy * 100))
-        # Care! Doesn't work on metacentrum.cz (cause: dependencies)
-        print("    ROC AUC score:           {}"
-                .format(roc_auc_score(label, pre)))
+        # Temporarily disabled, not working because of wrong label format
+        # print("    ROC AUC score:           {}".format(roc_auc_score(label, pre)))
         print("    Sensitivity:             {}".format(sensitivity))
         print("    Specificity:             {}".format(specificity))
         print("    Precision:               {}".format(precision))
@@ -419,15 +372,15 @@ def classify(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
 
         return accuracy
 
-def classifySplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
-    partSize = len(nnInput) / NUM_PARTITIONS
-    loglosses = np.zeros((len(labelIndexes), NUM_PARTITIONS))
+def classifySplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
+    partSize = len(nnInput) / RP['num_partitions']
+    loglosses = np.zeros((len(labelIndexes), RP['num_partitions']))
 
-    accuracies = np.zeros((len(labelIndexes), NUM_PARTITIONS))
+    accuracies = np.zeros((len(labelIndexes), RP['num_partitions']))
 
-    for i in range(NUM_PARTITIONS):
+    for i in range(RP['num_partitions']):
         print '\n    Partition {}'.format(i)
-        if USE_EMBEDDING:
+        if RD['use_embedding']:
             partInput = np.zeros([partSize, len(nnInput[0])])
         else:
             partInput = np.zeros([partSize, len(nnInput[0]), len(nnInput[0][0])])
@@ -435,7 +388,7 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
         for j in range(base, base + partSize):
             partInput[j - base] = nnInput[j]
 
-        preRaw = model.predict(partInput, batch_size = BATCH)
+        preRaw = model.predict(partInput, batch_size = RP['batch'])
 
         metricidx = 0
         labCtr = 0
@@ -449,19 +402,9 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
                 label.append(rawLabel[labidx][base + j])
             labCtr += 1
 
-            if ZSCORE_NORM:
-                pre = data.zScoreDenormalize(pre, zMean[labidx], zDev[labidx])
-                label = data.zScoreDenormalize(label, zMean[labidx], zDev[labidx])
-
-            if LOGARITHM:
-                for j in range(len(pre)):
-                    pre[j] = exp(-pre[j])
-                    label[j] = exp(-label[j])
-
             # print samples of predictions
-            for j in range(min(PREDICT_PRINT_SAMPLES / NUM_PARTITIONS, len(pre))):
+            for j in range(min(RP['predict_print_samples'] / RP['num_partitions'], len(pre))):
                 print("        prediction: {}, label: {}".format(pre[j],label[j]))
-
 
             falseNegative = 0.0
             falsePositive = 0.0
@@ -469,15 +412,19 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
             trueNegative  = 0.0
 
             for j in range(len(pre)):
-                if j < PREDICT_PRINT_SAMPLES:
+                if j < RP['predict_print_samples']:
                     print "    Predicted: {} Label: {}".format(pre[j], label[j])
-                if pre[j] < CLASSIFY_THRESHOLD and label[j] == CLASSIFY_LABEL_POS:
+                if pre[j] < RP['classify_threshold'] and utility.equals(label[j],
+                        RP['classify_label_pos']):
                     falseNegative += 1
-                elif pre[j] > CLASSIFY_THRESHOLD and label[j] == CLASSIFY_LABEL_NEG:
+                elif pre[j] > RP['classify_threshold'] and utility.equals(label[j],
+                        RP['classify_label_neg']):
                     falsePositive += 1
-                elif pre[j] > CLASSIFY_THRESHOLD and label[j] == CLASSIFY_LABEL_POS:
+                elif pre[j] > RP['classify_threshold'] and utility.equals(label[j],
+                        RP['classify_label_pos']):
                     truePositive += 1
-                elif pre[j] < CLASSIFY_THRESHOLD and label[j] == CLASSIFY_LABEL_NEG:
+                elif pre[j] < RP['classify_threshold'] and utility.equals(label[j],
+                        RP['classify_label_neg']):
                     trueNegative += 1
 
             loglosses[metricidx][i] = utility.logloss(pre,label)
@@ -496,16 +443,16 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
     accuracyDev = []
 
     for lab in range(len(loglosses)):
-        loglossAvg.append(np.sum(loglosses[lab]) / NUM_PARTITIONS)
-        accuracyAvg.append(np.sum(accuracies[lab]) / NUM_PARTITIONS)
+        loglossAvg.append(np.sum(loglosses[lab]) / RP['num_partitions'])
+        accuracyAvg.append(np.sum(accuracies[lab]) / RP['num_partitions'])
 
         loglossDev.append(0.0)
         accuracyDev.append(0.0)
-        for i in range(NUM_PARTITIONS):
+        for i in range(RP['num_partitions']):
             loglossDev[lab] += (loglosses[lab][i] - loglossAvg[lab])**2
             accuracyDev[lab] += (accuracies[lab][i] - accuracyAvg[lab])**2
-        loglossDev[lab] = sqrt(loglossDev[lab] / NUM_PARTITIONS)
-        accuracyDev[lab] = sqrt(accuracyDev[lab] / NUM_PARTITIONS)
+        loglossDev[lab] = sqrt(loglossDev[lab] / RP['num_partitions'])
+        accuracyDev[lab] = sqrt(accuracyDev[lab] / RP['num_partitions'])
 
         print '      label {} Logloss Average:   {}'.format(lab, loglossAvg[lab])
         print '      label {} Logloss Deviation: {}'.format(lab, loglossDev[lab])
@@ -522,7 +469,7 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = LABEL_IDXS):
     print '  Logloss mean of devs: {}'.format(loglossDevOverall)
     print '\n  Accuracy mean of avgs: {}'.format(accuracyAvgOverall)
     print '  Accuracy mean of devs: {}'.format(accuracyDevOverall)
-    return accuracyAvgOverall, accuracyDevOverall
+    return accuracyAvgOverall, accuracyDevOverall, loglossAvgOverall, loglossDevOverall
 
 
 # TODO: encapsulate training rnn on a label to a function, not working yet
@@ -552,33 +499,36 @@ def modelOnLabels(trainIn, trainLabel, testIn, testLabel, alphaSize, nomiSize,
 # Do preprocessing and train/test data division
 def preprocess(fullIn, labels, testFlags):
 
-    if LOGARITHM:
-        for idx in LABEL_IDXS:
+    if RP['logarithm']:
+        for idx in RP['label_idxs']:
             labels[idx] = data.logarithm(labels[idx])
 
     global zMean, zDev
     zMean = {}
     zDev = {}
-    if ZSCORE_NORM:
-        for idx in LABEL_IDXS:
+    if RP['zscore_norm']:
+        for idx in RP['label_idxs']:
             labels[idx], m, d = data.zScoreNormalize(labels[idx])
             zMean[idx] = m
             zDev[idx] = d
 
-
-
     # check for NaN or inf values, which break our RNN
-    for idx in LABEL_IDXS:
+    for idx in RP['label_idxs']:
         for label in labels[idx]:
             if np.isnan(label) or np.isinf(label):
-                raise ValueError('Preprocess error: bad value in data: {}'.format(label))
+                raise ValueError('Preprocess error: bad value in data: {}'
+                        .format(label))
 
+    if RP['label_binning']:
+        for idx in RP['label_idxs']:
+            labels[idx] = utility.bin(labels[idx], RP['label_binning_ratio'],
+                    classA = RP['classify_label_neg'], classB = RP['classify_label_pos'])
 
-    if FLAG_BASED_HOLD:
+    if RP['flag_based_hold']:
         trainIn, trainLabel, testIn, testLabel = data.holdoutBased(testFlags,
                 fullIn, labels)
     else:
-        trainIn, trainLabel, testIn, testLabel = data.holdout(HOLDOUT_RATIO,
+        trainIn, trainLabel, testIn, testLabel = data.holdout(RP['holdout_ratio'],
                 fullIn, labels)
 
 
@@ -589,89 +539,103 @@ def run(grid = None):
     startTime = time.time()
 
     # Initialize using the same seed (to get stable results on comparisons)
-    np.random.seed(SEED)
+    np.random.seed(RP['seed'])
 
     fullIn, labels, alphaSize, nomiSize, testFlags = data.prepareData()
 
     trainIn, trainLabel, testIn, testLabel = preprocess(fullIn, labels,
             testFlags)
 
-    if not CHAINED_MODELS:
+    loglossTest = None
+    loglossStdTest = None
+
+    if not RP['chained_models']:
         model = configureModel(alphaSize, nomiSize)
 
         epochsDone = train(model, trainIn, trainLabel, (testIn, testLabel))
 
-        if SCATTER_VISUALIZE:
-            utility.visualize2D(model, 1, testIn, testLabel[LABEL_IDXS[0]])
+        if RP['label_binning_after_train'] and not RP['label_binning']:
+            for idx in RP['label_idxs']:
+                trainLabel[idx] = utility.bin(trainLabel[idx], RP['label_binning_ratio'],
+                        classA = RP['classify_label_neg'],
+                        classB = RP['classify_label_pos'])
+                testLabel[idx] = utility.bin(testLabel[idx], RP['label_binning_ratio'],
+                        classA = RP['classify_label_neg'],
+                        classB = RP['classify_label_pos'])
+            model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
+                alphaSize, nomiSize, [0], model.get_weights())
+
+        if RP['scatter_visualize']:
+            utility.visualize2D(model, 1, testIn, testLabel[RP['label_idxs'][0]])
 
         print("\n  Prediction of training data:")
-        if CLASSIFY:
+        if RP['classify']:
             relevanceTrain = classify(model, trainIn, trainLabel)
         else:
             relevanceTrain = predict(model, trainIn, trainLabel)
 
         print("\n  Prediction of testing data:")
-        if CLASSIFY:
-            if USE_PARTITIONS:
-                relevanceTest, stdTest = classifySplit(model, testIn, testLabel)
+        if RP['classify']:
+            if RP['use_partitions']:
+                relevanceTest, stdTest, loglossTest, loglossStdTest = classifySplit(model, testIn, testLabel)
             else:
                 relevanceTest = classify(model, testIn, testLabel)
         else:
-            if USE_PARTITIONS:
+            if RP['use_partitions']:
                 relevanceTest, stdTest = predictSplit(model, testIn, testLabel)
             else:
                 relevanceTest = predict(model, testIn, testLabel)
     else:
-        for idx in range(len(CHAINED_LABELS)):
-            if idx in FREEZE_IDXS:
+        for idx in range(len(RP['chained_labels'])):
+            if idx in RP['freeze_idxs']:
                 print '    Freezing inner layers.'
-                TRAINABLE_INNER = False
+                RP['trainable_inner'] = False
 
             if idx == 0:
                 model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
-                    alphaSize, nomiSize, CHAINED_LABELS[idx], uniOutput =
+                    alphaSize, nomiSize, RP['chained_labels'][idx], uniOutput =
                     True)
-            elif idx == len(CHAINED_LABELS) - 1:
+            elif idx == len(RP['chained_labels']) - 1:
                 model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn,
-                    testLabel, alphaSize, nomiSize, CHAINED_LABELS[idx],
+                    testLabel, alphaSize, nomiSize, RP['chained_labels'][idx],
                     model.get_weights(), uniOutput = True)
             else:
                 model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn,
-                    testLabel, alphaSize, nomiSize, CHAINED_LABELS[idx],
+                    testLabel, alphaSize, nomiSize, RP['chained_labels'][idx],
                     model.get_weights())
 
             print("\n  Prediction of training data:")
-            if CLASSIFY:
+            if RP['classify']:
                 relevanceTrain = classify(model, trainIn, trainLabel,
-                        labelIndexes = CHAINED_LABELS[idx])
+                        labelIndexes = RP['chained_labels'][idx])
             else:
                 relevanceTrain = predict(model, trainIn, trainLabel,
-                        labelIndexes = CHAINED_LABELS[idx])
+                        labelIndexes = RP['chained_labels'][idx])
 
             print("\n  Prediction of testing data:")
-            if CLASSIFY:
-                if USE_PARTITIONS:
-                    relevanceTest, stdTest = classifySplit(model, testIn, testLabel,
-                        labelIndexes = CHAINED_LABELS[idx])
+            if RP['classify']:
+                if RP['use_partitions']:
+                    relevanceTest, stdTest, loglossTest, loglossStdTest = classifySplit(model, testIn, testLabel,
+                        labelIndexes = RP['chained_labels'][idx])
                 else:
                     relevanceTest = classify(model, testIn, testLabel, labelIndexes
-                        = CHAINED_LABELS[idx])
+                        = RP['chained_labels'][idx])
             else:
-                if USE_PARTITIONS:
+                if RP['use_partitions']:
                     relevanceTest, stdTest = predictSplit(model, testIn, testLabel,
-                        labelIndexes = CHAINED_LABELS[idx])
+                        labelIndexes = RP['chained_labels'][idx])
                 else:
                     relevanceTest = predict(model, testIn, testLabel, labelIndexes
-                        = CHAINED_LABELS[idx])
+                        = RP['chained_labels'][idx])
 
-        if SCATTER_VISUALIZE:
+        if RP['scatter_visualize']:
             utility.visualize2D(model, 1, testIn,
-                    testLabel[CHAINED_PREDICT[0]])
+                    testLabel[RP['chained_predict'][0]])
 
     endTime = time.time()
     deltaTime = endTime - startTime
 
-    if CLASSIFY:
+    if RP['classify']:
         taskType = 'classification'
     else:
         taskType = 'regression'
@@ -697,19 +661,20 @@ def run(grid = None):
         relevance_training = relevanceTrain,
         relevance_testing = relevanceTest,
         relevance_testing_std = stdTest,
-        epoch_max = EPOCHS,
+        log_loss = loglossTest,
+        log_loss_std = loglossStdTest,
+        epoch_max = RP['epochs'],
         epoch_count = epochsDone,
         runtime_second = deltaTime,
         parameter_count = model.count_params(),
-        learning_rate = LEARNING_RATE,
+        learning_rate = RP['learning_rate'],
         optimization_method = OPTIMIZER.__class__.__name__,
-        batch_size = BATCH,
-        comment = COMMENT,
+        batch_size = RP['batch'],
+        comment = RP['comment'],
         label_name = ','.join(cc.exp['params']['data']['labels']),
         model = modelSummary,
-        seed = SEED,
+        seed = RP['seed'],
         memory_pm_mb = memRss,
         memory_vm_mb = memVms,
-        learning_curve = open('local/plots/{}'.format(utility.PLOT_NAME),
-            'rb').read(),
+        learning_curve = open('{}/{}'.format(cc.cfg['plots']['dir'], utility.PLOT_NAME),'rb').read(),
         hostname = socket.gethostname())

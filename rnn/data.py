@@ -2,6 +2,7 @@ import numpy as np
 import random
 import pubchem as pc
 
+import pandas as pd
 import utility
 
 import db.db as db
@@ -9,22 +10,7 @@ from config import config as cc
 
 from math import floor, log, isnan, sqrt, ceil
 
-print(cc.exp)
-
-USE_EMBEDDING = cc.exp['params']['data']['use_embedding']
-
-# Number of label columns to prepare
-INPUT_COUNT = cc.exp['params']['data']['input_count']
-EXTRA_NOMINALS = cc.exp['params']['data']['extra_nominals']
-LABEL_COUNT = cc.exp['params']['data']['label_count']
-USE_TEST_FLAGS = cc.exp['params']['data']['use_test_flags']
-
-# Fixed alphasize options
-ALPHA_FIXED = cc.exp['params']['data']['alpha_fixed']
-ALPHA_FIXED_SIZE = cc.exp['params']['data']['alpha_fixed_size']
-
-# Epsilon for catching numbers close to zero
-EPS = cc.exp['params']['data']['eps']
+RD = cc.exp['params']['data']
 
 # Transforms data into 1 of k encoding
 # Output format is 3D array of integers, representing positions of binary 1
@@ -46,8 +32,8 @@ def formatSMILES(rawData, col):
 
     maxLen = 0
     for item in rawData:
-        if USE_TEST_FLAGS:
-            tStat = item[LABEL_COUNT + INPUT_COUNT]
+        if RD['use_test_flags']:
+            tStat = item[RD['label_count'] + RD['input_count']]
             if not (tStat == 0 or tStat == 1):
                 continue
         maxLen = max(maxLen, len(item[col]))
@@ -57,8 +43,8 @@ def formatSMILES(rawData, col):
     print("    Maximum length of sample: {}".format(maxLen))
     print("    Size of alphabet: {}".format(size))
 
-    if ALPHA_FIXED:
-        size = ALPHA_FIXED_SIZE
+    if RD['alpha_fixed']:
+        size = RD['alpha_fixed_size']
     output = np.zeros((len(rawData), maxLen, size))
 
     itemCtr = 0
@@ -235,10 +221,10 @@ def holdoutBased(testFlags, words, label):
             testSize += 1
         elif testFlags[i] == 0:
             trainSize += 1
-        elif testFlags[i] != None:
-            raise ValueError("Unknown value in test flags")
+        elif not pd.isnull(testFlags[i]): # pandas treats Nones as NaNs
+            raise ValueError("Unknown value in test flags: {}".format(testFlags[i]))
 
-    if USE_EMBEDDING:
+    if RD['use_embedding']:
         trainWords = np.zeros((trainSize, len(words[0])))
         trainLabel = np.zeros((len(label), trainSize))
         trainIdx = 0
@@ -272,7 +258,7 @@ def holdoutBased(testFlags, words, label):
 def logarithm(array):
     loged = np.zeros(len(array))
     for i in range(len(array)):
-        if array[i] > EPS:
+        if array[i] > RD['eps']:
             loged[i] = -log(array[i])
     return loged
 
@@ -322,16 +308,16 @@ def getRawData(source = 'chembl', table = ''):
 
 # Call all routines to prepare data for neural network
 def prepareData(source = 'chembl', table = ''):
-    np.set_printoptions(threshold = 'nan', suppress = True)     # Jan: is this the right way to assign nan? See: http://stackoverflow.com/questions/19374254/assigning-a-variable-nan-in-python-without-numpy
-
+    # changed from 'nan' to safer np.nan
+    np.set_printoptions(threshold = np.nan, suppress = True)
     data = db.getData().values
 
-    if not USE_EMBEDDING:
+    if not RD['use_embedding']:
         # SMILES column
         alphaSize, timesteps, formattedWords = formatSMILES(data, 0)
         # Nominal data columns
         nomiSize = 0
-        if EXTRA_NOMINALS > 0:
+        if RD['extra_nominals'] > 0:
             n, formattedNominals = formatNominal(data, timesteps, 1)
             formattedWords = np.concatenate((formattedWords, formattedNominals),
                     axis = 2)
@@ -343,8 +329,11 @@ def prepareData(source = 'chembl', table = ''):
     else:
         nomiSize = 0
         alphaSize, timesteps, formattedWords = formatSMILESEmbedded(data, 0)
+
+        # Shift defines offset inside of integer, used for coding multiple
+        # small numeric values as one variable (needed in embedding)
         shift = int(log(alphaSize, 2) + 1)
-        if EXTRA_NOMINALS > 0:
+        if RD['extra_nominals'] > 0:
             n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
                     1, shift)
             shift += int(log(n, 2) + 1)
@@ -356,24 +345,24 @@ def prepareData(source = 'chembl', table = ''):
 
     # put labels into array
     labels = []
-    for i in range(LABEL_COUNT):
+    for i in range(RD['label_count']):
         labels.append(np.zeros((len(data))))
     i = 0
     for item in data:
-        for labelID in range(LABEL_COUNT):
-            labels[labelID][i] = item[labelID + INPUT_COUNT]
+        for labelID in range(RD['label_count']):
+            labels[labelID][i] = item[labelID + RD['input_count']]
         i += 1
     resolveMissingLabels(labels)
 
     # put test flags into array - test flags are expected in last column
     testFlags = []
-    if USE_TEST_FLAGS:
+    if RD['use_test_flags']:
         for item in data:
-            testFlags.append(item[LABEL_COUNT + INPUT_COUNT])
+            testFlags.append(item[RD['label_count'] + RD['input_count']])
 
     # include shift value to nomiSize if embedding is used
-    if USE_EMBEDDING:
-        return formattedWords, labels, alphaSize, (nomiSize, shift), testFlags      # Jan: where is shift defined?
+    if RD['use_embedding']:
+        return formattedWords, labels, alphaSize, (nomiSize, shift), testFlags
     else:
         return formattedWords, labels, alphaSize, nomiSize, testFlags
 

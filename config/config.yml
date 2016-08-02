@@ -11,4 +11,8 @@ db:
 statistics:
   table: 'journal'
 
+# Plots
+plots:
+  dir: 'local/plots'
+
 experiments: []
