@@ -51,12 +51,22 @@ def sendStatistics(**kwargs):
     for col,val in kwargs.iteritems():
         cols.append(col)
         # mysql.connector has problems with converting numpy values, we supply explicit conversion
-        if type(val) is numpy.float64:
-            vals.append(float(val))
-        elif type(val) is numpy.int64:
-            vals.append(int(val))
+
+        if(type(val) is dict):
+            if val['type']=='bin':
+                if cc.cfg['db']['driver']=='postgresql':
+                    vals.append(psycopg2.Binary(val['val']))
+                else:
+                    vals.append(val['val'])
+            else:
+                vals.append(val['val'])
         else:
-            vals.append(val)
+            if type(val) is numpy.float64:
+                vals.append(float(val))
+            elif type(val) is numpy.int64:
+                vals.append(int(val))
+            else:
+                vals.append(val)
 
     query = 'INSERT INTO {} ({}) VALUES ({})'.format(
         cc.cfg['statistics']['table'],
