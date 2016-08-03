@@ -432,7 +432,7 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
             accuracies[metricidx][i] = 1 - (falseNegative + falsePositive) / len(label)
 
             # we need to normalize the confidences to [0,1]?
-            aucs[metricidx][i] = roc_auc_score(label, (np.array(pre)-RP['classify_label_neg'])/(RP['classify_label_pos']-RP['classify_label_neg']))
+            aucs[metricidx][i] = roc_auc_score(label, pre)
 
             print '      Logloss Value: {}'.format(loglosses[metricidx][i])
             print '      Accuracy: {}'.format(accuracies[metricidx][i])
