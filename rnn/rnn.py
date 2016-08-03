@@ -698,7 +698,7 @@ def run(grid = None):
         seed = RP['seed'],
         memory_pm_mb = memRss,
         memory_vm_mb = memVms,
-        learning_curve = open('{}/{}'.format(cc.cfg['plots']['dir'], utility.PLOT_NAME),'rb').read(),
+        learning_curve = {'val':open('{}/{}'.format(cc.cfg['plots']['dir'], utility.PLOT_NAME),'rb').read(),'type':'bin'},
         hostname = socket.gethostname(),
         experiment_config = yaml.dump(cc.exp,default_flow_style=False),
         git_commit = gitCommit)
