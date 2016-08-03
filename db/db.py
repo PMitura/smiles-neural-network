@@ -22,7 +22,7 @@ def getData():
     con = getCon()
 
     query = 'SELECT {} FROM {}'.format(
-        ','.join(cc.exp['fetch']['cols']),
+        ','.join(['"{}"'.format(x) for x in cc.exp['fetch']['cols']]),
         cc.exp['fetch']['table'])
 
     if cc.exp['fetch']['where']:

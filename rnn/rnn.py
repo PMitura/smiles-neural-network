@@ -61,7 +61,7 @@ def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(RP['label_idxs'
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
 
     # default learning rate 0.001
-    model.compile(loss = 'mse', optimizer = OPTIMIZER)
+    model.compile(loss = RP['objective'], optimizer = OPTIMIZER)
 
     print('  ...done')
     return model
@@ -676,10 +676,10 @@ def run(grid = None):
     # TODO: add memory_pm_mb, memory_vm_bm
 
     if not RP['classify']:
-        loglossTest = 0
-        loglossStdTest = 0
-        aucTest = 0
-        aucStdTest = 0
+        loglossTest = None
+        loglossStdTest = None
+        aucTest = None
+        aucStdTest = None
 
     db.sendStatistics(
         dataset_name = cc.exp['fetch']['table'],
@@ -710,4 +710,5 @@ def run(grid = None):
         learning_curve = {'val':open('{}/{}'.format(cc.cfg['plots']['dir'], utility.PLOT_NAME),'rb').read(),'type':'bin'},
         hostname = socket.gethostname(),
         experiment_config = yaml.dump(cc.exp,default_flow_style=False),
-        git_commit = gitCommit)
+        git_commit = gitCommit,
+        objective = RP['objective'])

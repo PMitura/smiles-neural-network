@@ -2,7 +2,7 @@
 
 import sys, getopt
 from config import config as cc
-from keras.optimizers import Adam, Adadelta, Adagrad
+from keras.optimizers import Adam, Adadelta, Adagrad, Nadam, Adamax
 
 def main(argv):
     path = 'local/config.yml'
@@ -22,7 +22,6 @@ def main(argv):
         # reloads the rnn.rnn module which populates new config values to their respective vars
         import rnn.rnn
         reload(rnn.rnn)
-
 
         # optimizer grid search
         seeds = range(12346, 12346+10)

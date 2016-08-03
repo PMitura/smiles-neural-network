@@ -32,6 +32,9 @@ params:
     epochs: 150
 
     classify: true            # regression if false
+    classify_threshold: 0.5
+    classify_label_pos: 1
+    classify_label_neg: 0
     label_binning: true
     label_binning_after_train: false
     label_binning_ratio: 0.5
@@ -50,4 +53,4 @@ params:
     label_idxs: '[0]'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[FULL CONFIG] multi-seed test with binary labels only'
+    comment: 'Testing classification with various objectives'
