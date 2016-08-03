@@ -48,7 +48,7 @@ params:
     holdout_ratio: 0.8
 
     # preprocessing switches
-    label_idxs: '[2]'      # indexes of columns to use as label
+    label_idxs: '[0]'      # indexes of columns to use as label
 
     # statistics settings
     comment: '[EXP2][TWO_HOT] multiple target labels - using one hot encoding for labels'
