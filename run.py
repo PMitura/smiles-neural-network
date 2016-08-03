@@ -25,11 +25,11 @@ def main(argv):
 
         print(cc.cfg,cc.exp)
 
-        # optimizer grid search
-        optimizers = [Adam(lr = rnn.rnn.RP['learning_rate']), Adadelta(),
-                Adagrad(), Nadam(), Adamax()]
-        for o in optimizers:
-            rnn.rnn.OPTIMIZER = o
+        # loss function grid search
+        lossFns = ['mse', 'mae', 'mape', 'msle', 'squared_hinge', 'hinge',
+                'kld', 'poisson']
+        for fn in lossFns:
+            rnn.rnn.RP['objective'] = fn
             rnn.rnn.run()
         # rnn.rnn.run()
 
