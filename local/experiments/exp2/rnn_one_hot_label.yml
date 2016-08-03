@@ -13,7 +13,7 @@ fetch:
   'is_testing_50']
   order: 'canonical_smiles'
   index_col: ~
-  limit: 10000
+  limit: 4000
   where: ~ # 'is_testing IS NOT NULL'
 
 # Experiment params
@@ -29,7 +29,7 @@ params:
     testing: 'is_testing_50'
   rnn:
     # RNN parameters
-    learning_rate: 0.001
+    learning_rate: 0.003
     epochs: 150
 
     classify: false            # regression if false
