@@ -27,6 +27,8 @@ def getData():
 
     if cc.exp['fetch']['where']:
         query += ' WHERE {}'.format(cc.exp['fetch']['where'])
+    if cc.exp['fetch']['order']:
+        query += ' ORDER BY {} '.format(cc.exp['fetch']['order'])
     if cc.exp['fetch']['limit']:
         query += ' LIMIT {}'.format(cc.exp['fetch']['limit'])
 

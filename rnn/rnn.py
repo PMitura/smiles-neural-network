@@ -19,7 +19,7 @@ from keras.models import Sequential
 from keras.layers import Activation, Dense, Dropout, LSTM, AveragePooling1D
 from keras.layers import TimeDistributed, SimpleRNN, GRU
 from keras.layers import BatchNormalization, Embedding, merge
-from keras.optimizers import Adam, RMSprop
+from keras.optimizers import Adam, RMSprop, Adadelta, Adagrad
 import keras.callbacks
 # from keras.regularizers import l1
 
@@ -34,6 +34,8 @@ RP['freeze_idxs'] = eval(str(cc.exp['params']['rnn']['freeze_idxs']))
 RP['label_idxs'] = eval(str(cc.exp['params']['rnn']['label_idxs']))
 
 OPTIMIZER = Adam(lr = RP['learning_rate'])
+# OPTIMIZER = Adadelta()
+# OPTIMIZER = Adagrad()
 
 def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(RP['label_idxs'])):
     print('  Initializing and compiling...')
