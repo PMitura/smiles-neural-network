@@ -26,7 +26,7 @@ def main(argv):
         print(cc.cfg,cc.exp)
 
         # optimizer grid search
-        optimizers = [Adam(lr = cc.exp['params']['rnn']['learning_rate']), Adadelta(), Adagrad()]
+        optimizers = [Adam(lr = rnn.rnn.RP['learning_rate']), Adadelta(), Adagrad()]
         for o in optimizers:
             rnn.rnn.OPTIMIZER = o
             rnn.rnn.run()

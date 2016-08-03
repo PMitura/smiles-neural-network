@@ -539,7 +539,7 @@ def preprocess(fullIn, labels, testFlags):
                 raise ValueError('Preprocess error: bad value in data: {}'
                         .format(label))
 
-    if RP['label_binning']:
+    if RP['label_binning'] and RP['classify']:
         for idx in RP['label_idxs']:
             labels[idx] = utility.bin(labels[idx], RP['label_binning_ratio'],
                     classA = RP['classify_label_neg'], classB = RP['classify_label_pos'])
@@ -567,22 +567,23 @@ def run(grid = None):
     if not RP['chained_models']:
         model = configureModel(alphaSize, nomiSize)
         epochsDone = train(model, trainIn, trainLabel, (testIn, testLabel))
-
-        if RP['label_binning_after_train'] and not RP['label_binning']:
-            for idx in RP['label_idxs']:
-                trainLabel[idx] = utility.bin(trainLabel[idx], RP['label_binning_ratio'],
-                        classA = RP['classify_label_neg'],
-                        classB = RP['classify_label_pos'])
-                testLabel[idx] = utility.bin(testLabel[idx], RP['label_binning_ratio'],
-                        classA = RP['classify_label_neg'],
-                        classB = RP['classify_label_pos'])
-            model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
-                alphaSize, nomiSize, [0], model.get_weights())
-        elif not RP['label_binning_after_train'] and not RP['label_binning']:
-            for idx in RP['label_idxs']:
-                testLabel[idx] = utility.bin(testLabel[idx], RP['label_binning_ratio'],
-                        classA = RP['classify_label_neg'],
-                        classB = RP['classify_label_pos'])
+        
+        if RP['classify']:
+            if RP['label_binning_after_train'] and not RP['label_binning']:
+                for idx in RP['label_idxs']:
+                    trainLabel[idx] = utility.bin(trainLabel[idx], RP['label_binning_ratio'],
+                            classA = RP['classify_label_neg'],
+                            classB = RP['classify_label_pos'])
+                    testLabel[idx] = utility.bin(testLabel[idx], RP['label_binning_ratio'],
+                            classA = RP['classify_label_neg'],
+                            classB = RP['classify_label_pos'])
+                model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
+                    alphaSize, nomiSize, [0], model.get_weights())
+            elif not RP['label_binning_after_train'] and not RP['label_binning']:
+                for idx in RP['label_idxs']:
+                    testLabel[idx] = utility.bin(testLabel[idx], RP['label_binning_ratio'],
+                            classA = RP['classify_label_neg'],
+                            classB = RP['classify_label_pos'])
 
         if RP['scatter_visualize']:
             utility.visualize2D(model, 1, testIn, testLabel[RP['label_idxs'][0]])
@@ -673,6 +674,12 @@ def run(grid = None):
 
 
     # TODO: add memory_pm_mb, memory_vm_bm
+    
+    if not RP['classify']:
+        loglossTest = 0
+        loglossStdTest = 0
+        aucTest = 0
+        aucStdTest = 0
 
     db.sendStatistics(
         dataset_name = cc.exp['fetch']['table'],
