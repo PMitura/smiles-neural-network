@@ -50,4 +50,4 @@ params:
     label_idxs: '[0]'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[FULL CONFIG] multi-seed test with binary labels only'
+    comment: 'Testing classification with various objectives'

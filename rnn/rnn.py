@@ -710,5 +710,5 @@ def run(grid = None):
         learning_curve = {'val':open('{}/{}'.format(cc.cfg['plots']['dir'], utility.PLOT_NAME),'rb').read(),'type':'bin'},
         hostname = socket.gethostname(),
         experiment_config = yaml.dump(cc.exp,default_flow_style=False),
-        git_commit = gitCommit
+        git_commit = gitCommit,
         objective = RP['objective'])

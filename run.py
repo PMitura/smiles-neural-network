@@ -27,7 +27,7 @@ def main(argv):
 
         # loss function grid search
         lossFns = ['mse', 'mae', 'mape', 'msle', 'squared_hinge', 'hinge',
-                'kld', 'poisson']
+                'binary_crossentropy']
         for fn in lossFns:
             rnn.rnn.RP['objective'] = fn
             rnn.rnn.run()
