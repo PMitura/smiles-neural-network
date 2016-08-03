@@ -55,7 +55,7 @@ def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(RP['label_idxs'
     model.add(Activation('relu', trainable = RP['trainable_inner']))
     model.add(Dense(outputLen))
 
-    if RP['classify']:
+    if False and RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
 
     # default learning rate 0.001
@@ -576,6 +576,11 @@ def run(grid = None):
                         classB = RP['classify_label_pos'])
             model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
                 alphaSize, nomiSize, [0], model.get_weights())
+        elif not RP['label_binning_after_train'] and not RP['label_binning']:
+            for idx in RP['label_idxs']:
+                testLabel[idx] = utility.bin(testLabel[idx], RP['label_binning_ratio'],
+                        classA = RP['classify_label_neg'],
+                        classB = RP['classify_label_pos'])
 
         if RP['scatter_visualize']:
             utility.visualize2D(model, 1, testIn, testLabel[RP['label_idxs'][0]])
