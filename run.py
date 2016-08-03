@@ -2,7 +2,7 @@
 
 import sys, getopt
 from config import config as cc
-from keras.optimizers import Adam, RMSprop, Adadelta, Adagrad
+from keras.optimizers import Adam, Adadelta, Adagrad
 
 def main(argv):
     path = 'local/config.yml'
@@ -26,7 +26,7 @@ def main(argv):
         print(cc.cfg,cc.exp)
 
         # optimizer grid search
-        optimizers = [Adam(lr = RP['learning_rate']), Adadelta(), Adagrad()]
+        optimizers = [Adam(lr = cc.exp['params']['rnn']['learning_rate']), Adadelta(), Adagrad()]
         for o in optimizers:
             rnn.rnn.OPTIMIZER = o
             rnn.rnn.run()
