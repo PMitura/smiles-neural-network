@@ -28,10 +28,11 @@ SMILES_ALPHABET_BITS = int(ceil(log(SMILES_ALPHABET_LEN,2)))
 def formatSMILES(rawData, col):
     print('  Formatting SMILES data column...')
 
+
     maxLen = 0
     for item in rawData:
         if RD['use_test_flags']:
-            tStat = item[RD['label_count'] + RD['input_count']]
+            tStat = item[RD['label_count'] + RD['input_count'] + RD['extra_nominals']]
             if not (tStat == 0 or tStat == 1):
                 continue
         maxLen = max(maxLen, len(item[col]))
@@ -298,10 +299,10 @@ def prepareData(source = 'chembl', table = ''):
             formattedWords = np.concatenate((formattedWords, formattedNominals),
                     axis = 2)
             nomiSize += n
-            n, formattedNominals = formatNominal(data, timesteps, 2)
-            formattedWords = np.concatenate((formattedWords, formattedNominals),
-                    axis = 2)
-            nomiSize += n
+            #n, formattedNominals = formatNominal(data, timesteps, 2)
+            #formattedWords = np.concatenate((formattedWords, formattedNominals),
+            #        axis = 2)
+            #nomiSize += n
     else:
         nomiSize = 0
         alphaSize, timesteps, formattedWords = formatSMILESEmbedded(data, 0)
@@ -326,7 +327,7 @@ def prepareData(source = 'chembl', table = ''):
     i = 0
     for item in data:
         for labelID in range(RD['label_count']):
-            labels[labelID][i] = item[labelID + RD['input_count']]
+            labels[labelID][i] = item[labelID + RD['input_count'] + RD['extra_nominals']]
         i += 1
     resolveMissingLabels(labels)
 
@@ -334,7 +335,7 @@ def prepareData(source = 'chembl', table = ''):
     testFlags = []
     if RD['use_test_flags']:
         for item in data:
-            testFlags.append(item[RD['label_count'] + RD['input_count']])
+            testFlags.append(item[RD['label_count'] + RD['input_count'] + RD['extra_nominals']])
 
     # include shift value to nomiSize if embedding is used
     if RD['use_embedding']:

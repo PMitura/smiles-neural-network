@@ -1,4 +1,4 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/rnn_alogp_regression.yml']
+experiments: ['local/experiments/exp2/rnn_one_hot_label.yml']

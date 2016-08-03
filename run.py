@@ -26,11 +26,11 @@ def main(argv):
         print(cc.cfg,cc.exp)
 
         # optimizer grid search
-        optimizers = [Adam(lr = rnn.rnn.RP['learning_rate']), Adadelta(), Adagrad()]
-        for o in optimizers:
-            rnn.rnn.OPTIMIZER = o
-            rnn.rnn.run()
-        # rnn.rnn.run()
+        #optimizers = [Adam(lr = rnn.rnn.RP['learning_rate']), Adadelta(), Adagrad()]
+        #for o in optimizers:
+        #    rnn.rnn.OPTIMIZER = o
+        #    rnn.rnn.run()
+        rnn.rnn.run()
 
 
 if __name__ == '__main__':
