@@ -24,7 +24,7 @@ def main(argv):
         reload(rnn.rnn)
 
         # optimizer grid search
-        seeds = range(12346, 12346+10)
+        seeds = range(12346, 12346+1)
         for seed in seeds:
             rnn.rnn.RP['seed'] = seed
 
