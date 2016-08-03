@@ -1,4 +1,5 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/rnn_alogp.yml']
+experiments: ['local/experiments/rnn_alogp_cont.yml',
+              'local/experiments/rnn_alogp_bin.yml']
