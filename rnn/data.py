@@ -10,25 +10,23 @@ from config import config as cc
 
 from math import floor, log, isnan, sqrt, ceil
 
+from sets import Set
+
 RD = cc.exp['params']['data']
+
+SMILES_ALPHABET_UNKNOWN = '?'
+SMILES_ALPHABET = [SMILES_ALPHABET_UNKNOWN,'-','=','#','*','.','(',')','[',']','{','}','-','+',
+    '0','1','2','3','4','5','6','7','8','9',
+    'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+    'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+SMILES_ALPHABET_LOOKUP_TABLE = { v:k for k,v in enumerate(SMILES_ALPHABET) }
+SMILES_ALPHABET_LEN = len(SMILES_ALPHABET)
+SMILES_ALPHABET_BITS = int(ceil(log(SMILES_ALPHABET_LEN,2)))
 
 # Transforms data into 1 of k encoding
 # Output format is 3D array of integers, representing positions of binary 1
 def formatSMILES(rawData, col):
     print('  Formatting SMILES data column...')
-
-    # Get a set of all used characters
-    alphabet = set()
-    for item in rawData:
-        for char in item[col]:
-            alphabet.add(char)
-
-    # Map columns to letters
-    colMapping = {}
-    size = 1
-    for char in alphabet:
-        colMapping[char] = size
-        size += 1
 
     maxLen = 0
     for item in rawData:
@@ -41,27 +39,22 @@ def formatSMILES(rawData, col):
     # DEBUG, data properties
     print("    Number of samples: {}".format(len(rawData)))
     print("    Maximum length of sample: {}".format(maxLen))
-    print("    Size of alphabet: {}".format(size))
+    print("    Size of alphabet: {}".format(SMILES_ALPHABET_LEN))
 
-    if RD['alpha_fixed']:
-        size = RD['alpha_fixed_size']
-    output = np.zeros((len(rawData), maxLen, size))
+    output = np.zeros((len(rawData), maxLen, SMILES_ALPHABET_LEN))
 
-    itemCtr = 0
-    for item in rawData:
-        charCtr = 0
-        for char in item[col]:
-            if charCtr >= maxLen:
+    for itemIdx,item in enumerate(rawData):
+        for charIdx,char in enumerate(item[col]):
+            if charIdx >= maxLen:
                 break
-            charIdx = colMapping[char]
-            output[itemCtr][charCtr][charIdx] = 1
-            charCtr += 1
-        for i in range(charCtr, maxLen):
-            output[itemCtr][i][0] = 1
-        itemCtr += 1
+            char = char if char in SMILES_ALPHABET_LOOKUP_TABLE else SMILES_ALPHABET_UNKNOWN
+            output[itemIdx][charIdx][SMILES_ALPHABET_LOOKUP_TABLE[char]] = 1
+
+        for i in range(len(item[col]), maxLen):
+            output[itemIdx][i][SMILES_ALPHABET_LOOKUP_TABLE[SMILES_ALPHABET_UNKNOWN]] = 1
 
     print('  ...done')
-    return size, maxLen, output
+    return SMILES_ALPHABET_LEN, maxLen, output
 
 
 def formatNominal(rawData, timesteps, col):
@@ -99,19 +92,6 @@ def formatNominal(rawData, timesteps, col):
 def formatSMILESEmbedded(rawData, col):
     print('  Formatting SMILES data column...')
 
-    # Get a set of all used characters
-    alphabet = set()
-    for item in rawData:
-        for char in item[col]:
-            alphabet.add(char)
-
-    # Map columns to letters
-    colMapping = {}
-    size = 1
-    for char in alphabet:
-        colMapping[char] = size
-        size += 1
-
     maxLen = 0
     for item in rawData:
         maxLen = max(maxLen, len(item[col]))
@@ -119,23 +99,19 @@ def formatSMILESEmbedded(rawData, col):
     # DEBUG, data properties
     print("    Number of samples: {}".format(len(rawData)))
     print("    Maximum length of sample: {}".format(maxLen))
-    print("    Size of alphabet: {}".format(size))
+    print("    Size of alphabet: {}".format(SMILES_ALPHABET_LEN))
 
     output = np.zeros((len(rawData), maxLen))
 
-    itemCtr = 0
-    for item in rawData:
-        charCtr = 0
-        for char in item[col]:
-            charIdx = colMapping[char]
-            output[itemCtr][charCtr] = charIdx
-            charCtr += 1
-        for i in range(charCtr, maxLen):
-            output[itemCtr][i] = 0
-        itemCtr += 1
+    for itemIdx,item in enumerate(rawData):
+        for charIdx,char in enumerate(item[col]):
+            char = char if char in SMILES_ALPHABET_LOOKUP_TABLE else SMILES_ALPHABET_UNKNOWN
+            output[itemIdx][charCtr] = SMILES_ALPHABET_LOOKUP_TABLE[char]
+        for i in range(len(item[col]), maxLen):
+            output[itemIdx][i] = SMILES_ALPHABET_LOOKUP_TABLE[SMILES_ALPHABET_UNKNOWN]
 
     print('  ...done')
-    return size, maxLen, output
+    return SMILES_ALPHABET_LEN, maxLen, output
 
 
 # Same as formatSmilesEmbedded, but uses words instead of characters
