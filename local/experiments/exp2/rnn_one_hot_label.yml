@@ -32,7 +32,7 @@ params:
     learning_rate: 0.001
     epochs: 150
 
-    classify: true            # regression if false
+    classify: false            # regression if false
     label_binning: true
     label_binning_after_train: false
     label_binning_ratio: 0.5
@@ -48,7 +48,7 @@ params:
     holdout_ratio: 0.8
 
     # preprocessing switches
-    label_idxs: '[0]'      # indexes of columns to use as label
+    label_idxs: '[3]'      # indexes of columns to use as label
 
     # statistics settings
     comment: '[EXP2][TWO_HOT] multiple target labels - using one hot encoding for labels'
