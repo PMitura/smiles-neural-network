@@ -1,0 +1,53 @@
+# Experiment rnn_alogp
+name: 'rnn_alogp'
+
+# Template for default values
+template: 'rnn.yml'
+
+# DB fetch params
+fetch:
+  table: 'output.target_molweight'
+  cols: ['canonical_smiles',
+  'alogp',
+  'is_testing']
+  order: 'canonical_smiles'
+  index_col: ~
+  limit: 10000
+  where: ~ # 'is_testing IS NOT NULL'
+
+# Experiment params
+params:
+  data:
+    # number of label columns to prepare
+    input_count: 1
+    extra_nominals: 0
+    label_count: 1
+    use_test_flags: true
+    # for statistics sending
+    labels: ['alogp']
+    testing: 'is_testing'
+  rnn:
+    # RNN parameters
+    learning_rate: 0.001
+    epochs: 150
+
+    classify: false            # regression if false
+    label_binning: false
+    label_binning_after_train: true
+    label_binning_ratio: 0.5
+
+    zscore_norm: true
+    logarithm: false
+    chained_models: false
+
+    # learning rate decay settings
+    learning_rate_decay: false
+
+    flag_based_hold: true
+    holdout_ratio: 0.8
+
+    # preprocessing switches
+    label_idxs: '[0]'      # indexes of columns to use as label
+
+    # statistics settings
+    comment: 'Grid search for best optimizer (including: adaptive LR)'

@@ -2,6 +2,7 @@
 
 import sys, getopt
 from config import config as cc
+from keras.optimizers import Adam, RMSprop, Adadelta, Adagrad
 
 def main(argv):
     path = 'local/config.yml'
@@ -24,13 +25,12 @@ def main(argv):
 
         print(cc.cfg,cc.exp)
 
-
-        # Grid search hacking HERE!
-        for sd in range(12346, 12355):
-            rnn.rnn.RP['seed'] = sd
+        # optimizer grid search
+        optimizers = [Adam(lr = RP['learning_rate']), Adadelta(), Adagrad()]
+        for o in optimizers:
+            rnn.rnn.OPTIMIZER = o
             rnn.rnn.run()
         # rnn.rnn.run()
-
 
 
 if __name__ == '__main__':

@@ -57,7 +57,7 @@ def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(RP['label_idxs'
     model.add(Activation('relu', trainable = RP['trainable_inner']))
     model.add(Dense(outputLen))
 
-    if False and RP['classify']:
+    if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
 
     # default learning rate 0.001
