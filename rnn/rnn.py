@@ -567,7 +567,7 @@ def run(grid = None):
     if not RP['chained_models']:
         model = configureModel(alphaSize, nomiSize)
         epochsDone = train(model, trainIn, trainLabel, (testIn, testLabel))
-        
+
         if RP['classify']:
             if RP['label_binning_after_train'] and not RP['label_binning']:
                 for idx in RP['label_idxs']:
@@ -674,7 +674,7 @@ def run(grid = None):
 
 
     # TODO: add memory_pm_mb, memory_vm_bm
-    
+
     if not RP['classify']:
         loglossTest = 0
         loglossStdTest = 0
