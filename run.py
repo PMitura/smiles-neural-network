@@ -23,14 +23,14 @@ def main(argv):
         import rnn.rnn
         reload(rnn.rnn)
 
-        print(cc.cfg,cc.exp)
 
         # optimizer grid search
         seeds = range(12346, 12346+10)
-
         for seed in seeds:
-           rnn.rnn.SEED = seed
-           rnn.rnn.run()
+            rnn.rnn.RP['seed'] = seed
+
+            print(cc.cfg,cc.exp)
+            rnn.rnn.run()
         # rnn.rnn.run()
 
 
