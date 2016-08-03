@@ -611,7 +611,6 @@ def run(grid = None):
             if idx in RP['freeze_idxs']:
                 print '    Freezing inner layers.'
                 RP['trainable_inner'] = False
-            print RP['chained_labels'][idx]
 
             if idx == 0:
                 model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
@@ -677,10 +676,10 @@ def run(grid = None):
     # TODO: add memory_pm_mb, memory_vm_bm
     
     if not RP['classify']:
-        loglossTest = 0
-        loglossStdTest = 0
-        aucTest = 0
-        aucStdTest = 0
+        loglossTest = None
+        loglossStdTest = None
+        aucTest = None
+        aucStdTest = None
 
     db.sendStatistics(
         dataset_name = cc.exp['fetch']['table'],
