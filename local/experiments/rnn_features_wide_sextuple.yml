@@ -43,7 +43,6 @@ params:
 
     zscore_norm: true
     logarithm: false
-    chained_models: false
 
     # learning rate decay settings
     learning_rate_decay: false
@@ -55,4 +54,4 @@ params:
     label_idxs: 'range(46)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: 'Grid search for best optimizer (including: adaptive LR)'
+    comment: '[v2] Sextuple setup, grid search for best optimizer'

@@ -611,6 +611,7 @@ def run(grid = None):
             if idx in RP['freeze_idxs']:
                 print '    Freezing inner layers.'
                 RP['trainable_inner'] = False
+            print RP['chained_labels'][idx]
 
             if idx == 0:
                 model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
