@@ -11,10 +11,6 @@ params:
     label_count: ~
     use_test_flags: ~
 
-    # fixed alphasize options
-    alpha_fixed: false
-    alpha_fixed_size: ~
-
     # epsilon for catching numbers close to zero
     eps: 0.0001
 
