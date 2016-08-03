@@ -52,7 +52,16 @@ def rms(array, size):
     return sqrt(sqrSum / size)
 
 # Logloss
-def logloss(predictions, labels):
+# test1:
+#   labels = [-1, -1, -1, 1, 1, 1]
+#   predictions = [-1, -0.6, -0.4, -0.52, 0.8, 1]
+#   logloss = 0.352049227758
+# test2:
+#   labels = [-1, -1, -1, 1, 1, 1]
+#   predictions = [-1, -0.6, -0.4, -0.52, 0.6, 1]
+#   logloss = 0.371679733701
+
+def logloss(predictions, labels, lo = -1, hi = 1):
     if len(predictions) != len(labels):
         raise RuntimeError('logloss: lengths of arrays differ: predictions: %d, labels: %d'.format(len(predictions), len(labels)))
 
@@ -60,6 +69,11 @@ def logloss(predictions, labels):
 
     p = np.array(predictions)
     y = np.array(labels)
+
+
+    # Squash values to [0,1]
+    p = (p-lo)/(hi-lo)
+    y = (y-lo)/(hi-lo)
 
     # avoid NaN and Inf
     eps = 1e-15
