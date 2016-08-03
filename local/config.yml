@@ -2,4 +2,5 @@
 
 # Experiments to run
 experiments: ['local/experiments/rnn_alogp_cont.yml',
-              'local/experiments/rnn_alogp_bin.yml']
+              'local/experiments/rnn_alogp_bin.yml',
+              'local/experiments/rnn_alogp_cont_nobin.yml']
