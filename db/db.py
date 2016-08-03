@@ -1,16 +1,20 @@
 from config import config as cc
-import mysql.connector
+import psycopg2
 import pandas as pd
 import numpy
 
 
 def getCon():
-    con = mysql.connector.connect(
-        user = cc.cfg['db']['user'],
-        password = cc.cfg['db']['pass'],
-        host = cc.cfg['db']['host'],
-        database= cc.cfg['db']['name'])
+    try:
+        con = psycopg2.connect(
+            user = cc.cfg['db']['user'],
+            password = cc.cfg['db']['pass'],
+            host = cc.cfg['db']['host'],
+            database= cc.cfg['db']['name'])
+    except:
+        print 'Unable to connect'
     return con
+
 
 def getData():
     print('Downloading data...')

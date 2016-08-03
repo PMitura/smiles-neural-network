@@ -2,14 +2,14 @@
 
 # Database
 db:
-  user: 'guest'
-  pass: 'relational'
-  host: 'relational.fit.cvut.cz'
-  name: 'ctu_qsar'
+  user: 'postgres'
+  pass: 'samurai'
+  host: '192.168.201.207'
+  name: 'chembl_21'
 
 # Statistics
 statistics:
-  table: 'journal'
+  table: 'output.journal'
 
 # Plots
 plots:

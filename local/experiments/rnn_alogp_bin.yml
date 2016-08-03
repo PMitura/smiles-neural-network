@@ -6,7 +6,7 @@ template: 'rnn.yml'
 
 # DB fetch params
 fetch:
-  table: 'target_molweight'
+  table: 'output.target_molweight'
   cols: ['canonical_smiles',
   'alogp',
   'is_testing']
@@ -31,11 +31,14 @@ params:
     epochs: 150
 
     classify: true            # regression if false
-    label_binning: false
-    label_binning_after_train: true
+    label_binning: true
+    label_binning_after_train: false
     label_binning_ratio: 0.5
 
+    zscore_norm: false
+    logarithm: false
     chained_models: false
+
     # learning rate decay settings
     learning_rate_decay: false
 
@@ -46,4 +49,4 @@ params:
     label_idxs: '[0]'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[TEST] auc test'
+    comment: '[FULL CONFIG] multi-seed test with binary labels only'
