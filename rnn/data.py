@@ -107,7 +107,7 @@ def formatSMILESEmbedded(rawData, col):
     for itemIdx,item in enumerate(rawData):
         for charIdx,char in enumerate(item[col]):
             char = char if char in SMILES_ALPHABET_LOOKUP_TABLE else SMILES_ALPHABET_UNKNOWN
-            output[itemIdx][charCtr] = SMILES_ALPHABET_LOOKUP_TABLE[char]
+            output[itemIdx][charIdx] = SMILES_ALPHABET_LOOKUP_TABLE[char]
         for i in range(len(item[col]), maxLen):
             output[itemIdx][i] = SMILES_ALPHABET_LOOKUP_TABLE[SMILES_ALPHABET_UNKNOWN]
 
@@ -307,18 +307,20 @@ def prepareData(source = 'chembl', table = ''):
         nomiSize = 0
         alphaSize, timesteps, formattedWords = formatSMILESEmbedded(data, 0)
 
+
         # Shift defines offset inside of integer, used for coding multiple
         # small numeric values as one variable (needed in embedding)
-        shift = int(log(alphaSize, 2) + 1)
+        shift = SMILES_ALPHABET_BITS
         if RD['extra_nominals'] > 0:
             n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
                     1, shift)
+
             shift += int(log(n, 2) + 1)
             nomiSize += n
-            n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
-                    2, shift)
-            shift += int(log(n, 2) + 1)
-            nomiSize += n
+            #n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
+            #        2, shift)
+            #shift += int(log(n, 2) + 1)
+            #nomiSize += n
 
     # put labels into array
     labels = []

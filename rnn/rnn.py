@@ -88,6 +88,7 @@ def train(model, nnInput, labels, validation, makePlot = True,
         labelIndexes = RP['label_idxs']):
     print('  Training model...')
 
+
     # needed format is orthogonal to ours
     formattedLabels = np.zeros((len(labels[0]), len(labelIndexes)))
     formattedValid = np.zeros((len(validation[1][labelIndexes[0]]),
@@ -562,6 +563,7 @@ def run(grid = None):
     np.random.seed(RP['seed'])
 
     fullIn, labels, alphaSize, nomiSize, testFlags = data.prepareData()
+
     trainIn, trainLabel, testIn, testLabel = preprocess(fullIn, labels, testFlags)
 
     if not RP['chained_models']:
