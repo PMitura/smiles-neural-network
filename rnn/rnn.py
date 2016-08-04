@@ -53,7 +53,7 @@ def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(RP['label_idxs'
             input_shape = (None, alphaSize + nomiSize)))
 
     model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable =
-            RP['trainable_inner'], stateful = True, batch_input_shape=(int(RP['gru_layer_multiplier'] * alphaSize, 111 ,RP['batch']) ))
+            RP['trainable_inner'] ))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
     model.add(Dense(outputLen))
 
