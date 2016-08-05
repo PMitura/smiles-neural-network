@@ -296,10 +296,11 @@ def prepareData(source = 'chembl', table = ''):
         # Nominal data columns
         nomiSize = 0
         if RD['extra_nominals'] > 0:
-            n, formattedNominals = formatNominal(data, timesteps, 1)
-            formattedWords = np.concatenate((formattedWords, formattedNominals),
-                    axis = 2)
-            nomiSize += n
+            for i in range(RD['extra_nominals']):
+                n, formattedNominals = formatNominal(data, timesteps, 1+i)
+                formattedWords = np.concatenate((formattedWords, formattedNominals),
+                        axis = 2)
+                nomiSize += n
             #n, formattedNominals = formatNominal(data, timesteps, 2)
             #formattedWords = np.concatenate((formattedWords, formattedNominals),
             #        axis = 2)
@@ -313,15 +314,18 @@ def prepareData(source = 'chembl', table = ''):
         # small numeric values as one variable (needed in embedding)
         shift = SMILES_ALPHABET_BITS
         if RD['extra_nominals'] > 0:
-            n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
-                    1, shift)
+            for i in range(RD['extra_nominals']):
+                n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
+                        1+i, shift)
 
-            shift += int(log(n, 2) + 1)
-            nomiSize += n
+                shift += int(log(n, 2) + 1)
+                nomiSize += n
             #n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
             #        2, shift)
             #shift += int(log(n, 2) + 1)
             #nomiSize += n
+
+
 
     # put labels into array
     labels = []

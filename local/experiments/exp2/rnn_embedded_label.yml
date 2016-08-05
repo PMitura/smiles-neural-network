@@ -8,12 +8,12 @@ template: 'rnn.yml'
 fetch:
   table: 'output.target_protein_big_cleaned_deduplicated'
   cols: ['canonical_smiles',
-  'standard_type',
+  'standard_type','protein_accession',
   'standard_value_log_median_centered',
   'is_testing_50']
   order: 'canonical_smiles'
   index_col: ~
-  limit: 2000
+  limit: 20000
   where: ~ #'protein_accession="P03372"'
 
 # Experiment params
@@ -21,7 +21,7 @@ params:
   data:
     # number of label columns to prepare
     input_count: 1
-    extra_nominals: 1
+    extra_nominals: 2
     label_count: 1
     use_test_flags: true
     # for statistics sending
