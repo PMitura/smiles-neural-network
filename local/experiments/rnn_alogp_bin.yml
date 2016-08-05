@@ -26,7 +26,6 @@ params:
     # for statistics sending
     labels: ['alogp']
     testing: 'is_testing'
-    activation_after_hru: 'tanh' 
   rnn:
     # RNN parameters
     learning_rate: 0.001
@@ -40,6 +39,7 @@ params:
     label_binning: true
     label_binning_after_train: false
     label_binning_ratio: 0.5
+    activation_after_gru: 'sigmoid' 
 
     zscore_norm: false
     logarithm: false
