@@ -1,6 +1,7 @@
 import yaml
 import os
 import collections
+import sys
 
 cfg = { }
 
@@ -34,12 +35,10 @@ def loadExperiment(experimentPath):
     global exp
 
     exp = { }
-    try:
-        expObj = loadYAML(experimentPath)
 
-        if 'template' in expObj and expObj['template']:
-            exp = loadYAML(os.path.dirname(__file__)+'/templates/'+expObj['template'])
+    expObj = loadYAML(experimentPath)
 
-        update(exp, expObj)
-    except:
-        raise IOError('Config: error loading config from path: {}'.format(experimentPath))
+    if 'template' in expObj and expObj['template']:
+        exp = loadYAML(os.path.dirname(__file__)+'/templates/'+expObj['template'])
+
+    update(exp, expObj)

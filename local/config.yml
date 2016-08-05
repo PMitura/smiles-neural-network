@@ -1,4 +1,4 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/exp2/rnn_embedded_label.yml']
+experiments: ['local/experiments/exp2/rnn_embedded_multitask.yml']
