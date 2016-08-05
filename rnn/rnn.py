@@ -506,7 +506,6 @@ def modelOnLabels(trainIn, trainLabel, testIn, testLabel, alphaSize, nomiSize,
                 weights[11][i][j] = 0.1
         model.set_weights(weights)
     elif weights != None:
-        # preserve randomized weights
         oriW = model.get_weights()
         weights[11] = oriW[11]
         model.set_weights(weights)
@@ -551,6 +550,7 @@ def preprocess(fullIn, labels, testFlags):
         trainIn, trainLabel, testIn, testLabel = data.holdout(RP['holdout_ratio'],
                 fullIn, labels)
 
+    print len(testLabel[0])
 
     return trainIn, trainLabel, testIn, testLabel
 

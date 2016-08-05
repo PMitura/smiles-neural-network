@@ -195,7 +195,7 @@ def holdoutBased(testFlags, words, label):
     for i in range(len(testFlags)):
         if testFlags[i] == 1:
             testSize += 1
-        elif testFlags[i] == 0:
+        elif testFlags[i] == 0 or pd.isnull(testFlags[i]):
             trainSize += 1
         elif not pd.isnull(testFlags[i]): # pandas treats Nones as NaNs
             raise ValueError("Unknown value in test flags: {}".format(testFlags[i]))
@@ -221,7 +221,7 @@ def holdoutBased(testFlags, words, label):
             for j in range(len(label)):
                 testLabel[j][testIdx] = label[j][i]
             testIdx += 1
-        elif testFlags[i] == 0:
+        elif testFlags[i] == 0 or pd.isnull(testFlags[i]):
             trainWords[trainIdx] = words[i]
             for j in range(len(label)):
                 trainLabel[j][trainIdx] = label[j][i]
@@ -245,6 +245,8 @@ def zScoreNormalize(array):
     avg = utility.mean(array, len(array))
     dev = utility.stddev(array, len(array))
     for i in range(len(array)):
+        if pd.isnull(array[i]):
+            raise ValueError('Cannot normalize \"None\" value')
         normalized[i] = (array[i] - avg) / dev
         # print "Original ", array[i]
         # print "Normalized ", normalized[i]
