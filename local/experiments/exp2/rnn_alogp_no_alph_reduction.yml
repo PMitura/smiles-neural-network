@@ -1,14 +1,14 @@
-# Experiment rnn_alogp_no_alph_reduction
-name: 'rnn_alogp_no_alph_reduction'
+# Experiment rnn_slogp_no_alph_reduction
+name: 'rnn_slogp_no_alph_reduction'
 
 # Template for default values
 template: 'rnn.yml'
 
 # DB fetch params
 fetch:
-  table: 'output.target_molweight'
+  table: 'output.target_molweight_features_wide'
   cols: ['canonical_smiles',
-  'alogp',
+  'SlogP_VSA10',
   'is_testing']
   order: 'canonical_smiles'
   index_col: ~
@@ -24,7 +24,7 @@ params:
     label_count: 1
     use_test_flags: true
     # for statistics sending
-    labels: ['alogp']
+    labels: ['SlogP_VSA10']
     testing: 'is_testing'
   rnn:
     # RNN parameters
@@ -50,4 +50,4 @@ params:
     label_idxs: '[0]'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[EXP2][ALOGP][NO_ALPH] input dimensionality reduction - no reduction'
+    comment: '[EXP2][SLOGP][NO_ALPH] input dimensionality reduction - no reduction'
