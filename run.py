@@ -26,11 +26,13 @@ def main(argv):
         print(cc.cfg,cc.exp)
 
         # loss function grid search
-        lossFns = ['mse', 'mae', 'mape', 'msle', 'squared_hinge', 'hinge',
-                'binary_crossentropy']
+        lossFns = ['mse', 'mae', 'mape', 'msle', 'squared_hinge', 'hinge', 'binary_crossentropy']
+        objs = ['relu', 'hard_sigmoid', 'tanh']
         for fn in lossFns:
-            rnn.rnn.RP['objective'] = fn
-            rnn.rnn.run()
+            for obj in objs:
+                rnn.rnn.RP['objective'] = fn
+                rnn.rnn.RP['classify_activation'] = obj
+                rnn.rnn.run()
         # rnn.rnn.run()
 
 

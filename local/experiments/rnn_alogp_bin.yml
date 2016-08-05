@@ -32,14 +32,15 @@ params:
     epochs: 150
 
     classify: true            # regression if false
-    classify_threshold: 0
+    classify_threshold: 0.5
     classify_label_pos: 1
-    classify_label_neg: -1
+    classify_label_neg: 0
+    classify_activation: 'tanh'
 
     label_binning: true
     label_binning_after_train: false
     label_binning_ratio: 0.5
-    activation_after_gru: 'sigmoid' 
+    activation_after_gru: 'tanh' 
 
     zscore_norm: false
     logarithm: false
@@ -55,4 +56,4 @@ params:
     label_idxs: '[0]'      # indexes of columns to use as label
 
     # statistics settings
-    comment: 'Testing classification with various objectives'
+    comment: 'Activation vs objective grid'

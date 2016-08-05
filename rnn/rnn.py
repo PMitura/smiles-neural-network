@@ -299,10 +299,10 @@ def classify(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
             if pre[i] < RP['classify_threshold'] and utility.equals(label[i],
                     RP['classify_label_pos']):
                 falseNegative += 1
-            elif pre[i] > RP['classify_threshold'] and utility.equals(label[i],
+            elif pre[i] >= RP['classify_threshold'] and utility.equals(label[i],
                     RP['classify_label_neg']):
                 falsePositive += 1
-            elif pre[i] > RP['classify_threshold'] and utility.equals(label[i],
+            elif pre[i] >= RP['classify_threshold'] and utility.equals(label[i],
                     RP['classify_label_pos']):
                 truePositive += 1
             elif pre[i] < RP['classify_threshold'] and utility.equals(label[i],
@@ -420,10 +420,10 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
                 if pre[j] < RP['classify_threshold'] and utility.equals(label[j],
                         RP['classify_label_pos']):
                     falseNegative += 1
-                elif pre[j] > RP['classify_threshold'] and utility.equals(label[j],
+                elif pre[j] >= RP['classify_threshold'] and utility.equals(label[j],
                         RP['classify_label_neg']):
                     falsePositive += 1
-                elif pre[j] > RP['classify_threshold'] and utility.equals(label[j],
+                elif pre[j] >= RP['classify_threshold'] and utility.equals(label[j],
                         RP['classify_label_pos']):
                     truePositive += 1
                 elif pre[j] < RP['classify_threshold'] and utility.equals(label[j],
