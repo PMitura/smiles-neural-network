@@ -125,9 +125,10 @@ def formatNominalEmbedded(rawData, timesteps, output, col, shift = 0):
     for item in rawData:
         nominals.add(item[col])
 
+
     # Map columns to nominals
     colMapping = {}
-    size = 1
+    size = 0
     for value in nominals:
         colMapping[value] = size
         size += 1
