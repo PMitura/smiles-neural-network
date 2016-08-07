@@ -5,14 +5,14 @@ import numpy
 
 
 def getCon():
-    try:
-        con = psycopg2.connect(
+    # try:
+    con = psycopg2.connect(
             user = cc.cfg['db']['user'],
             password = cc.cfg['db']['pass'],
             host = cc.cfg['db']['host'],
             database= cc.cfg['db']['name'])
-    except:
-        print 'Unable to connect'
+    # except:
+        # print 'Unable to connect'
     return con
 
 

@@ -7,6 +7,8 @@ from scipy.stats.stats import pearsonr
 from sklearn.metrics import roc_auc_score
 
 import db.db as db
+import visualization
+
 from config import config as cc
 import yaml
 
@@ -104,8 +106,10 @@ def train(model, nnInput, labels, validation, makePlot = True,
 
     learningRateScheduler = keras.callbacks.LearningRateScheduler(learningRateDecayer)
 
+    modelLogger = visualization.ModelLogger()
+
     history = model.fit(nnInput, formattedLabels, nb_epoch = RP['epochs'],
-            batch_size = RP['batch'], callbacks = [early,learningRateScheduler],
+            batch_size = RP['batch'], callbacks = [early,learningRateScheduler,modelLogger],
             validation_data = (validation[0], formattedValid))
 
     if makePlot:
@@ -114,6 +118,9 @@ def train(model, nnInput, labels, validation, makePlot = True,
             values[i][0] = history.history['loss'][i]
             values[i][1] = history.history['val_loss'][i]
         utility.plotLoss(values)
+
+
+    visualization.weightHistogram(modelLogger)
 
     print('    Model weights:')
     print(model.summary())
