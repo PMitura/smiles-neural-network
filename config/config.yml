@@ -15,5 +15,7 @@ statistics:
 # Plots
 plots:
   dir: 'local/plots'
+  weight_histograms: 'local/plots/weight_hists'
+  update_histograms: 'local/plots/update_hists'
 
 experiments: ~

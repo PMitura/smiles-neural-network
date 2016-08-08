@@ -120,7 +120,8 @@ def train(model, nnInput, labels, validation, makePlot = True,
         utility.plotLoss(values)
 
 
-    visualization.weightHistogram(modelLogger)
+    visualization.weightsHistogram(modelLogger)
+    visualization.updatesHistogram(modelLogger)
 
     print('    Model weights:')
     print(model.summary())
