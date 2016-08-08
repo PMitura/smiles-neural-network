@@ -30,6 +30,7 @@ params:
     chained_models: ~
     chained_labels: ~
     chained_predict: ~
+    chained_test_labels: ~
     freeze_idxs: ~
     trainable_inner: true
 

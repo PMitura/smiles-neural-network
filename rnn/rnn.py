@@ -30,6 +30,7 @@ RD = cc.exp['params']['data']
 # manual eval where needed
 RP['chained_labels'] = eval(str(cc.exp['params']['rnn']['chained_labels']))
 RP['chained_predict'] = eval(str(cc.exp['params']['rnn']['chained_predict']))
+RP['chained_test_labels'] = eval(str(cc.exp['params']['rnn']['chained_test_labels']))
 RP['freeze_idxs'] = eval(str(cc.exp['params']['rnn']['freeze_idxs']))
 RP['label_idxs'] = eval(str(cc.exp['params']['rnn']['label_idxs']))
 
@@ -550,8 +551,6 @@ def preprocess(fullIn, labels, testFlags):
         trainIn, trainLabel, testIn, testLabel = data.holdout(RP['holdout_ratio'],
                 fullIn, labels)
 
-    print len(testLabel[0])
-
     return trainIn, trainLabel, testIn, testLabel
 
 
@@ -607,10 +606,13 @@ def run(grid = None):
             else:
                 relevanceTest = predict(model, testIn, testLabel)
     else:
+        model = None
         for idx in range(len(RP['chained_labels'])):
             if idx in RP['freeze_idxs']:
                 print '    Freezing inner layers.'
                 RP['trainable_inner'] = False
+            else:
+                RP['trainable_inner'] = True
 
             if idx == 0:
                 model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
@@ -635,8 +637,9 @@ def run(grid = None):
             print("\n  Prediction of testing data:")
             if RP['classify']:
                 if RP['use_partitions']:
-                    relevanceTest, stdTest, loglossTest, loglossStdTest, aucTest, aucStdTest = classifySplit(model, testIn, testLabel,
-                        labelIndexes = RP['chained_labels'][idx])
+                    relevanceTest, stdTest, loglossTest, loglossStdTest, \
+                        aucTest, aucStdTest = classifySplit(model, \
+                        testIn, testLabel, labelIndexes = RP['chained_labels'][idx])
                 else:
                     relevanceTest = classify(model, testIn, testLabel, labelIndexes
                         = RP['chained_labels'][idx])
@@ -647,6 +650,42 @@ def run(grid = None):
                 else:
                     relevanceTest = predict(model, testIn, testLabel, labelIndexes
                         = RP['chained_labels'][idx])
+
+        # Permafreeze for last training. Not sure if good idea.
+        RP['trainable_inner'] = False
+
+        # Train and test on split testing data
+        nTrainIn, nTrainLabel, nTestIn, nTestLabel = data.holdout(RP['holdout_ratio'],
+                testIn, testLabel)
+        for idxes in RP['chained_test_labels']:
+            model, epochsDone = modelOnLabels(nTrainIn, nTrainLabel, nTestIn,
+                nTestLabel, alphaSize, nomiSize, idxes,
+                model.get_weights())
+
+            print("\n  Prediction of training data:")
+            if RP['classify']:
+                relevanceTrain = classify(model, nTrainIn, nTrainLabel,
+                        labelIndexes = idxes)
+            else:
+                relevanceTrain = predict(model, nTrainIn, nTrainLabel,
+                        labelIndexes = idxes)
+
+            print("\n  Prediction of testing data:")
+            if RP['classify']:
+                if RP['use_partitions']:
+                    relevanceTest, stdTest, loglossTest, loglossStdTest, \
+                        aucTest, aucStdTest = classifySplit(model, nTestIn, \
+                        nTestLabel, labelIndexes = idxes)
+                else:
+                    relevanceTest = classify(model, nTestIn, nTestLabel,
+                        labelIndexes = idxes)
+            else:
+                if RP['use_partitions']:
+                    relevanceTest, stdTest = predictSplit(model, nTestIn,
+                        nTestLabel, labelIndexes = idxes)
+                else:
+                    relevanceTest = predict(model, nTestIn, nTestLabel,
+                        labelIndexes = idxes)
 
         if RP['scatter_visualize']:
             utility.visualize2D(model, 1, testIn,
