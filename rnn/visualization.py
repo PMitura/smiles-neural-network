@@ -6,6 +6,7 @@ import collections
 
 from config import config as cc
 import os
+from math import ceil
 
 def flatten(x):
     if isinstance(x, collections.Iterable):
@@ -70,12 +71,16 @@ class ModelLogger(keras.callbacks.Callback):
 
         # compute updates
         self.epochLogs[0]['updates'] = []
+        self.epochLogs[0]['ratios'] = []
         for i in range(1,len(self.epochLogs)):
             newUpdates = []
+            newRatios = []
             for x in range(len(self.epochLogs[i]['weights'])):
                 newUpdates.append(self.epochLogs[i-1]['weights'][x] - self.epochLogs[i]['weights'][x])
+                newRatios.append(newUpdates[-1] / self.epochLogs[i]['weights'][x])
 
             self.epochLogs[i]['updates'] = np.array(newUpdates)
+            self.epochLogs[i]['ratios'] = np.array(newRatios)
 
     def getWeights(self):
         weights = []
@@ -86,50 +91,40 @@ class ModelLogger(keras.callbacks.Callback):
         return weights
 
 
-def weightsHistogram(modelLogger):
-
-    if not os.path.exists(cc.cfg['plots']['weight_histograms']):
-        os.makedirs(cc.cfg['plots']['weight_histograms'])
+def histograms(modelLogger):
+    if not os.path.exists(cc.cfg['plots']['histograms']):
+        os.makedirs(cc.cfg['plots']['histograms'])
 
     cntEpochs = len(modelLogger.epochLogs)
     cntLayers = len(modelLogger.epochLogs[-1]['weights'])
 
+    logVals = [
+        {'name':'weights','color':'blue'},
+        {'name':'updates','color':'red'},
+        {'name':'ratios','color':'green'}
+    ]
+
+    subplotRows = len(logVals)
+    subplotCols = cntLayers
+
     for x in range(cntEpochs):
-        plt.figure()
-        plt.suptitle('Weights histogram per layer, epoch {}/{}'.format(x,cntEpochs-1), fontsize=14)
-        for i,layerWeights in enumerate(modelLogger.epochLogs[x]['weights']):
-            histmin = layerWeights.min()
-            histmax = layerWeights.max()
+        subplotIdx = 1
 
-            plt.subplot(2, cntLayers/2, i+1)
-            plt.title(modelLogger.model.layers[modelLogger.loggedLayers[i]].name)
-            plt.hist(layerWeights, range = (histmin, histmax), bins = 30, color = 'blue')
+        plt.figure(figsize=(5*subplotCols,5*subplotRows))
+        plt.suptitle('Histograms per layer, epoch {}/{}'.format(x,cntEpochs-1), fontsize=14)
+
+        for logVal in logVals:
+            for i,layer in enumerate(modelLogger.epochLogs[x][logVal['name']]):
+                histmin = layer.min()
+                histmax = layer.max()
+
+                plt.subplot(subplotRows, subplotCols, subplotIdx)
+                plt.title('{}, {}'.format(modelLogger.model.layers[modelLogger.loggedLayers[i]].name,logVal['name']))
+                plt.hist(layer, range = (histmin, histmax), bins = 30, color = logVal['color'])
+
+                subplotIdx+=1
+
         plt.tight_layout()
         plt.subplots_adjust(top=0.9)
-        plt.savefig('{}/weight_hist_{e:03d}.png'.format(cc.cfg['plots']['weight_histograms'], e = x))
+        plt.savefig('{}/hist_{e:03d}.png'.format(cc.cfg['plots']['histograms'], e = x))
         plt.close()
-
-
-def updatesHistogram(modelLogger):
-
-    if not os.path.exists(cc.cfg['plots']['update_histograms']):
-        os.makedirs(cc.cfg['plots']['update_histograms'])
-
-    cntEpochs = len(modelLogger.epochLogs)
-    cntLayers = len(modelLogger.epochLogs[-1]['updates'])
-
-    for x in range(1,cntEpochs):
-        plt.figure()
-        plt.suptitle('Updates histogram per layer, epoch {}/{}'.format(x,cntEpochs-1), fontsize=14)
-        for i,layerUpdates in enumerate(modelLogger.epochLogs[x]['updates']):
-            histmin = layerUpdates.min()
-            histmax = layerUpdates.max()
-
-            plt.subplot(2, cntLayers/2, i+1)
-            plt.title(modelLogger.model.layers[modelLogger.loggedLayers[i]].name)
-            plt.hist(layerUpdates, range = (histmin, histmax), bins = 30, color = 'red')
-        plt.tight_layout()
-        plt.subplots_adjust(top=0.9)
-        plt.savefig('{}/weight_hist_{e:03d}.png'.format(cc.cfg['plots']['update_histograms'], e = x))
-        plt.close()
-

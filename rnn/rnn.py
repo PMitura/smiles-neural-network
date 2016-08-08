@@ -119,9 +119,7 @@ def train(model, nnInput, labels, validation, makePlot = True,
             values[i][1] = history.history['val_loss'][i]
         utility.plotLoss(values)
 
-
-    visualization.weightsHistogram(modelLogger)
-    visualization.updatesHistogram(modelLogger)
+    visualization.histograms(modelLogger)
 
     print('    Model weights:')
     print(model.summary())
