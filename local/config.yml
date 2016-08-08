@@ -2,8 +2,3 @@
 
 # Experiments to run
 experiments: ['local/experiments/exp2/rnn_alogp_embedding.yml']
-
-db:
-  user: 'postgres'
-  pass: 'samurai'
-  host: 'kessl.net'
