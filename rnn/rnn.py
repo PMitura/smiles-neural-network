@@ -660,7 +660,7 @@ def run(grid = None):
         for idxes in RP['chained_test_labels']:
             model, epochsDone = modelOnLabels(nTrainIn, nTrainLabel, nTestIn,
                 nTestLabel, alphaSize, nomiSize, idxes,
-                model.get_weights())
+                model.get_weights(), uniOutput = True)
 
             print("\n  Prediction of training data:")
             if RP['classify']:
