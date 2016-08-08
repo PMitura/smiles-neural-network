@@ -36,9 +36,9 @@ params:
     early_stop: 20
 
     chained_models: true
-    # chained_labels: '[range(1, 4) * 8, range(4, 8) * 6, range(8, 14) * 4, 
-    # range(14, 22) * 3, range(22, 46)]'
-    chained_labels: '[range(1, 4) * 8]'
+    chained_labels: '[range(1, 4) * 8, range(4, 8) * 6, range(8, 14) * 4, 
+        range(14, 22) * 3, range(22, 46)]'
+    # chained_labels: '[range(1, 4) * 8]'
     chained_test_labels: '[[0] * 24]'
     chained_predict: '[0]'
     freeze_idxs: 'set()'
