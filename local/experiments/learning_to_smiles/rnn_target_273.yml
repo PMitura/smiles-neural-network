@@ -34,7 +34,7 @@ params:
     objective: 'binary_crossentropy'
     classify_label_pos: 1
     classify_label_neg: 0
-    classify_activation: 'sigmoid'
+    classify_activation: 'hard_sigmoid'
 
     classify: true            # regression if false
     label_binning: false
