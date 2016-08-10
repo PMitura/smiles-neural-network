@@ -572,6 +572,10 @@ def run(grid = None):
 
     trainIn, trainLabel, testIn, testLabel = preprocess(fullIn, labels, testFlags)
 
+
+    for l in testLabel:
+        print(l)
+
     if not RP['chained_models']:
         model = configureModel(alphaSize, nomiSize)
         epochsDone = train(model, trainIn, trainLabel, (testIn, testLabel))
