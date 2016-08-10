@@ -31,6 +31,9 @@ params:
     learning_rate: 0.003
     epochs: 150
 
+    td_layer_multiplier: 0.25   # time-distributed layer modifier of neuron count
+    gru_layer_multiplier: 0.5
+
     objective: 'binary_crossentropy'
     classify_label_pos: 1
     classify_label_neg: 0
