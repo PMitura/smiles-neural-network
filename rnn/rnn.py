@@ -52,14 +52,14 @@ def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(RP['label_idxs'
         model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * (alphaSize +
             nomiSize[0])), activation = 'tanh', trainable = RP['trainable_inner'])))
     else:
-        model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * (alphaSize+nomiSize)), activation = 'tanh', init='uniform', trainable = RP['trainable_inner']),
+        model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * (alphaSize+nomiSize)), activation = 'tanh', init='glorot_normal', trainable = RP['trainable_inner']),
             input_shape = (None, alphaSize + nomiSize)))
 
 
     # model.add(GRU(int(RP['gru_layer_multiplier'] * 300), trainable = RP['trainable_inner'], return_sequences = True ))
-    model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'] , init='uniform'))
+    model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'] , init='uniform', inner_init='uniform'))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
-    model.add(Dense(outputLen,init='uniform') )
+    model.add(Dense(outputLen,init='glorot_normal') )
 
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
