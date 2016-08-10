@@ -1,7 +1,7 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/learning_to_smiles/rnn_target_273.yml']
+experiments: ['local/experiments/learning_to_smiles/rnn_class_debug.yml']
 
 plots:
   histograms: false
