@@ -25,19 +25,19 @@ params:
     testing: 'is_testing'
   rnn:
     # RNN parameters
-    learning_rate: 0.01
-    epochs: 40
+    learning_rate: 0.001
+    epochs: 150
 
     classify: false            # regression if false
     label_binning: false
     label_binning_after_train: false
     label_binning_ratio: 0.5
-    early_stop: 5
+    early_stop: 20
 
     chained_models: true
     chained_labels: '[range(1,54), [0] * 53]'
     # chained_labels: '[range(1, 4) * 8]'
-    chained_test_labels: '[[0] * 53]'
+    # chained_test_labels: '[[0] * 53]'
     chained_predict: '[0]'
     freeze_idxs: 'set()'
     trainable_inner: true
