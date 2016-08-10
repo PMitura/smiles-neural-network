@@ -1,4 +1,4 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/test/rnn_test.yml']
+experiments: ['local/experiments/test/rnn_test2.yml']

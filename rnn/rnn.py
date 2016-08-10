@@ -661,7 +661,7 @@ def run(grid = None):
                         = RP['chained_labels'][idx])
 
         # Permafreeze for last training. Not sure if good idea.
-        '''RP['trainable_inner'] = False
+        RP['trainable_inner'] = False
 
         # Train and test on split testing data
         nTrainIn, nTrainLabel, nTestIn, nTestLabel = data.holdout(RP['holdout_ratio'],
@@ -695,7 +695,7 @@ def run(grid = None):
                 else:
                     relevanceTest = predict(model, nTestIn, nTestLabel,
                         labelIndexes = idxes)
-        '''
+
         if RP['scatter_visualize']:
             utility.visualize2D(model, 1, testIn,
                     testLabel[RP['chained_predict'][0]])
