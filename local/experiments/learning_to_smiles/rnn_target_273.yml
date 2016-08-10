@@ -12,7 +12,7 @@ fetch:
   'is_testing']
   order: 'canonical_smiles'
   index_col: ~
-  limit: 20
+  limit: ~ # 20
   where: ~ #'is_testing IS NOT NULL'
 
 # Experiment params
