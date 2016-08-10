@@ -15,6 +15,7 @@ statistics:
 # Plots
 plots:
   dir: 'local/plots'
-  histograms: 'local/plots/hists'
+  histograms_dir: 'local/plots/hists'
+  histograms: false
 
 experiments: ~

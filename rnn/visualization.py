@@ -92,8 +92,11 @@ class ModelLogger(keras.callbacks.Callback):
 
 
 def histograms(modelLogger):
-    if not os.path.exists(cc.cfg['plots']['histograms']):
-        os.makedirs(cc.cfg['plots']['histograms'])
+    if not cc.cfg['plots']['histograms']:
+        return
+
+    if not os.path.exists(cc.cfg['plots']['histograms_dir']):
+        os.makedirs(cc.cfg['plots']['histograms_dir'])
 
     cntEpochs = len(modelLogger.epochLogs)
     cntLayers = len(modelLogger.epochLogs[-1]['weights'])
@@ -126,5 +129,5 @@ def histograms(modelLogger):
 
         plt.tight_layout()
         plt.subplots_adjust(top=0.9)
-        plt.savefig('{}/hist_{e:03d}.png'.format(cc.cfg['plots']['histograms'], e = x))
+        plt.savefig('{}/hist_{e:03d}.png'.format(cc.cfg['plots']['histograms_dir'], e = x))
         plt.close()
