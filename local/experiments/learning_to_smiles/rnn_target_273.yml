@@ -34,10 +34,10 @@ params:
     td_layer_multiplier: 0.25   # time-distributed layer modifier of neuron count
     gru_layer_multiplier: 0.5
 
-    objective: 'binary_crossentropy'
-    classify_label_pos: 1
-    classify_label_neg: 0
-    classify_activation: 'hard_sigmoid'
+    # objective: 'binary_crossentropy'
+    # classify_label_pos: 1
+    # classify_label_neg: 0
+    # classify_activation: 'hard_sigmoid'
 
     classify: true            # regression if false
     label_binning: false
