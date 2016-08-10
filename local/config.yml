@@ -1,4 +1,16 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/exp2/rnn_alogp_embedding.yml']
+experiments: ['local/experiments/test/rnn_test.yml']
+
+# Database
+db:
+  user: 'guest'
+  pass: 'relational'
+  host: 'relational.fit.cvut.cz'
+  name: 'ctu_qsar'
+  driver: 'mysql'
+
+# Statistics
+statistics:
+  table: 'journal'
