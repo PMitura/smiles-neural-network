@@ -28,10 +28,11 @@ SMILES_ALPHABET_BITS = int(ceil(log(SMILES_ALPHABET_LEN,2)))
 def formatSMILES(rawData, col):
     print('  Formatting SMILES data column...')
 
+
     maxLen = 0
     for item in rawData:
         if RD['use_test_flags']:
-            tStat = item[RD['label_count'] + RD['input_count']]
+            tStat = item[RD['label_count'] + RD['input_count'] + RD['extra_nominals']]
             if not (tStat == 0 or tStat == 1):
                 continue
         maxLen = max(maxLen, len(item[col]))
@@ -106,7 +107,7 @@ def formatSMILESEmbedded(rawData, col):
     for itemIdx,item in enumerate(rawData):
         for charIdx,char in enumerate(item[col]):
             char = char if char in SMILES_ALPHABET_LOOKUP_TABLE else SMILES_ALPHABET_UNKNOWN
-            output[itemIdx][charCtr] = SMILES_ALPHABET_LOOKUP_TABLE[char]
+            output[itemIdx][charIdx] = SMILES_ALPHABET_LOOKUP_TABLE[char]
         for i in range(len(item[col]), maxLen):
             output[itemIdx][i] = SMILES_ALPHABET_LOOKUP_TABLE[SMILES_ALPHABET_UNKNOWN]
 
@@ -124,9 +125,10 @@ def formatNominalEmbedded(rawData, timesteps, output, col, shift = 0):
     for item in rawData:
         nominals.add(item[col])
 
+
     # Map columns to nominals
     colMapping = {}
-    size = 1
+    size = 0
     for value in nominals:
         colMapping[value] = size
         size += 1
@@ -296,30 +298,36 @@ def prepareData(source = 'chembl', table = ''):
         # Nominal data columns
         nomiSize = 0
         if RD['extra_nominals'] > 0:
-            n, formattedNominals = formatNominal(data, timesteps, 1)
-            formattedWords = np.concatenate((formattedWords, formattedNominals),
-                    axis = 2)
-            nomiSize += n
-            n, formattedNominals = formatNominal(data, timesteps, 2)
-            formattedWords = np.concatenate((formattedWords, formattedNominals),
-                    axis = 2)
-            nomiSize += n
+            for i in range(RD['extra_nominals']):
+                n, formattedNominals = formatNominal(data, timesteps, 1+i)
+                formattedWords = np.concatenate((formattedWords, formattedNominals),
+                        axis = 2)
+                nomiSize += n
+            #n, formattedNominals = formatNominal(data, timesteps, 2)
+            #formattedWords = np.concatenate((formattedWords, formattedNominals),
+            #        axis = 2)
+            #nomiSize += n
     else:
         nomiSize = 0
         alphaSize, timesteps, formattedWords = formatSMILESEmbedded(data, 0)
 
+
         # Shift defines offset inside of integer, used for coding multiple
         # small numeric values as one variable (needed in embedding)
-        shift = int(log(alphaSize, 2) + 1)
+        shift = SMILES_ALPHABET_BITS
         if RD['extra_nominals'] > 0:
-            n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
-                    1, shift)
-            shift += int(log(n, 2) + 1)
-            nomiSize += n
-            n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
-                    2, shift)
-            shift += int(log(n, 2) + 1)
-            nomiSize += n
+            for i in range(RD['extra_nominals']):
+                n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
+                        1+i, shift)
+
+                shift += int(log(n, 2) + 1)
+                nomiSize += n
+            #n, formattedWords = formatNominalEmbedded(data, timesteps, formattedWords,
+            #        2, shift)
+            #shift += int(log(n, 2) + 1)
+            #nomiSize += n
+
+
 
     # put labels into array
     labels = []
@@ -328,7 +336,7 @@ def prepareData(source = 'chembl', table = ''):
     i = 0
     for item in data:
         for labelID in range(RD['label_count']):
-            labels[labelID][i] = item[labelID + RD['input_count']]
+            labels[labelID][i] = item[labelID + RD['input_count'] + RD['extra_nominals']]
         i += 1
     resolveMissingLabels(labels)
 
@@ -336,7 +344,7 @@ def prepareData(source = 'chembl', table = ''):
     testFlags = []
     if RD['use_test_flags']:
         for item in data:
-            testFlags.append(item[RD['label_count'] + RD['input_count']])
+            testFlags.append(item[RD['label_count'] + RD['input_count'] + RD['extra_nominals']])
 
     # include shift value to nomiSize if embedding is used
     if RD['use_embedding']:

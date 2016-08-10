@@ -1,18 +1,27 @@
 from config import config as cc
 import psycopg2
+import mysql.connector
 import pandas as pd
 import numpy
 
 
 def getCon():
-    try:
-        con = psycopg2.connect(
-            user = cc.cfg['db']['user'],
-            password = cc.cfg['db']['pass'],
-            host = cc.cfg['db']['host'],
-            database= cc.cfg['db']['name'])
-    except:
-        print 'Unable to connect'
+
+
+    dbcfg = {
+        'user': cc.cfg['db']['user'],
+        'password': cc.cfg['db']['pass'],
+        'host': cc.cfg['db']['host'],
+        'database': cc.cfg['db']['name']
+    }
+
+    if cc.cfg['db']['driver']=='postgresql':
+        con = psycopg2.connect(**dbcfg)
+    elif cc.cfg['db']['driver']=='mysql':
+        con = mysql.connector.connect(**dbcfg)
+    else:
+        raise Exception('getCon: unknown db driver {}'.format(cc.cfg['db']['driver']))
+
     return con
 
 
@@ -21,9 +30,15 @@ def getData():
 
     con = getCon()
 
-    query = 'SELECT {} FROM {}'.format(
-        ','.join(['"{}"'.format(x) for x in cc.exp['fetch']['cols']]),
-        cc.exp['fetch']['table'])
+    if cc.cfg['db']['driver']=='postgresql':
+        query = 'SELECT {} FROM {}'.format(
+            ','.join(['"{}"'.format(x) for x in cc.exp['fetch']['cols']]),
+            cc.exp['fetch']['table'])
+    else: #mysql
+        query = 'SELECT {} FROM {}'.format(
+            ','.join(['{}'.format(x) for x in cc.exp['fetch']['cols']]),
+            cc.exp['fetch']['table'])
+
 
     if cc.exp['fetch']['where']:
         query += ' WHERE {}'.format(cc.exp['fetch']['where'])

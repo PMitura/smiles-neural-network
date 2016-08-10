@@ -23,16 +23,11 @@ def main(argv):
         import rnn.rnn
         reload(rnn.rnn)
 
-        print(cc.cfg,cc.exp)
+        # optimizer grid search
+        seeds = range(12346, 12346+1)
+        for seed in seeds:
+            rnn.rnn.RP['seed'] = seed
 
-        # loss function grid search
-        """
-        lossFns = ['mse', 'mae', 'mape', 'msle', 'squared_hinge', 'hinge',
-                'binary_crossentropy']
-        for fn in lossFns:
-            rnn.rnn.RP['objective'] = fn
-            rnn.rnn.run()
-        """
         rnn.rnn.run()
 
 

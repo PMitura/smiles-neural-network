@@ -4,7 +4,7 @@
 db:
   user: 'postgres'
   pass: 'samurai'
-  host: '10.203.103.29'
+  host: '147.32.233.145'
   name: 'chembl_21'
   driver: 'postgresql'
 
@@ -15,5 +15,6 @@ statistics:
 # Plots
 plots:
   dir: 'local/plots'
+  histograms: 'local/plots/hists'
 
 experiments: ~

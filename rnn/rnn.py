@@ -7,6 +7,8 @@ from scipy.stats.stats import pearsonr
 from sklearn.metrics import roc_auc_score
 
 import db.db as db
+import visualization
+
 from config import config as cc
 import yaml
 
@@ -53,8 +55,8 @@ def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(RP['label_idxs'
             nomiSize)), activation = 'tanh', trainable = RP['trainable_inner']),
             input_shape = (None, alphaSize + nomiSize)))
 
-    model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable =
-            RP['trainable_inner']))
+    # model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'], return_sequences = True ))
+    model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize*4), trainable = RP['trainable_inner'] ))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
     model.add(Dense(outputLen))
 
@@ -89,6 +91,7 @@ def train(model, nnInput, labels, validation, makePlot = True,
         labelIndexes = RP['label_idxs']):
     print('  Training model...')
 
+
     # needed format is orthogonal to ours
     formattedLabels = np.zeros((len(labels[0]), len(labelIndexes)))
     formattedValid = np.zeros((len(validation[1][labelIndexes[0]]),
@@ -104,8 +107,10 @@ def train(model, nnInput, labels, validation, makePlot = True,
 
     learningRateScheduler = keras.callbacks.LearningRateScheduler(learningRateDecayer)
 
+    modelLogger = visualization.ModelLogger()
+
     history = model.fit(nnInput, formattedLabels, nb_epoch = RP['epochs'],
-            batch_size = RP['batch'], callbacks = [early,learningRateScheduler],
+            batch_size = RP['batch'], callbacks = [early,learningRateScheduler,modelLogger],
             validation_data = (validation[0], formattedValid))
 
     if makePlot:
@@ -114,6 +119,8 @@ def train(model, nnInput, labels, validation, makePlot = True,
             values[i][0] = history.history['loss'][i]
             values[i][1] = history.history['val_loss'][i]
         utility.plotLoss(values)
+
+    visualization.histograms(modelLogger)
 
     print('    Model weights:')
     print(model.summary())
@@ -561,12 +568,13 @@ def run(grid = None):
     np.random.seed(RP['seed'])
 
     fullIn, labels, alphaSize, nomiSize, testFlags = data.prepareData()
+
     trainIn, trainLabel, testIn, testLabel = preprocess(fullIn, labels, testFlags)
 
     if not RP['chained_models']:
         model = configureModel(alphaSize, nomiSize)
         epochsDone = train(model, trainIn, trainLabel, (testIn, testLabel))
-        
+
         if RP['classify']:
             if RP['label_binning_after_train'] and not RP['label_binning']:
                 for idx in RP['label_idxs']:
@@ -713,7 +721,7 @@ def run(grid = None):
 
 
     # TODO: add memory_pm_mb, memory_vm_bm
-    
+
     if not RP['classify']:
         loglossTest = None
         loglossStdTest = None
