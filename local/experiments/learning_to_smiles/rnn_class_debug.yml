@@ -9,7 +9,7 @@ fetch:
   table: 'output.target_protein_p03372_ic50_binary'
   cols: ['canonical_smiles',
   'standard_value_50']
-  order: 'canonical_smiles'
+  order: ~
   index_col: ~
   limit: ~ # 10
   where: ~ #'is_testing IS NOT NULL'
@@ -27,8 +27,8 @@ params:
     testing: 'is_testing'
   rnn:
     # RNN parameters
-    learning_rate: 0.003
-    epochs: 150
+    learning_rate: 0.05
+    epochs: 3
 
     #objective: 'binary_crossentropy'
     #classify_label_pos: 1

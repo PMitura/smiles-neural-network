@@ -52,14 +52,14 @@ def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(RP['label_idxs'
         model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * (alphaSize +
             nomiSize[0])), activation = 'tanh', trainable = RP['trainable_inner'])))
     else:
-        model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * (alphaSize+nomiSize)), activation = 'tanh', init='glorot_normal', trainable = RP['trainable_inner']),
+        model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * (alphaSize+nomiSize)), activation = 'tanh', trainable = RP['trainable_inner']),
             input_shape = (None, alphaSize + nomiSize)))
 
 
     # model.add(GRU(int(RP['gru_layer_multiplier'] * 300), trainable = RP['trainable_inner'], return_sequences = True ))
-    model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'] , init='uniform', inner_init='uniform'))
+    model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner']))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
-    model.add(Dense(outputLen,init='glorot_normal') )
+    model.add(Dense(outputLen) )
 
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
@@ -390,6 +390,8 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
     accuracies = np.zeros((len(labelIndexes), RP['num_partitions']))
     aucs = np.zeros((len(labelIndexes), RP['num_partitions']))
 
+    # print(rawLabel)
+
     for i in range(RP['num_partitions']):
         print '\n    Partition {}'.format(i)
         if RD['use_embedding']:
@@ -442,8 +444,12 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
             loglosses[metricidx][i] = utility.logloss(pre,label)
             accuracies[metricidx][i] = 1 - (falseNegative + falsePositive) / len(label)
 
+
             # we need to normalize the confidences to [0,1]?
-            aucs[metricidx][i] = roc_auc_score(label, pre)
+            try:
+                aucs[metricidx][i] = roc_auc_score(label, pre)
+            except:
+                aucs[metricidx][i] = np.nan
 
             print '      Logloss Value: {}'.format(loglosses[metricidx][i])
             print '      Accuracy: {}'.format(accuracies[metricidx][i])
