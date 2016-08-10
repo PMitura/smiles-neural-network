@@ -26,13 +26,13 @@ params:
   rnn:
     # RNN parameters
     learning_rate: 0.01
-    epochs: 150
+    epochs: 40
 
     classify: false            # regression if false
     label_binning: false
     label_binning_after_train: false
     label_binning_ratio: 0.5
-    early_stop: 20
+    early_stop: 5
 
     chained_models: true
     chained_labels: '[range(1,54)]'
