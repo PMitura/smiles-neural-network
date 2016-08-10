@@ -51,8 +51,7 @@ def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(RP['label_idxs'
         model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * (alphaSize +
             nomiSize[0])), activation = 'tanh', trainable = RP['trainable_inner'])))
     else:
-        model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * (alphaSize +
-            nomiSize)), activation = 'tanh', trainable = RP['trainable_inner']),
+        model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * 300), activation = 'tanh', trainable = RP['trainable_inner']),
             input_shape = (None, alphaSize + nomiSize)))
 
     model.add(GRU(int(RP['gru_layer_multiplier'] * 300), trainable = RP['trainable_inner'], return_sequences = True ))
