@@ -1,0 +1,52 @@
+# Experiment rnn_alogp
+name: 'rnn_molweight'
+
+# Template for default values
+template: 'rnn.yml'
+
+# DB fetch params
+fetch:
+  table: 'output.target_molweight'
+  cols: ['canonical_smiles',
+  'molweight']
+  order: 'canonical_smiles'
+  index_col: ~
+  limit: 10000
+  where: ~ # 'is_testing IS NOT NULL'
+
+# Experiment params
+params:
+  data:
+    # number of label columns to prepare
+    input_count: 1
+    extra_nominals: 0
+    label_count: 1
+    use_test_flags: false
+    # for statistics sending
+    labels: ['molweight']
+    testing: 'is_testing'
+  rnn:
+    # RNN parameters
+    learning_rate: 0.01
+    epochs: 150
+
+    classify: false            # regression if false
+    label_binning: false
+    label_binning_after_train: true
+    label_binning_ratio: 0.5
+
+    zscore_norm: true
+    logarithm: true
+    chained_models: false
+
+    # learning rate decay settings
+    learning_rate_decay: false
+
+    flag_based_hold: false
+    holdout_ratio: 0.5
+
+    # preprocessing switches
+    label_idxs: '[0]'      # indexes of columns to use as label
+
+    # statistics settings
+    comment: 'Back to molweight'

@@ -23,15 +23,8 @@ def main(argv):
         import rnn.rnn
         reload(rnn.rnn)
 
-        # optimizer grid search
-        seeds = range(12346, 12346+1)
-        for seed in seeds:
-            rnn.rnn.RP['seed'] = seed
-
-            print(cc.cfg,cc.exp)
-            rnn.rnn.run()
-        # rnn.rnn.run()
-
+        print(cc.cfg,cc.exp)
+        rnn.rnn.run()
 
 if __name__ == '__main__':
     main(sys.argv[1:])
