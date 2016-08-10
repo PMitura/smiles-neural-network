@@ -35,7 +35,7 @@ params:
     early_stop: 5
 
     chained_models: true
-    chained_labels: '[range(1,54)]'
+    chained_labels: '[range(1,54), [0] * 53]'
     # chained_labels: '[range(1, 4) * 8]'
     chained_test_labels: '[[0] * 53]'
     chained_predict: '[0]'
