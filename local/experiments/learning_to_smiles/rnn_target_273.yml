@@ -12,7 +12,7 @@ fetch:
   'is_testing']
   order: 'canonical_smiles'
   index_col: ~
-  limit: ~ # 8000
+  limit: 20
   where: ~ #'is_testing IS NOT NULL'
 
 # Experiment params
@@ -28,7 +28,7 @@ params:
     testing: 'is_testing'
   rnn:
     # RNN parameters
-    learning_rate: 0.001
+    learning_rate: 0.01
     epochs: 150
 
     classify: true            # regression if false
@@ -43,8 +43,10 @@ params:
     # learning rate decay settings
     learning_rate_decay: false
 
-    flag_based_hold: false
+    flag_based_hold: true
     holdout_ratio: 0.8
+
+    num_partitions: 1
 
     # preprocessing switches
     label_idxs: '[0]'      # indexes of columns to use as label
