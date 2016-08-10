@@ -8,7 +8,7 @@ template: 'rnn.yml'
 fetch:
   table: 'output.target_273_51_ki'
   cols: ['canonical_smiles',
-  'standard_value_50',
+  'standard_value',
   'is_testing']
   order: 'canonical_smiles'
   index_col: ~
@@ -24,20 +24,20 @@ params:
     label_count: 1
     use_test_flags: true
     # for statistics sending
-    labels: ['standard_value_50']
+    labels: ['standard_value']
     testing: 'is_testing'
   rnn:
     # RNN parameters
     learning_rate: 0.01
     epochs: 150
 
-    classify: true            # regression if false
+    classify: false            # regression if false
     label_binning: false
     label_binning_after_train: false
     label_binning_ratio: 0.5
 
     zscore_norm: false
-    logarithm: false
+    logarithm: true
     chained_models: false
 
     # learning rate decay settings
@@ -52,4 +52,4 @@ params:
     label_idxs: '[0]'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[LTS][273] learning to smiles - target 273 - classification'
+    comment: '[LTS][273] learning to smiles - target 273 - regres'
