@@ -27,7 +27,7 @@ params:
   rnn:
     # RNN parameters
     learning_rate: 0.003
-    epochs: 150
+    epochs: 85
 
     td_layer_multiplier: 4
     gru_layer_multiplier: 4
@@ -36,7 +36,7 @@ params:
     label_binning: false
     label_binning_after_train: false
     label_binning_ratio: 0.5
-    early_stop: 20
+    early_stop: 5
 
     chained_models: false
     chained_labels: '[range(1, 25)]'
@@ -59,4 +59,4 @@ params:
     label_idxs: 'range(53)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[WIDE_VAL] second GRU, 4*alph model, 30000 rows'
+    comment: '[WIDE_VAL] 85 epochs, 5 early stop, second GRU, 4*alph model, 30000 rows'
