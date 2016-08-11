@@ -5,7 +5,14 @@ import numpy as np
 from math import sqrt, exp, log, ceil
 from scipy.stats.stats import pearsonr
 from sklearn.metrics import roc_auc_score
+from sklearn import preprocessing
 
+from keras.regularizers import l2, activity_l2
+import matplotlib
+import matplotlib.pyplot as plt
+
+
+import pandas as pd
 import db.db as db
 import visualization
 
@@ -39,6 +46,12 @@ RP['label_idxs'] = eval(str(cc.exp['params']['rnn']['label_idxs']))
 OPTIMIZER = Adam(lr = RP['learning_rate'])
 
 
+def rsqrComp(pred, truth):
+    merged = pd.concat([pred, truth],axis=1).T
+
+    pearCr = np.corrcoef(merged)
+    return pearCr[0][1] * pearCr[0][1]
+
 def run():
     startTime = time.time()
 
@@ -47,30 +60,167 @@ def run():
 
     rawData = db.getData()
 
-    print(rawData)
+    rawData.reindex(np.random.permutation(rawData.index))
+
+    # print(rawData)
+
+    X_raw = rawData.iloc[:, 2:]
+    y_raw = rawData.iloc[:, 1:2]
 
 
+    scalerX = preprocessing.StandardScaler(copy=False)
+    scalerX.fit(X_raw)
+    scalery = preprocessing.StandardScaler(copy=False)
+    scalery.fit(y_raw)
 
+    if RP['zscore_norm']:
+        X = pd.DataFrame(scalerX.transform(X_raw), columns=X_raw.columns.values)
+        y = pd.DataFrame(scalery.transform(y_raw), columns=y_raw.columns.values)
+    else:
+        X = X_raw
+        y = y_raw
 
-def configureModel():
-    print('  Initializing and compiling...')
+    # print(X.head(), y.head())
+
 
     model = Sequential()
 
-    model.add(Dense(32))
-    model.add(Activation('tanh'))
+    # hidden
+    model.add(Dense(50, W_regularizer=l2(0.01), input_shape=(X.shape[1], )))
+    model.add(Activation('relu'))
+    model.add(Dense(1))
 
-    # default learning rate 0.001
-    model.compile(loss = RP['objective'], optimizer = OPTIMIZER)
+    model.compile(loss = 'mse', optimizer = OPTIMIZER)
 
-    print('  ...done')
-    return model
+    ratio = 0.8
+    split = int(X.shape[0] * ratio)
+
+
+    trainX, testX = X.iloc[:split], X.iloc[split:]
+    trainy, testy = y.iloc[:split], y.iloc[split:]
+
+
+    print(trainX.shape, testX.shape, trainy.shape, testy.shape)
+
+
+    history = model.fit(trainX.values, trainy.values, nb_epoch = RP['epochs'],
+            batch_size = RP['batch'],
+            validation_data = (testX.values, testy.values))
+
+
+    predTrain = model.predict(trainX.values, batch_size = RP['batch'])
+    if RP['zscore_norm']:
+        predTrainScaled = pd.DataFrame(scalery.inverse_transform(predTrain),columns=['pred'])
+        testTrainScaled = pd.DataFrame(scalery.inverse_transform(trainy),columns=['true'])
+    else:
+        predTrainScaled = pd.DataFrame(predTrain,columns=['pred'])
+        testTrainScaled = pd.DataFrame(trainy,columns=['true'])
+
+    predByTruthTrain = pd.concat([predTrainScaled, testTrainScaled],axis=1)
+    print(predByTruthTrain.head())
+
+    trainRsqr = rsqrComp(predTrainScaled,testTrainScaled)
+    print('train R2: {}'.format(trainRsqr))
+
+
+    rsqrs = []
+
+    for i in range(RP['num_partitions']):
+        partSize = int(len(testX)/RP['num_partitions'])+1
+        lo = i*partSize
+        hi = min((i+1)*partSize, len(testX))
+
+        testXpart = testX.iloc[lo:hi].copy()
+        testypart = testy.iloc[lo:hi].copy()
+
+        pred = model.predict(testXpart.values, batch_size = RP['batch'])
+
+        if RP['zscore_norm']:
+            predScaled = pd.DataFrame(scalery.inverse_transform(pred), columns=['pred'])
+            testScaled = pd.DataFrame(scalery.inverse_transform(testypart), columns=['true'])
+        else:
+            predScaled = pd.DataFrame(pred,columns=['pred'])
+            testScaled = pd.DataFrame(testypart,columns=['true'])
+
+        predByTruth = pd.concat([predScaled, testScaled],axis=1)
+
+        print(predByTruth.head())
+
+        rsqr = rsqrComp(predScaled, testScaled)
+        rsqrs.append(rsqr)
+
+        print('test R2: {}'.format(rsqr))
+
+    rsqrAvg = np.mean(rsqrs)
+    rsqrDev = np.std(rsqrs)
+
+
+    print('test R2: {} +/- {}'.format(rsqrAvg,rsqrDev))
+
+
+    print('Plot:')
+    values = np.zeros((len(history.history['loss']), 2))
+    for i in range(len(history.history['loss'])):
+        values[i][0] = history.history['loss'][i]
+        values[i][1] = history.history['val_loss'][i]
+    utility.plotLoss(values)
+
+    print('Dump csv pred')
+    pred = model.predict(testX.values, batch_size = RP['batch'])
+
+
+    if RP['zscore_norm']:
+        predScaled = pd.DataFrame(scalery.inverse_transform(pred), columns=['pred'])
+        testScaled = pd.DataFrame(scalery.inverse_transform(testy), columns=['true'])
+    else:
+        predScaled = pd.DataFrame(pred,columns=['pred'])
+        testScaled = pd.DataFrame(testy,columns=['true'])
+
+    predByTruth = pd.concat([predScaled, testScaled],axis=1)
+
+    # predByTruth.plot(x='pred',y='true', kind='scatter')
+    # plt.show()
+    # predByTruth.to_csv('local/pred.csv')
+
+
+    import subprocess
+    try:
+        gitCommit = subprocess.check_output('git rev-parse HEAD', shell=True).strip()
+    except:
+        gitCommit = None
+
+    db.sendStatistics(
+        dataset_name = cc.exp['fetch']['table'],
+        split_name = cc.exp['params']['data']['testing'],
+        training_row_count = len(trainX),
+        testing_row_count = len(testX),
+        task = 'regression',
+        relevance_training = trainRsqr,
+        relevance_testing = rsqrAvg,
+        relevance_testing_std = rsqrDev,
+        epoch_max = RP['epochs'],
+        epoch_count = RP['epochs'],
+        parameter_count = model.count_params(),
+        learning_rate = RP['learning_rate'],
+        optimization_method = OPTIMIZER.__class__.__name__,
+        batch_size = RP['batch'],
+        comment = RP['comment'],
+        label_name = ','.join(cc.exp['params']['data']['labels']),
+        model = utility.modelToString(model),
+        seed = RP['seed'],
+        learning_curve = {'val':open('{}/{}'.format(cc.cfg['plots']['dir'], utility.PLOT_NAME),'rb').read(),'type':'bin'},
+        hostname = socket.gethostname(),
+        experiment_config = yaml.dump(cc.exp,default_flow_style=False),
+        git_commit = gitCommit,
+        objective = RP['objective'])
 
 
 def train(model, nnInput, labels, validation, makePlot = True,
         labelIndexes = RP['label_idxs']):
     print('  Training model...')
 
+
+ # train(model, trainIn, trainLabel, (testIn, testLabel))
 
     # needed format is orthogonal to ours
     formattedLabels = np.zeros((len(labels[0]), len(labelIndexes)))
@@ -558,7 +708,7 @@ def preprocess(fullIn, labels, testFlags):
     return trainIn, trainLabel, testIn, testLabel
 
 
-def run(grid = None):
+def runx(grid = None):
     startTime = time.time()
 
     # Initialize using the same seed (to get stable results on comparisons)

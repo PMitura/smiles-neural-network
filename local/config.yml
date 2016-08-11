@@ -1,4 +1,4 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/wide_features_valid/rnn_wide_features_valid.yml']
+experiments: ['local/experiments/dnn_rapidminer/dnn_rapidminer.yml']
