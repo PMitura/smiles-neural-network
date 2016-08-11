@@ -567,7 +567,7 @@ def run(grid = None):
     if not RP['chained_models']:
         model = configureModel(alphaSize, nomiSize)
         epochsDone = train(model, trainIn, trainLabel, (testIn, testLabel))
-        
+
         if RP['classify']:
             if RP['label_binning_after_train'] and not RP['label_binning']:
                 for idx in RP['label_idxs']:
@@ -674,7 +674,7 @@ def run(grid = None):
 
 
     # TODO: add memory_pm_mb, memory_vm_bm
-    
+
     if not RP['classify']:
         loglossTest = None
         loglossStdTest = None
@@ -710,5 +710,5 @@ def run(grid = None):
         learning_curve = {'val':open('{}/{}'.format(cc.cfg['plots']['dir'], utility.PLOT_NAME),'rb').read(),'type':'bin'},
         hostname = socket.gethostname(),
         experiment_config = yaml.dump(cc.exp,default_flow_style=False),
-        git_commit = gitCommit
+        git_commit = gitCommit,
         objective = RP['objective'])

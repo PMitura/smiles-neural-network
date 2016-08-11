@@ -26,11 +26,11 @@ def main(argv):
         print(cc.cfg,cc.exp)
 
         # loss function grid search
-        lossFns = ['mse', 'mae', 'mape', 'msle', 'squared_hinge', 'hinge',
-                'kld', 'poisson']
-        for fn in lossFns:
-            rnn.rnn.RP['objective'] = fn
-            rnn.rnn.run()
+        #lossFns = ['mse', 'mae', 'mape', 'msle', 'squared_hinge', 'hinge',
+        #       'kld', 'poisson']
+        #for fn in lossFns:
+        #    rnn.rnn.RP['objective'] = fn
+        rnn.rnn.run()
         # rnn.rnn.run()
 
 

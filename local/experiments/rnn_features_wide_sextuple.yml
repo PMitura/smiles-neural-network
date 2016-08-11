@@ -35,9 +35,10 @@ params:
     label_binning_ratio: 0.5
 
     chained_models: true
-    chained_labels: '[range(1, 4) * 8, range(4, 8) * 6, range(8, 14) * 4, 
-        range(14, 22) * 3, range(22, 46), [0] * 24]'
-    chained_predict: '[0]'
+    #chained_labels: '[range(1, 4) * 8, range(4, 8) * 6, range(8, 14) * 4,
+   #     range(14, 22) * 3, range(22, 46), [0] * 24]'
+    chained_labels: '[range(1,4)*8, range(1,25)]'
+    chained_predict: '[range(1,25)]'
     freeze_idxs: 'set([5])'
     trainable_inner: true
 
@@ -54,4 +55,4 @@ params:
     label_idxs: 'range(46)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[v2] Sextuple setup, grid search for best optimizer'
+    comment: '[WIDE_VAL] sextuple setup replication'
