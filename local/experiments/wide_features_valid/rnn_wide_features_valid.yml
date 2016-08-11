@@ -29,8 +29,8 @@ params:
     learning_rate: 0.003
     epochs: 150
 
-    td_layer_multiplier: 2
-    gru_layer_multiplier: 2
+    td_layer_multiplier: 4
+    gru_layer_multiplier: 4
 
     classify: false            # regression if false
     label_binning: false
@@ -59,4 +59,4 @@ params:
     label_idxs: 'range(53)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[WIDE_VAL] 2*alph model, 30000 rows'
+    comment: '[WIDE_VAL] 4*alph model, 30000 rows'
