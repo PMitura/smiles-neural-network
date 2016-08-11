@@ -261,6 +261,15 @@ def predictSplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
         print '      label {} R2 Deviation: {}'.format(labelIndexes[lab],
                 rsqrDev[lab])
 
+
+    for i in range(len(rsqrAvg)):
+        if np.isnan(rsqrAvg[i]) or np.isnan(rsqrDev[i]):
+            rsqrAvg[i] = np.nan
+            rsqrDev[i] = np.nan
+
+    rsqrAvg = [x for x in rsqrAvg if not np.isnan(x)]
+    rsqrDev = [x for x in rsqrDev if not np.isnan(x)]
+
     rsqrAvgOverall = utility.mean(rsqrAvg, len(rsqrAvg))
     rsqrDevOverall = utility.mean(rsqrDev, len(rsqrDev))
     print '\n  R2 mean of avgs: {}'.format(rsqrAvgOverall)
