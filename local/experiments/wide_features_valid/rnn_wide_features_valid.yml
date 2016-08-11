@@ -59,4 +59,4 @@ params:
     label_idxs: 'range(53)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[WIDE_VAL] second GRU, 2*alph model, 30000 rows'
+    comment: '[WIDE_VAL] second GRU, 4*alph model, 30000 rows'
