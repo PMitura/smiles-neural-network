@@ -164,26 +164,13 @@ def holdout(ratio, words, label):
     if ratio >= 1 or ratio <= 0:
         raise ValueError('Ratio must be in (0, 1) interval')
 
+    splitPoint = int(floor(len(words) * ratio))
 
+    trainWords = words[:splitPoint]
+    trainLabel = [lab[:splitPoint] for lab in label]
 
-    # Prepare training set
-    trainSize = int(floor(len(words) * ratio))
-    trainWords = np.zeros((trainSize, len(words[0]), len(words[0][0])))
-    trainLabel = np.zeros((len(label), trainSize))
-    for i in range(trainSize):
-        trainWords[i] = words[i]
-        for j in range(len(label)):
-            trainLabel[j][i] = label[j][i]
-
-
-    # Prepare testing set
-    testSize = int(floor(len(words) - (len(words) * ratio)))
-    testWords = np.zeros((testSize, len(words[0]), len(words[0][0])))
-    testLabel = np.zeros((len(label), testSize))
-    for i in range(testSize):
-        testWords[i] = words[i + trainSize]
-        for j in range(len(label)):
-            testLabel[j][i] = label[j][i + trainSize]
+    testWords = words[splitPoint:]
+    testLabel = [lab[splitPoint:] for lab in label]
 
     return trainWords, trainLabel, testWords, testLabel
 
