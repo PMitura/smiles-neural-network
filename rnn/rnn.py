@@ -55,7 +55,7 @@ def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(RP['label_idxs'
     else:
         model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * (alphaSize+nomiSize)), activation = 'tanh',
             trainable = RP['trainable_inner'],
-            W_regularizer=l2(0.01)),
+            W_regularizer=l2(0.1)),
             input_shape = (None, alphaSize + nomiSize)))
 
 
