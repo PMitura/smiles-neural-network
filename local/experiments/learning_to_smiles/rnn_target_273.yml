@@ -54,7 +54,7 @@ params:
     flag_based_hold: true
     holdout_ratio: 0.8
 
-    num_partitions: 1
+    num_partitions: 5
 
     # preprocessing switches
     label_idxs: '[0]'      # indexes of columns to use as label

@@ -165,6 +165,7 @@ def holdout(ratio, words, label):
         raise ValueError('Ratio must be in (0, 1) interval')
 
 
+
     # Prepare training set
     trainSize = int(floor(len(words) * ratio))
     trainWords = np.zeros((trainSize, len(words[0]), len(words[0][0])))
