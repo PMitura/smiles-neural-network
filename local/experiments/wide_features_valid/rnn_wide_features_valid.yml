@@ -27,7 +27,7 @@ params:
   rnn:
     # RNN parameters
     learning_rate: 0.003
-    epochs: 1
+    epochs: 150
 
     classify: false            # regression if false
     label_binning: false
