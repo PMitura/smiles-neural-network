@@ -22,6 +22,7 @@ from keras.layers import Activation, Dense, Dropout, LSTM, AveragePooling1D
 from keras.layers import TimeDistributed, SimpleRNN, GRU
 from keras.layers import BatchNormalization, Embedding, merge
 from keras.optimizers import Adam, RMSprop, Adadelta, Adagrad
+from keras.regularizers import l2, activity_l2
 import keras.callbacks
 # from keras.regularizers import l1
 
@@ -52,11 +53,13 @@ def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(RP['label_idxs'
         model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * (alphaSize +
             nomiSize[0])), activation = 'tanh', trainable = RP['trainable_inner'])))
     else:
-        model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * (alphaSize+nomiSize)), activation = 'tanh', trainable = RP['trainable_inner']),
+        model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * (alphaSize+nomiSize)), activation = 'tanh',
+            trainable = RP['trainable_inner'],
+            W_regularizer=l2(0.01)),
             input_shape = (None, alphaSize + nomiSize)))
 
 
-    model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'], return_sequences = True ))
+    # model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'], return_sequences = True ))
     model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner']))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
     model.add(Dense(outputLen) )
