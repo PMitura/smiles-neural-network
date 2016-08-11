@@ -19,12 +19,12 @@ def main(argv):
         # load configuration into global var and run it
         cc.loadExperiment(experiment)
 
-        # reloads the rnn.rnn module which populates new config values to their respective vars
-        import rnn.rnn
-        reload(rnn.rnn)
+        # reloads the dnn.dnn module which populates new config values to their respective vars
+        import dnn.dnn
+        reload(dnn.dnn)
 
         print(cc.cfg,cc.exp)
-        rnn.rnn.run()
+        dnn.dnn.run()
 
 if __name__ == '__main__':
     main(sys.argv[1:])
