@@ -59,7 +59,7 @@ def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(RP['label_idxs'
 
 
     # model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'], return_sequences = True ))
-    model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner']))
+    model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), dropout_W = 0.1, dropout_U = 0.1, trainable = RP['trainable_inner']))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
     model.add(Dense(outputLen, b_regularizer=l2(0.00001), W_regularizer=l2(0.00001)) )
 

@@ -59,4 +59,4 @@ params:
     label_idxs: 'range(53)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[WIDE_REG] Output b + W_regularization 0.00001 with lower learning rate 0.001'
+    comment: '[WIDE_REG] Output b + W_regularization 0.00001, GRU dropout 0.1'
