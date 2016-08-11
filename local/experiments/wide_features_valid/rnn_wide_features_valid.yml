@@ -27,7 +27,7 @@ params:
   rnn:
     # RNN parameters
     learning_rate: 0.003
-    epochs: 150
+    epochs: 1
 
     classify: false            # regression if false
     label_binning: false
@@ -56,4 +56,4 @@ params:
     label_idxs: 'range(53)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[FEATURESWIDE] Just train on big, then test on all of 1977'
+    comment: '[WIDE_VAL] basic model, 8000 rows'
