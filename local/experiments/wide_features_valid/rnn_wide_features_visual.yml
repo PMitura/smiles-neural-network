@@ -26,11 +26,11 @@ params:
     testing: 'is_testing'
   rnn:
     # RNN parameters
-    learning_rate: 0.0015
+    learning_rate: 0.001
     epochs: 150
 
-    td_layer_multiplier: 0.2
-    gru_layer_multiplier: 0.2
+    td_layer_multiplier: 2
+    gru_layer_multiplier: 2
 
     classify: false            # regression if false
     label_binning: false
