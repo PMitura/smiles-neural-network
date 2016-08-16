@@ -20,6 +20,6 @@ plots:
   layer_activations: true
   layer_activations_dir: 'local/plots/activations'
   layer_activations_points_cap: 1000
-  layer_activations_label_cap: 4
+  layer_activations_label_cap: 10
 
 experiments: ~

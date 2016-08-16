@@ -160,9 +160,8 @@ def layerActivations(model, data, labels):
 
     plt.figure(figsize=(5*subplotCols,5*subplotRows))
 
-
     for i in range(1,len(model.layers)):
-        print('Running tSNE for layer {}/{}'.format(i,len(model.layers)))
+        print('Running tSNE for layer {}/{}'.format(i+1,len(model.layers)))
 
         func = K.function([model.layers[0].input], [model.layers[i].output])
         out = func([data])[0]
@@ -174,7 +173,7 @@ def layerActivations(model, data, labels):
 
         for j in range(numLabels):
             plt.subplot(subplotRows, subplotCols, subplotIdx)
-            plt.title('layer {} / label {}'.format(i,cc.exp['params']['data']['labels'][j]))
+            plt.title('{} / {}'.format(model.layers[i].name,cc.exp['params']['data']['labels'][j]))
             plt.scatter(tsneOut[0],tsneOut[1],c=labels[j],cmap = 'plasma')
 
             subplotIdx += 1
@@ -183,7 +182,7 @@ def layerActivations(model, data, labels):
         # plot = tsneDF.plot.scatter(x = 'a', y = 'b', c = 'c', cmap = 'plasma')
 
 
-
+    plt.tight_layout()
     plt.savefig('{}/activations.png'.format(cc.cfg['plots']['layer_activations_dir']))
     plt.close()
 
