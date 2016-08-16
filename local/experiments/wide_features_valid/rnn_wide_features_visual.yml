@@ -1,5 +1,5 @@
-# Experiment rnn_wide_features_regularization
-name: 'rnn_wide_features_regularization'
+# Experiment rnn_wide_features_visual
+name: 'rnn_wide_features_visual'
 
 # Template for default values
 template: 'rnn.yml'
@@ -27,7 +27,7 @@ params:
   rnn:
     # RNN parameters
     learning_rate: 0.001
-    epochs: 1
+    epochs: 150
 
     td_layer_multiplier: 0.2
     gru_layer_multiplier: 0.2

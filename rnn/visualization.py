@@ -1,8 +1,13 @@
 import keras.callbacks
+from keras import backend as K
 
 import numpy as np
 import matplotlib.pyplot as plt
 import collections
+import pandas as pd
+
+from sklearn.manifold import TSNE
+
 
 from config import config as cc
 import os
@@ -131,3 +136,55 @@ def histograms(modelLogger):
         plt.subplots_adjust(top=0.9)
         plt.savefig('{}/hist_{e:03d}.png'.format(cc.cfg['plots']['histograms_dir'], e = x))
         plt.close()
+
+
+# data = [items][symbols][onehot]
+def layerActivations(model, data, labels):
+    if not cc.cfg['plots']['layer_activations']:
+        return
+
+    print('Visualizing activations with tSNE...')
+
+    if not os.path.exists(cc.cfg['plots']['layer_activations_dir']):
+        os.makedirs(cc.cfg['plots']['layer_activations_dir'])
+
+
+    numLabels = cc.cfg['plots']['layer_activations_label_cap']
+
+    data = data[:cc.cfg['plots']['layer_activations_points_cap']]
+    labels = labels[:numLabels,:cc.cfg['plots']['layer_activations_points_cap']]
+
+    subplotCols = numLabels
+    subplotRows = len(model.layers)-1
+    subplotIdx = 1
+
+    plt.figure(figsize=(5*subplotCols,5*subplotRows))
+
+
+    for i in range(1,len(model.layers)):
+        print('Running tSNE for layer {}/{}'.format(i,len(model.layers)))
+
+        func = K.function([model.layers[0].input], [model.layers[i].output])
+        out = func([data])[0]
+
+        tsneModel = TSNE(n_components = 2, random_state = 0)
+        tsneOut = tsneModel.fit_transform(out).T
+
+        # labeledTsneOut = np.hstack((tsneOut, labels[0].reshape(-1,1)))
+
+        for j in range(numLabels):
+            plt.subplot(subplotRows, subplotCols, subplotIdx)
+            plt.title('layer {} / label {}'.format(i,cc.exp['params']['data']['labels'][j]))
+            plt.scatter(tsneOut[0],tsneOut[1],c=labels[j],cmap = 'plasma')
+
+            subplotIdx += 1
+
+        # tsneDF = pd.DataFrame(labeledTsneOut, columns = ('a', 'b', 'c'))
+        # plot = tsneDF.plot.scatter(x = 'a', y = 'b', c = 'c', cmap = 'plasma')
+
+
+
+    plt.savefig('{}/activations.png'.format(cc.cfg['plots']['layer_activations_dir']))
+    plt.close()
+
+    print('...done')
