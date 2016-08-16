@@ -1,4 +1,4 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/wide_features_valid/rnn_wide_features_visual.yml']
+experiments: ['local/experiments/wide_features_valid/rnn_wide_features_learning_curve.yml']

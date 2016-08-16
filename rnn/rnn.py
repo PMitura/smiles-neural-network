@@ -136,6 +136,8 @@ def train(model, nnInput, labels, validation, makePlot = True,
 def predict(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
     preRaw = model.predict(nnInput, batch_size = RP['batch'])
 
+    rsqrs = []
+
     for labCtr,labidx in enumerate(labelIndexes):
         print '  Predictions for label {}'.format(labidx)
 
@@ -197,7 +199,12 @@ def predict(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
         print("      correlation coefficient: {}".format(pearCr[0][1]))
         print("      R2:                      {}".format(pearCr[0][1] * pearCr[0][1]))
 
-    return pearCr[0][1] * pearCr[0][1]
+        rsqr = pearCr[0][1] * pearCr[0][1]
+        if not np.isnan(rsqr):
+            rsqrs.append(rsqr)
+
+
+    return np.mean(rsqrs)
 
 
 # Modification of predict, divides data and computes avg and dev of R2
@@ -558,6 +565,7 @@ def preprocess(fullIn, labels, testFlags):
             labels[idx], m, d = data.zScoreNormalize(labels[idx])
             zMean[idx] = m
             zDev[idx] = d
+
 
     # check for NaN or inf values, which break our RNN
     for idx in RP['label_idxs']:

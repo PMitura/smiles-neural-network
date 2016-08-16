@@ -24,6 +24,9 @@ def equals(a, b):
 
 # Mean of given values
 def mean(array, size):
+    if size == 0:
+        return np.nan
+
     arraySum = 0.0
     for i in range(size):
         arraySum += array[i]
@@ -32,6 +35,9 @@ def mean(array, size):
 
 # Variance of given values
 def variance(array, size):
+    if size == 0:
+        return np.nan
+
     avg = mean(array, size)
     dev = 0.0
     for i in range(size):

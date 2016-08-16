@@ -234,6 +234,11 @@ def zScoreNormalize(array):
     normalized = np.zeros(len(array))
     avg = utility.mean(array, len(array))
     dev = utility.stddev(array, len(array))
+
+    # Maybe hacky, but is in theory right
+    if dev == 0:
+        return normalized, avg, dev
+
     for i in range(len(array)):
         if pd.isnull(array[i]):
             raise ValueError('Cannot normalize \"None\" value')

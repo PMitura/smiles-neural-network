@@ -17,7 +17,7 @@ plots:
   dir: 'local/plots'
   histograms: false
   histograms_dir: 'local/plots/hists'
-  layer_activations: true
+  layer_activations: false
   layer_activations_dir: 'local/plots/activations'
   layer_activations_points_cap: 1000
   layer_activations_label_cap: 10
