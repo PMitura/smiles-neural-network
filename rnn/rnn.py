@@ -625,10 +625,15 @@ def run(grid = None):
 
         print("\n  Prediction of training data:")
         if RP['classify']:
-            relevanceTrain = classify(model, trainIn, trainLabel)
-
+            if RP['use_partitions']:
+                relevanceTrain, stdTrain = classifySplit(model, trainIn, trainLabel)
+            else:
+                relevanceTrain = classify(model, trainIn, trainLabel)
         else:
-            relevanceTrain = predict(model, trainIn, trainLabel)
+            if RP['use_partitions']:
+                relevanceTrain, stdTrain = predictSplit(model, trainIn, trainLabel)
+            else:
+                relevanceTrain = predict(model, trainIn, trainLabel)
 
         print("\n  Prediction of testing data:")
         if RP['classify']:
@@ -739,11 +744,14 @@ def run(grid = None):
     memRss, memVms = utility.getMemoryUsage()
 
     if np.isnan(relevanceTest):
-        relevanceTest = -1
+        relevanceTest = None
     if np.isnan(relevanceTrain):
-        relevanceTrain = -1
+        relevanceTrain = None
     if np.isnan(stdTest):
-        stdTest = -1
+        stdTest = None
+    if np.isnan(stdTrain):
+        stdTrain = None
+
 
     import subprocess
     try:
@@ -767,6 +775,7 @@ def run(grid = None):
         testing_row_count = len(testLabel[0]),
         task = 'classification' if RP['classify'] else 'regression',
         relevance_training = relevanceTrain,
+        relevance_training_std = stdTrain,
         relevance_testing = relevanceTest,
         relevance_testing_std = stdTest,
         log_loss = loglossTest,
