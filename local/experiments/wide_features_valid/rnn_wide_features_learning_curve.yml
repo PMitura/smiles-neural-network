@@ -11,7 +11,7 @@ fetch:
   order: 'canonical_smiles'
   index_col: ~
   limit: ~
-  where:  'is_testing_all IS NOT NULL and length(canonical_smiles) <= 100'
+  where:  'is_testing_all IS NOT NULL and length(canonical_smiles) <= 80'
 
 # Experiment params
 params:
@@ -59,4 +59,4 @@ params:
     label_idxs: 'range(53)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[LEARNING_CURVE][LIMIT_380732] limiting data to 380732 rows'
+    comment: '[LEARNING_CURVE][NO_LIMIT] using all the data within resource limits'
