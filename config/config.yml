@@ -24,7 +24,7 @@ plots:
 
 # Persistence of models
 persistence:
-  model: false
+  model: true
   model_dir: 'local/models'
 
 experiments: ~
