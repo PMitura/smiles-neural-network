@@ -2,11 +2,16 @@ import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as pltib
-import psutil
+import psutil,subprocess,os
 
 from math import sqrt
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
+
+from keras.models import model_from_yaml
+
+
+import utility
 
 from config import config as cc
 
@@ -121,6 +126,34 @@ def modelToString(model):
         string += str(modelDict)
     return string
 
+def getGitCommitHash():
+    try:
+        gitCommit = subprocess.check_output('git rev-parse HEAD', shell=True).strip()
+    except:
+        gitCommit = None
+
+    return gitCommit
+
+
+
+def saveModel(model):
+    if not cc.cfg['persistence']['model']:
+        return
+
+    if not os.path.exists(cc.cfg['persistence']['model_dir']):
+        os.makedirs(cc.cfg['persistence']['model_dir'])
+
+    yamlModel = model.to_yaml()
+    gitCommit = utility.getGitCommitHash()
+
+    open(os.path.join(cc.cfg['persistence']['model_dir'], gitCommit+'.yml'), 'w').write(yamlModel)
+    model.save_weights(os.path.join(cc.cfg['persistence']['model_dir'], gitCommit+'.h5'), overwrite=True)
+
+
+def loadModel(modelName):
+    model = model_from_yaml(open(os.path.join(cc.cfg['persistence']['model_dir'], modelName+'.yml')).read())
+    model.load_weights(os.path.join(os.path.join(cc.cfg['persistence']['model_dir'], modelName+'.h5')))
+    return model
 
 def plotLoss(values):
     print '    Plotting losses'

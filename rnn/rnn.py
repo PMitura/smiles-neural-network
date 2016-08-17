@@ -735,6 +735,11 @@ def run(grid = None):
 
     visualization.layerActivations(model, testIn, testLabel)
 
+    utility.saveModel(model)
+
+    newModel = utility.loadModel(utility.getGitCommitHash())
+
+
 
     endTime = time.time()
     deltaTime = endTime - startTime
@@ -753,11 +758,6 @@ def run(grid = None):
         stdTrain = None
 
 
-    import subprocess
-    try:
-        gitCommit = subprocess.check_output('git rev-parse HEAD', shell=True).strip()
-    except:
-        gitCommit = None
 
 
     # TODO: add memory_pm_mb, memory_vm_bm
@@ -768,6 +768,7 @@ def run(grid = None):
         aucTest = None
         aucStdTest = None
 
+    '''
     db.sendStatistics(
         dataset_name = cc.exp['fetch']['table'],
         split_name = cc.exp['params']['data']['testing'],
@@ -798,5 +799,6 @@ def run(grid = None):
         learning_curve = {'val':open('{}/{}'.format(cc.cfg['plots']['dir'], utility.PLOT_NAME),'rb').read(),'type':'bin'},
         hostname = socket.gethostname(),
         experiment_config = yaml.dump(cc.exp,default_flow_style=False),
-        git_commit = gitCommit,
+        git_commit = utility.getGitCommitHash(),
         objective = RP['objective'])
+    '''

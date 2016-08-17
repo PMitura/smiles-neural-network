@@ -22,4 +22,9 @@ plots:
   layer_activations_points_cap: 1000
   layer_activations_label_cap: 10
 
+# Persistence of models
+persistence:
+  model: false
+  model_dir: 'local/models'
+
 experiments: ~
