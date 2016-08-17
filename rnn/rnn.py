@@ -113,7 +113,7 @@ def train(model, nnInput, labels, validation, makePlot = True,
     modelLogger = visualization.ModelLogger()
 
     history = model.fit(nnInput, formattedLabels, nb_epoch = RP['epochs'],
-            batch_size = RP['batch'], callbacks = [early,learningRateScheduler,modelLogger],
+            batch_size = RP['batch'], callbacks = [early],
             validation_data = (validation[0], formattedValid))
 
     if makePlot:

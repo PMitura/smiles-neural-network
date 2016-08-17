@@ -71,7 +71,7 @@ sicho_descriptors = Set([
 LELIMIT = 10000
 
 def getData(con, lo):
-    query = 'SELECT * FROM target_molweight LIMIT {}, {}'.format(lo,LELIMIT)
+    query = 'SELECT * FROM output.target_geminin_deduplicated LIMIT {} OFFSET {}'.format(LELIMIT,lo)
 
     df = pd.read_sql(
         sql = query,
@@ -107,8 +107,8 @@ def sendData(con, df):
             if pd.isnull(val):
                 vals[i]=None
 
-        query = 'INSERT INTO target_molweight_features_wide ({}) VALUES ({})'.format(
-            ','.join(cols),
+        query = 'INSERT INTO output.target_geminin_deduplicated_features_wide ({}) VALUES ({})'.format(
+            ','.join(['"{}"'.format(x) for x in cols]),
             ','.join(['%s']*len(cols)))
 
         cursor.execute(query, tuple(vals))
