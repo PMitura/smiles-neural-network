@@ -768,7 +768,6 @@ def run(grid = None):
         aucTest = None
         aucStdTest = None
 
-    '''
     db.sendStatistics(
         dataset_name = cc.exp['fetch']['table'],
         split_name = cc.exp['params']['data']['testing'],
@@ -801,4 +800,3 @@ def run(grid = None):
         experiment_config = yaml.dump(cc.exp,default_flow_style=False),
         git_commit = utility.getGitCommitHash(),
         objective = RP['objective'])
-    '''
