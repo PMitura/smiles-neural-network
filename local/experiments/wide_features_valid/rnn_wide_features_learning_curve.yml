@@ -59,4 +59,4 @@ params:
     label_idxs: 'range(53)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[LEARNING_CURVE][NO_LIMIT] using all the data within resource limits'
+    comment: '[SAVING_MODEL] 53 features learning model, 100k rows'
