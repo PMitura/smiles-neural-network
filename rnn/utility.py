@@ -137,9 +137,6 @@ def getGitCommitHash():
 
 
 def saveModel(model):
-    if not cc.cfg['persistence']['model']:
-        return
-
     if not os.path.exists(cc.cfg['persistence']['model_dir']):
         os.makedirs(cc.cfg['persistence']['model_dir'])
 

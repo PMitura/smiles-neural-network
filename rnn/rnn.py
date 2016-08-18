@@ -655,10 +655,9 @@ def run(grid = None):
 
     visualization.layerActivations(model, testIn, testLabel)
 
-    utility.saveModel(model)
 
-    newModel = utility.loadModel(utility.getGitCommitHash())
-
+    if cc.cfg['persistence']['model']:
+        utility.saveModel(model)
 
 
     endTime = time.time()
