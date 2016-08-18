@@ -64,7 +64,7 @@ def run():
 
     # print(rawData)
 
-    X_raw = rawData.iloc[:, 2:]
+    X_raw = rawData.iloc[:, 2:-1]
     y_raw = rawData.iloc[:, 1:2]
 
 
@@ -92,12 +92,25 @@ def run():
 
     model.compile(loss = 'mse', optimizer = OPTIMIZER)
 
-    ratio = 0.8
-    split = int(X.shape[0] * ratio)
+    if RD['use_test_flags']:
+        maskTrain = np.zeros(len(X),dtype=bool)
+        maskTest = np.zeros(len(X),dtype=bool)
+        for i in range(len(X)):
+            maskTrain[i] = rawData[RD['testing']][i] == 0
+            maskTest[i] = rawData[RD['testing']][i] == 1
+
+        trainX = X.loc[maskTrain]
+        testX = X.loc[maskTest]
+        trainy = y.loc[maskTrain]
+        testy = y.loc[maskTest]
+
+    else:
+        ratio = 0.8
+        split = int(X.shape[0] * ratio)
 
 
-    trainX, testX = X.iloc[:split], X.iloc[split:]
-    trainy, testy = y.iloc[:split], y.iloc[split:]
+        trainX, testX = X.iloc[:split], X.iloc[split:]
+        trainy, testy = y.iloc[:split], y.iloc[split:]
 
 
     print(trainX.shape, testX.shape, trainy.shape, testy.shape)
