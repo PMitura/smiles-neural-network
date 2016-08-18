@@ -17,6 +17,10 @@ params:
     labels: ~
     testing: ~
   rnn:
+    # Do not train, just load
+    load_model: None
+
+
     # RNN parameters
     seed: 12346
     td_layer_multiplier: 0.5   # time-distributed layer modifier of neuron count

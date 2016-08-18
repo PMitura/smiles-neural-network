@@ -599,53 +599,58 @@ def run(grid = None):
 
     trainIn, trainLabel, testIn, testLabel = preprocess(fullIn, labels, testFlags)
 
-    if not RP['chained_models']:
+
+    if RP['load_model']:
+        model = utility.loadModel(RP['load_model'])
+        epochsDone = RP['epochs']
+    else:
         model = configureModel(alphaSize, nomiSize)
         epochsDone = train(model, trainIn, trainLabel, (testIn, testLabel))
 
-        if RP['classify']:
-            if RP['label_binning_after_train'] and not RP['label_binning']:
-                for idx in RP['label_idxs']:
-                    trainLabel[idx] = utility.bin(trainLabel[idx], RP['label_binning_ratio'],
-                            classA = RP['classify_label_neg'],
-                            classB = RP['classify_label_pos'])
-                    testLabel[idx] = utility.bin(testLabel[idx], RP['label_binning_ratio'],
-                            classA = RP['classify_label_neg'],
-                            classB = RP['classify_label_pos'])
-                model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
-                    alphaSize, nomiSize, [0], model.get_weights())
-            elif not RP['label_binning_after_train'] and not RP['label_binning']:
-                for idx in RP['label_idxs']:
-                    testLabel[idx] = utility.bin(testLabel[idx], RP['label_binning_ratio'],
-                            classA = RP['classify_label_neg'],
-                            classB = RP['classify_label_pos'])
 
-        if RP['scatter_visualize']:
-            utility.visualize2D(model, 1, testIn, testLabel[RP['label_idxs'][0]])
+    if RP['classify']:
+        if RP['label_binning_after_train'] and not RP['label_binning']:
+            for idx in RP['label_idxs']:
+                trainLabel[idx] = utility.bin(trainLabel[idx], RP['label_binning_ratio'],
+                        classA = RP['classify_label_neg'],
+                        classB = RP['classify_label_pos'])
+                testLabel[idx] = utility.bin(testLabel[idx], RP['label_binning_ratio'],
+                        classA = RP['classify_label_neg'],
+                        classB = RP['classify_label_pos'])
+            model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
+                alphaSize, nomiSize, [0], model.get_weights())
+        elif not RP['label_binning_after_train'] and not RP['label_binning']:
+            for idx in RP['label_idxs']:
+                testLabel[idx] = utility.bin(testLabel[idx], RP['label_binning_ratio'],
+                        classA = RP['classify_label_neg'],
+                        classB = RP['classify_label_pos'])
 
-        print("\n  Prediction of training data:")
-        if RP['classify']:
-            if RP['use_partitions']:
-                relevanceTrain, stdTrain = classifySplit(model, trainIn, trainLabel)
-            else:
-                relevanceTrain = classify(model, trainIn, trainLabel)
+    if RP['scatter_visualize']:
+        utility.visualize2D(model, 1, testIn, testLabel[RP['label_idxs'][0]])
+
+    print("\n  Prediction of training data:")
+    if RP['classify']:
+        if RP['use_partitions']:
+            relevanceTrain, stdTrain = classifySplit(model, trainIn, trainLabel)
         else:
-            if RP['use_partitions']:
-                relevanceTrain, stdTrain = predictSplit(model, trainIn, trainLabel)
-            else:
-                relevanceTrain = predict(model, trainIn, trainLabel)
-
-        print("\n  Prediction of testing data:")
-        if RP['classify']:
-            if RP['use_partitions']:
-                relevanceTest, stdTest, loglossTest, loglossStdTest, aucTest, aucStdTest = classifySplit(model, testIn, testLabel)
-            else:
-                relevanceTest = classify(model, testIn, testLabel)
+            relevanceTrain = classify(model, trainIn, trainLabel)
+    else:
+        if RP['use_partitions']:
+            relevanceTrain, stdTrain = predictSplit(model, trainIn, trainLabel)
         else:
-            if RP['use_partitions']:
-                relevanceTest, stdTest = predictSplit(model, testIn, testLabel)
-            else:
-                relevanceTest = predict(model, testIn, testLabel)
+            relevanceTrain = predict(model, trainIn, trainLabel)
+
+    print("\n  Prediction of testing data:")
+    if RP['classify']:
+        if RP['use_partitions']:
+            relevanceTest, stdTest, loglossTest, loglossStdTest, aucTest, aucStdTest = classifySplit(model, testIn, testLabel)
+        else:
+            relevanceTest = classify(model, testIn, testLabel)
+    else:
+        if RP['use_partitions']:
+            relevanceTest, stdTest = predictSplit(model, testIn, testLabel)
+        else:
+            relevanceTest = predict(model, testIn, testLabel)
 
 
     visualization.layerActivations(model, testIn, testLabel)
