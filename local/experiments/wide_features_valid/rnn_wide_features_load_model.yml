@@ -61,4 +61,4 @@ params:
     label_idxs: 'range(53)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[SAVING_MODEL] 53 features learning model, 100k rows, len(canonical_smiles) <= 80'
+    comment: '[LOAD_MODEL] loading model ac0640cd762525c495417045cafff8160472860d

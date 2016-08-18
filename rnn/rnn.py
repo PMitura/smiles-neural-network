@@ -718,4 +718,5 @@ def run(grid = None):
         hostname = socket.gethostname(),
         experiment_config = yaml.dump(cc.exp,default_flow_style=False),
         git_commit = utility.getGitCommitHash(),
-        objective = RP['objective'])
+        objective = RP['objective'],
+        loaded_model = RP['load_model'])
