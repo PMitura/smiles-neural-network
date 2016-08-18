@@ -61,4 +61,4 @@ params:
     label_idxs: 'range(53)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[LOAD_MODEL] loading model ac0640cd762525c495417045cafff8160472860d
+    comment: '[LOAD_MODEL] loading model ac0640cd762525c495417045cafff8160472860d'
