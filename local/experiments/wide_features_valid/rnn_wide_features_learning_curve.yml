@@ -26,7 +26,7 @@ params:
     testing: 'is_testing_all'
   rnn:
     # RNN parameters
-    learning_rate: 0.001
+    learning_rate: 0.0005
     epochs: 150
 
     td_layer_multiplier: 2
