@@ -122,7 +122,6 @@ while True:
     sendData(con,df)
     print('Done')
 
-    break
     print(len(df),LELIMIT)
     if len(df) < LELIMIT:
         break
