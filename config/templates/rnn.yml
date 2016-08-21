@@ -18,7 +18,7 @@ params:
     testing: ~
   rnn:
     # Do not train, just load
-    load_model: None
+    load_model: null
 
 
     # RNN parameters
