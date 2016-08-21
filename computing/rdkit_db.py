@@ -54,9 +54,8 @@ def computeMACCS(smilesDf):
         dfData[maccsKeyNames[i]] = []
 
     for smiles in smilesDf.canonical_smiles:
-        mol = Chem.MolFromSmiles(smiles)
-
         try:
+            mol = Chem.MolFromSmiles(smiles)
             maccsBitVector = MACCSkeys.GenMACCSKeys(mol)
             for i in range(1,167):
                 dfData[maccsKeyNames[i]].append(maccsBitVector[i])
