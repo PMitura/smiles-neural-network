@@ -511,6 +511,21 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
         print '      label {} AUC Deviation: {}'.format(lab, aucDev[lab])
 
 
+
+    def filterStatNans(avg, dev):
+        for i in range(len(avg)):
+            if np.isnan(avg[i]) or np.isnan(dev[i]):
+                avg[i] = np.nan
+                dev[i] = np.nan
+
+        avg = [x for x in avg if not np.isnan(x)]
+        dev = [x for x in dev if not np.isnan(x)]
+        return avg,dev
+
+    loglossAvg, loglossDev = filterStatNans(loglossAvg, loglossDev)
+    accuracyAvg, accuracyDev = filterStatNans(accuracyAvg, accuracyDev)
+    aucAvg, aucDev = filterStatNans(aucAvg, aucDev)
+
     loglossAvgOverall = utility.mean(loglossAvg, len(loglossAvg))
     loglossDevOverall = utility.mean(loglossDev, len(loglossDev))
     accuracyAvgOverall = utility.mean(accuracyAvg, len(accuracyAvg))
@@ -631,7 +646,7 @@ def run(grid = None):
     print("\n  Prediction of training data:")
     if RP['classify']:
         if RP['use_partitions']:
-            relevanceTrain, stdTrain = classifySplit(model, trainIn, trainLabel)
+            relevanceTrain, stdTrain, loglossTrain, loglossStdTrain, aucTrain, aucStdTrain = classifySplit(model, trainIn, trainLabel)
         else:
             relevanceTrain = classify(model, trainIn, trainLabel)
     else:

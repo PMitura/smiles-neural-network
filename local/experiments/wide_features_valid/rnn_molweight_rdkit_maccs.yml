@@ -10,7 +10,7 @@ fetch:
   cols: ['canonical_smiles','maccs001','maccs002','maccs003','maccs004','maccs005','maccs006','maccs007','maccs008','maccs009','maccs010','maccs011','maccs012','maccs013','maccs014','maccs015','maccs016','maccs017','maccs018','maccs019','maccs020','maccs021','maccs022','maccs023','maccs024','maccs025','maccs026','maccs027','maccs028','maccs029','maccs030','maccs031','maccs032','maccs033','maccs034','maccs035','maccs036','maccs037','maccs038','maccs039','maccs040','maccs041','maccs042','maccs043','maccs044','maccs045','maccs046','maccs047','maccs048','maccs049','maccs050','maccs051','maccs052','maccs053','maccs054','maccs055','maccs056','maccs057','maccs058','maccs059','maccs060','maccs061','maccs062','maccs063','maccs064','maccs065','maccs066','maccs067','maccs068','maccs069','maccs070','maccs071','maccs072','maccs073','maccs074','maccs075','maccs076','maccs077','maccs078','maccs079','maccs080','maccs081','maccs082','maccs083','maccs084','maccs085','maccs086','maccs087','maccs088','maccs089','maccs090','maccs091','maccs092','maccs093','maccs094','maccs095','maccs096','maccs097','maccs098','maccs099','maccs100','maccs101','maccs102','maccs103','maccs104','maccs105','maccs106','maccs107','maccs108','maccs109','maccs110','maccs111','maccs112','maccs113','maccs114','maccs115','maccs116','maccs117','maccs118','maccs119','maccs120','maccs121','maccs122','maccs123','maccs124','maccs125','maccs126','maccs127','maccs128','maccs129','maccs130','maccs131','maccs132','maccs133','maccs134','maccs135','maccs136','maccs137','maccs138','maccs139','maccs140','maccs141','maccs142','maccs143','maccs144','maccs145','maccs146','maccs147','maccs148','maccs149','maccs150','maccs151','maccs152','maccs153','maccs154','maccs155','maccs156','maccs157','maccs158','maccs159','maccs160','maccs161','maccs162','maccs163','maccs164','maccs165','maccs166','is_testing_all']
   order: 'canonical_smiles'
   index_col: ~
-  limit: 100
+  limit: ~
   where:  'is_testing_all IS NOT NULL and length(canonical_smiles) <= 80'
 
 # Experiment params
@@ -36,7 +36,9 @@ params:
     classify_threshold: 0.5
     classify_label_pos: 1
     classify_label_neg: 0
-    classify_activation: 'tanh'
+    classify_activation: 'hard_sigmoid'
+
+    objective: 'binary_crossentropy'
 
     label_binning: false
     label_binning_after_train: false
@@ -59,4 +61,4 @@ params:
     label_idxs: 'range(166)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[MACCS test] ' # 53 features learning model, 350k rows, len(canonical_smiles) <= 80'
+    comment: '[SAVING_MODEL] MACCS keys, classify, 350k rows, len(canonical_smiles) <= 80'
