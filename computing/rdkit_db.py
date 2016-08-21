@@ -19,13 +19,13 @@ LELIMIT = 10000
 
 SICHO_RIPTORS = Set(['MinAbsPartialCharge','HeavyAtomMolWt','MaxAbsPartialCharge','MinAbsEStateIndex','Chi3n','HallKierAlpha','PEOE_VSA1','PEOE_VSA10','PEOE_VSA11','PEOE_VSA12','PEOE_VSA13','PEOE_VSA14','PEOE_VSA2','PEOE_VSA3','PEOE_VSA6','PEOE_VSA8','PEOE_VSA9','SMR_VSA1','SMR_VSA10','SMR_VSA3','SMR_VSA6','SMR_VSA9','SlogP_VSA10','SlogP_VSA3','SlogP_VSA4','SlogP_VSA6','TPSA','EState_VSA3','EState_VSA5','EState_VSA7','EState_VSA8','VSA_EState9','NHOHCount','NumAliphaticHeterocycles','NumAromaticHeterocycles','MolLogP','fr_Ar_COO','fr_C_O','fr_Imine','fr_NH1','fr_Ndealkylation2','fr_amide','fr_aryl_methyl','fr_ester','fr_ether','fr_furan','fr_imidazole','fr_methoxy','fr_piperzine','fr_pyridine','fr_sulfide','fr_thiazole','fr_urea'])
 
-#DOWNLOAD_TABLE = 'output.target_molweight'
-#DOWNLOAD_COLS = ['molregno','canonical_smiles', 'molweight','alogp','hba','hbd','psa','rtb','is_testing','is_testing_without_206_1977_testing']
-#SEND_TABLE = 'output.target_molweight_rdkit_maccs'
+DOWNLOAD_TABLE = 'output.target_molweight'
+DOWNLOAD_COLS = ['molregno','canonical_smiles', 'molweight','alogp','hba','hbd','psa','rtb','is_testing','is_testing_without_206_1977_testing','standard_value_1977_avg','is_in_1977','is_testing_all']
+SEND_TABLE = 'output.target_molweight_rdkit_maccs'
 
-DOWNLOAD_TABLE = 'output.target_geminin_deduplicated'
-DOWNLOAD_COLS = ['molregno','canonical_smiles','is_testing','standard_value_min','standard_value_max','standard_value_count','standard_value_std','standard_value_relative_std','standard_value_median']
-SEND_TABLE = 'output.target_geminin_deduplicated_rdkit_maccs'
+# DOWNLOAD_TABLE = 'output.target_geminin_deduplicated'
+# DOWNLOAD_COLS = ['molregno','canonical_smiles','is_testing','standard_value_min','standard_value_max','standard_value_count','standard_value_std','standard_value_relative_std','standard_value_median']
+# SEND_TABLE = 'output.target_geminin_deduplicated_rdkit_maccs'
 
 
 def computeDescriptors(smilesDf):
