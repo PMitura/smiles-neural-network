@@ -382,7 +382,7 @@ def classify(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
         else:
             fmeasure = np.nan
 
-        logloss = utility.logloss(pre,label)
+        logloss = utility.logloss(pre,label,RP['classify_label_neg'],RP['classify_label_pos'])
 
         print("    prediction mean:         {}".format(preAvg))
         print("    label mean:              {}".format(refAvg))
@@ -461,7 +461,7 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
                         RP['classify_label_neg']):
                     trueNegative += 1
 
-            loglosses[metricidx][i] = utility.logloss(pre,label)
+            loglosses[metricidx][i] = utility.logloss(pre,label,RP['classify_label_neg'],RP['classify_label_pos'])
             accuracies[metricidx][i] = 1 - (falseNegative + falsePositive) / len(label)
 
 
