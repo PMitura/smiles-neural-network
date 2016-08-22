@@ -66,14 +66,13 @@ def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(RP['label_idxs'
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
 
+    pretrainedModel = utility.loadModel('6340d6800a8965e8ffa367459ae292c9f88d25dd')
+    for i in range(2):
+        model.layers[i].set_weights(pretrainedModel.layers[i].get_weights())
+        model.layers[i].trainable = True
 
     # default learning rate 0.001
     model.compile(loss = RP['objective'], optimizer = OPTIMIZER)
-
-
-    # pretrainedModel = utility.loadModel('6340d6800a8965e8ffa367459ae292c9f88d25dd')
-    # for i in range(2):
-        # model.layers[i].set_weights(pretrainedModel.layers[i].get_weights())
 
     print('  ...done')
     return model

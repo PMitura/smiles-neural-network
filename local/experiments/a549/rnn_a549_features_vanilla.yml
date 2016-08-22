@@ -59,4 +59,4 @@ params:
     label_idxs: 'range(1)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[A549][VANILLA] start with blank, train on a549'
+    comment: '[A549][VANILLA] start with pretrained 350k, train on a549'
