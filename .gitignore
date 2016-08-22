@@ -4,6 +4,7 @@
 tags
 local/plots
 local/models
+local/models_bac
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
