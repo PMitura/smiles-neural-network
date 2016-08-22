@@ -1,7 +1,7 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/geminin/rnn_geminin_features_vanilla.yml']
+experiments: ['local/experiments/a549/rnn_a549_features_vanilla.yml']
 
 model: 'rnn'
 
