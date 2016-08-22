@@ -27,8 +27,6 @@ params:
   rnn:
     load_model: 'd7685a227684537b1ab144ec0bb6824c11c2bdd6'
 
-    num_partitions: 1
-
     # RNN parameters
     learning_rate: 0.001
     epochs: 150

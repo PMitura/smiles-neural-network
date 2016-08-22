@@ -12,7 +12,14 @@ from sklearn.feature_selection import VarianceThreshold
 
 import pylab
 
-data = db.getTarget_206_1977()
+from config import config as cc
+
+
+cc.loadConfig('../local/config.yml')
+
+# data = db.getTarget_206_1977()
+data = db.getTarget_geminin()
+
 
 duplicates = {}
 
@@ -24,7 +31,7 @@ for datum in data:
 
 new_data = []
 for smile, sval_arr in duplicates.iteritems():
-	
+
 	lemin = np.amin(sval_arr)
 	lemax = np.amax(sval_arr)
 
@@ -33,15 +40,17 @@ for smile, sval_arr in duplicates.iteritems():
 	elif lemin != 0 and lemax != 0:
 		if not (len(sval_arr) < 20 and int(math.log(lemin, 10)) != int(math.log(lemax, 10))):
 			new_data.append([smile,np.median(sval_arr)])
-		
+
 data = new_data
+
+print('Computing riptors:')
 
 df_data = {}
 
 df_data['smiles'] = []
 df_data['sval'] = []
 df_reorder = ['smiles','sval']
-for name, function in Descriptors.descList:		
+for name, function in Descriptors.descList:
 	df_data[name] = []
 	df_reorder.append(name)
 
@@ -50,7 +59,7 @@ for i in range(len(data)):
 	sval = data[i][1]
 
 	mol = Chem.MolFromSmiles(smiles)
-	for name, function in Descriptors.descList:		
+	for name, function in Descriptors.descList:
 		df_data[name].append(function(mol))
 
 	df_data['smiles'].append(smiles)
@@ -61,11 +70,13 @@ df = pd.DataFrame(df_data)
 df = df[df_reorder]
 df.set_index('smiles', inplace=True)
 
-# we convert the IC50 values to pIC50 
+# we convert the IC50 values to pIC50
 df.sval = df.sval.apply(lambda x : -1.0 * np.log10(x / 1.0e9))
 
 # drop infinite values
 df = df.drop(df[df.sval == np.inf].index)
+
+print('Feature selection:')
 
 def get_removed_feats(df, model):
     return df.columns.values[1:][~model.get_support()]
@@ -100,7 +111,7 @@ def find_correlated(data):
             to_remove = set(all_descs[mask])
             to_remove.remove(label)
             removed_descs.update(to_remove)
-        
+
     return removed_descs
 
 update_df(df, find_correlated(df))
@@ -109,7 +120,7 @@ update_df(df, find_correlated(df))
 from sklearn.feature_selection import SelectPercentile
 from sklearn.feature_selection import f_regression
 
-# keep only the descriptors that show significant 
+# keep only the descriptors that show significant
 # correlation with the target variable (pIC50)
 regre_sele = SelectPercentile(f_regression, percentile=50)
 regre_sele.fit(df.iloc[:,1:], df.sval)
@@ -149,6 +160,8 @@ features_train, features_test, sval_train, sval_test = train_test_split(
 )
 
 # and build the model:
+print('Building model:')
+
 
 from sklearn.svm import SVR
 from sklearn.grid_search import GridSearchCV
@@ -266,7 +279,7 @@ plt.show()
 from sklearn.manifold import TSNE
 
 model = TSNE(n_components=2)
-TSNEdata = model.fit_transform(df.iloc[:,1:])
+TSNEdata = model.fit_transform(df.iloc[:2000,1:])
 
 TSNEdf = pd.DataFrame(TSNEdata, columns=('x','y'))
 
