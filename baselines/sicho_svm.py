@@ -58,12 +58,15 @@ for i in range(len(data)):
 	smiles = data[i][0]
 	sval = data[i][1]
 
-	mol = Chem.MolFromSmiles(smiles)
-	for name, function in Descriptors.descList:
-		df_data[name].append(function(mol))
+    try:
+    	mol = Chem.MolFromSmiles(smiles)
+    	for name, function in Descriptors.descList:
+    		df_data[name].append(function(mol))
 
-	df_data['smiles'].append(smiles)
-	df_data['sval'].append(sval)
+    	df_data['smiles'].append(smiles)
+    	df_data['sval'].append(sval)
+    except:
+        pass
 
 # create dataframe, reorder values so that smiles is first, sval is second
 df = pd.DataFrame(df_data)
