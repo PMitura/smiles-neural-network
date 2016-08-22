@@ -18,8 +18,9 @@ from config import config as cc
 cc.loadConfig('../local/config.yml')
 
 # data = db.getTarget_206_1977()
-data = db.getTarget_geminin()
 # data = db.getTarget_206_1977_features_wide()
+# data = db.getTarget_geminin()
+data = db.getTarget_a549()
 
 '''
 duplicates = {}
@@ -328,7 +329,7 @@ TSNEdata = model.fit_transform(df.iloc[:2000,1:])
 
 TSNEdf = pd.DataFrame(TSNEdata, columns=('x','y'))
 
-TSNEdf['c'] = pd.Series(df.sval.values,index=TSNEdf.index)
+TSNEdf['c'] = pd.Series(df.sval.values[:2000],index=TSNEdf.index)
 
 plot = TSNEdf.plot.scatter(x = 'x', y = 'y', c = 'c', cmap = 'plasma')
 
