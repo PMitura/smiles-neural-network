@@ -64,4 +64,4 @@ params:
     label_idxs: 'range(166)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[SAVING_MODEL] MACCS keys, regression, 100k rows, len(canonical_smiles) <= 80'
+    comment: '[MACCS][ACC_TEST] testing maccs model for statistics faults'
