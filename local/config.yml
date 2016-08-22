@@ -1,7 +1,9 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/geminin/rnn_maccs_model_tests.yml']
+experiments: ['local/experiments/geminin/dnn_geminin_features.yml']
+
+model: 'dnn'
 
 # Persistence of models
 persistence:

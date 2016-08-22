@@ -20,18 +20,27 @@ def main(argv):
         cc.loadExperiment(experiment)
 
 
-        # limitGrid = [10,50,100,500,1000,5000,10000,50000,100000]
+        if cc.cfg['model'] == 'rnn':
+            # limitGrid = [10,50,100,500,1000,5000,10000,50000,100000]
 
-        # for lg in limitGrid:
-            # cc.exp['fetch']['limit'] = lg
-            # cc.exp['params']['rnn']['comment'] = '[LEARNING_CURVE][LIMIT_{}] limiting data to {} rows'.format(lg,lg)
+            # for lg in limitGrid:
+                # cc.exp['fetch']['limit'] = lg
+                # cc.exp['params']['rnn']['comment'] = '[LEARNING_CURVE][LIMIT_{}] limiting data to {} rows'.format(lg,lg)
 
-            # reloads the rnn.rnn module which populates new config values to their respective vars
-        import rnn.rnn
-        reload(rnn.rnn)
+                # reloads the rnn.rnn module which populates new config values to their respective vars
+            import rnn.rnn
+            reload(rnn.rnn)
 
-        print(cc.cfg,cc.exp)
-        rnn.rnn.run()
+            print(cc.cfg,cc.exp)
+            rnn.rnn.run()
+        elif cc.cfg['model'] == 'dnn':
+            import rnn.dnn
+            reload(rnn.dnn)
+
+            print(cc.cfg,cc.exp)
+            rnn.dnn.run()
+        else:
+            raise Exception('Run: unknown model')
 
 if __name__ == '__main__':
     main(sys.argv[1:])
