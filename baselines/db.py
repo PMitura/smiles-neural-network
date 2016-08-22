@@ -74,5 +74,5 @@ def getTarget_geminin():
 
     DB_COLS = ','.join(['"{}"'.format(x) for x in cols])
     # CAP_SIZE = 1976
-    CAP_SIZE = 100000
+    CAP_SIZE = 8000
     return fetchData('SELECT {} FROM {} LIMIT {}'.format(DB_COLS, DB_TABLE, CAP_SIZE))
