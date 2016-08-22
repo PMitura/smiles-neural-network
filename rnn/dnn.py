@@ -61,7 +61,9 @@ def run():
     rawData = db.getData()
 
     # filter infs and nans from data cols
-    cols = rawData.columns.tolist()[1:]
+    cols = rawData.columns.tolist()[1:-1]
+
+    print(cols)
 
     for col in cols:
         rawData = rawData.drop(rawData[np.isinf(rawData[col])].index)
@@ -93,14 +95,11 @@ def run():
     model = Sequential()
 
     # hidden
-    model.add(Dense(200, W_regularizer=l2(0.01), input_shape=(X.shape[1], )))
-    model.add(Dense(150, W_regularizer=l2(0.01)))
+    model.add(Dense(50, W_regularizer=l2(0.01), input_shape=(X.shape[1], )))
     model.add(Activation('relu'))
     model.add(Dense(1))
 
     model.compile(loss = 'mse', optimizer = OPTIMIZER)
-
-    print(rawData[RD['testing']][1648])
 
     if RD['use_test_flags']:
         maskTrain = np.zeros(len(X),dtype=bool)
