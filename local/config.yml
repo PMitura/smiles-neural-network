@@ -1,7 +1,7 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/wide_features_valid/rnn_molweight_rdkit_maccs.yml']
+experiments: ['local/experiments/wide_features_valid/rnn_wide_features_learning_curve.yml']
 
 # Persistence of models
 persistence:

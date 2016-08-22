@@ -130,7 +130,7 @@ def getGitCommitHash():
     try:
         gitCommit = subprocess.check_output('git rev-parse HEAD', shell=True).strip()
     except:
-        gitCommit = None
+        gitCommit = 'default'
 
     return gitCommit
 

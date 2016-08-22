@@ -693,6 +693,12 @@ def run(grid = None):
 
 
 
+    try:
+        gitCommit = subprocess.check_output('git rev-parse HEAD', shell=True).strip()
+    except:
+        gitCommit = 'default'
+
+
 
     # TODO: add memory_pm_mb, memory_vm_bm
 
@@ -732,6 +738,6 @@ def run(grid = None):
         learning_curve = {'val':open('{}/{}'.format(cc.cfg['plots']['dir'], utility.PLOT_NAME),'rb').read(),'type':'bin'},
         hostname = socket.gethostname(),
         experiment_config = yaml.dump(cc.exp,default_flow_style=False),
-        git_commit = utility.getGitCommitHash(),
+        git_commit = gitCommit,
         objective = RP['objective'],
         loaded_model = RP['load_model'])
