@@ -46,7 +46,7 @@ params:
     freeze_idxs: 'set()'
     trainable_inner: true
 
-    zscore_norm: true
+    zscore_norm: false
     logarithm: false
 
     # learning rate decay settings
