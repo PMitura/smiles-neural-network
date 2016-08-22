@@ -1,9 +1,9 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/a549/dnn_a549_features.yml']
+experiments: ['local/experiments/target_10576_ki/rnn_10576_ki_vanilla.yml']
 
-model: 'dnn'
+model: 'rnn'
 
 # Persistence of models
 persistence:

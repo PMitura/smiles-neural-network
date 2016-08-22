@@ -218,6 +218,11 @@ param_grid = [
   {'C': [1, 10, 100, 1000], 'epsilon': [0.0, 0.1, 0.2, 0.3, 0.4], 'gamma': [0.01, 0.001, 0.0001], 'kernel': ['rbf']},
  ]
 
+# {'kernel': 'rbf', 'C': 1, 'verbose': False, 'degree': 3, 'epsilon': 0.0, 'shrinking': True, 'max_iter': -1,
+ # 'tol': 0.001, 'cache_size': 200, 'coef0': 0.0, 'gamma': 0.01}
+# ()
+
+
 model = GridSearchCV(SVR(), param_grid, n_jobs=2, cv=5)
 model.fit(features_train, sval_train)
 model = model.best_estimator_
