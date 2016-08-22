@@ -415,6 +415,11 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
     accuracies = np.zeros((len(labelIndexes), RP['num_partitions']))
     aucs = np.zeros((len(labelIndexes), RP['num_partitions']))
 
+    falseNegativeGlobal = 0.0
+    falsePositiveGlobal = 0.0
+    truePositiveGlobal  = 0.0
+    trueNegativeGlobal  = 0.0
+
     # print(rawLabel)
 
     for i in range(RP['num_partitions']):
@@ -469,6 +474,11 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
             loglosses[metricidx][i] = utility.logloss(pre,label,RP['classify_label_neg'],RP['classify_label_pos'])
             accuracies[metricidx][i] = 1 - (falseNegative + falsePositive) / len(label)
 
+
+            falseNegativeGlobal += falseNegative
+            falsePositiveGlobal += falsePositive
+            truePositiveGlobal +=  truePositive
+            trueNegativeGlobal +=  trueNegative
 
             # we need to normalize the confidences to [0,1]?
             try:
@@ -544,6 +554,12 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
     print '  Accuracy mean of devs: {}'.format(accuracyDevOverall)
     print '\n  AUC mean of avgs: {}'.format(aucAvgOverall)
     print '  AUC mean of devs: {}'.format(aucDevOverall)
+
+    print 'FN: {}'.format(falseNegativeGlobal)
+    print 'FP: {}'.format(falsePositiveGlobal)
+    print 'TP: {}'.format(truePositiveGlobal)
+    print 'TN: {}'.format(trueNegativeGlobal)
+
     return accuracyAvgOverall, accuracyDevOverall, loglossAvgOverall, loglossDevOverall, aucAvgOverall, aucDevOverall
 
 
