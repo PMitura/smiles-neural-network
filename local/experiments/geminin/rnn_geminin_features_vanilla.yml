@@ -59,4 +59,4 @@ params:
     label_idxs: 'range(1)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[GEMININ][VANILLA] start with pretrained 350k, train on geminin'
+    comment: '[GEMININ][VANILLA] start with blank, train on geminin'
