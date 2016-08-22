@@ -26,9 +26,9 @@ params:
     testing: 'is_testing'
   rnn:
     # RNN parameters
-    learning_rate: 0.0003
+    learning_rate: 0.0001
     epochs: 500
-    batch: 80
+    batch: 160
 
     num_partitions: 5
 

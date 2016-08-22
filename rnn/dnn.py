@@ -93,7 +93,8 @@ def run():
     model = Sequential()
 
     # hidden
-    model.add(Dense(50, W_regularizer=l2(0.01), input_shape=(X.shape[1], )))
+    model.add(Dense(200, W_regularizer=l2(0.01), input_shape=(X.shape[1], )))
+    model.add(Dense(150, W_regularizer=l2(0.01)))
     model.add(Activation('relu'))
     model.add(Dense(1))
 
