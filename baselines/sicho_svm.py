@@ -24,22 +24,22 @@ data = db.getTarget_geminin()
 duplicates = {}
 
 for datum in data:
-	if datum[0] in duplicates:
-		duplicates[datum[0]].append(datum[1])
-	else:
-		duplicates[datum[0]] = [datum[1]]
+    if datum[0] in duplicates:
+       duplicates[datum[0]].append(datum[1])
+    else:
+       duplicates[datum[0]] = [datum[1]]
 
 new_data = []
 for smile, sval_arr in duplicates.iteritems():
 
-	lemin = np.amin(sval_arr)
-	lemax = np.amax(sval_arr)
+    lemin = np.amin(sval_arr)
+    lemax = np.amax(sval_arr)
 
-	if len(sval_arr) == 1:
-		new_data.append([smile,sval_arr[0]])
-	elif lemin != 0 and lemax != 0:
-		if not (len(sval_arr) < 20 and int(math.log(lemin, 10)) != int(math.log(lemax, 10))):
-			new_data.append([smile,np.median(sval_arr)])
+    if len(sval_arr) == 1:
+       new_data.append([smile,sval_arr[0]])
+    elif lemin != 0 and lemax != 0:
+       if not (len(sval_arr) < 20 and int(math.log(lemin, 10)) != int(math.log(lemax, 10))):
+         new_data.append([smile,np.median(sval_arr)])
 
 data = new_data
 
@@ -51,20 +51,20 @@ df_data['smiles'] = []
 df_data['sval'] = []
 df_reorder = ['smiles','sval']
 for name, function in Descriptors.descList:
-	df_data[name] = []
-	df_reorder.append(name)
+    df_data[name] = []
+    df_reorder.append(name)
 
 for i in range(len(data)):
-	smiles = data[i][0]
-	sval = data[i][1]
+    smiles = data[i][0]
+    sval = data[i][1]
 
     try:
-    	mol = Chem.MolFromSmiles(smiles)
-    	for name, function in Descriptors.descList:
-    		df_data[name].append(function(mol))
+        mol = Chem.MolFromSmiles(smiles)
+        for name, function in Descriptors.descList:
+           df_data[name].append(function(mol))
 
-    	df_data['smiles'].append(smiles)
-    	df_data['sval'].append(sval)
+        df_data['smiles'].append(smiles)
+        df_data['sval'].append(sval)
     except:
         pass
 
