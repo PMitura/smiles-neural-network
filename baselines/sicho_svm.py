@@ -19,8 +19,9 @@ cc.loadConfig('../local/config.yml')
 
 # data = db.getTarget_206_1977()
 data = db.getTarget_geminin()
+# data = db.getTarget_206_1977_features_wide()
 
-
+'''
 duplicates = {}
 
 for datum in data:
@@ -42,9 +43,16 @@ for smile, sval_arr in duplicates.iteritems():
          new_data.append([smile,np.median(sval_arr)])
 
 data = new_data
+'''
 
-print('Computing riptors:')
+cols = ['smiles','sval','MinAbsPartialCharge','HeavyAtomMolWt','MaxAbsPartialCharge','MinAbsEStateIndex','Chi3n','HallKierAlpha','PEOE_VSA1','PEOE_VSA10','PEOE_VSA11','PEOE_VSA12','PEOE_VSA13','PEOE_VSA14','PEOE_VSA2','PEOE_VSA3','PEOE_VSA6','PEOE_VSA8','PEOE_VSA9','SMR_VSA1','SMR_VSA10','SMR_VSA3','SMR_VSA6','SMR_VSA9','SlogP_VSA10','SlogP_VSA3','SlogP_VSA4','SlogP_VSA6','TPSA','EState_VSA3','EState_VSA5','EState_VSA7','EState_VSA8','VSA_EState9','NHOHCount','NumAliphaticHeterocycles','NumAromaticHeterocycles','MolLogP','fr_Ar_COO','fr_C_O','fr_Imine','fr_NH1','fr_Ndealkylation2','fr_amide','fr_aryl_methyl','fr_ester','fr_ether','fr_furan','fr_imidazole','fr_methoxy','fr_piperzine','fr_pyridine','fr_sulfide','fr_thiazole','fr_urea']
 
+df = pd.DataFrame(data, columns=cols)
+df.set_index('smiles', inplace=True)
+
+# print(df)
+
+'''
 df_data = {}
 
 df_data['smiles'] = []
@@ -58,26 +66,43 @@ for i in range(len(data)):
     smiles = data[i][0]
     sval = data[i][1]
 
+    if i % 1000 == 0:
+        print(i)
+
     try:
         mol = Chem.MolFromSmiles(smiles)
+        riptors = {}
         for name, function in Descriptors.descList:
-           df_data[name].append(function(mol))
+            riptors[name]=function(mol)
+            if np.isnan(riptors[name]) or np.isinf(riptors[name]):
+                raise Exception()
+
+
+
+        for name,riptor in riptors.itervalues():
+            df_data[name].append(riptor)
 
         df_data['smiles'].append(smiles)
         df_data['sval'].append(sval)
     except:
         pass
 
+
 # create dataframe, reorder values so that smiles is first, sval is second
 df = pd.DataFrame(df_data)
 df = df[df_reorder]
 df.set_index('smiles', inplace=True)
+'''
 
 # we convert the IC50 values to pIC50
 df.sval = df.sval.apply(lambda x : -1.0 * np.log10(x / 1.0e9))
 
+# lll = ['MinAbsPartialCharge','HeavyAtomMolWt','MaxAbsPartialCharge','MinAbsEStateIndex','Chi3n','HallKierAlpha','PEOE_VSA1','PEOE_VSA10','PEOE_VSA11','PEOE_VSA12','PEOE_VSA13','PEOE_VSA14','PEOE_VSA2','PEOE_VSA3','PEOE_VSA6','PEOE_VSA8','PEOE_VSA9','SMR_VSA1','SMR_VSA10','SMR_VSA3','SMR_VSA6','SMR_VSA9','SlogP_VSA10','SlogP_VSA3','SlogP_VSA4','SlogP_VSA6','TPSA','EState_VSA3','EState_VSA5','EState_VSA7','EState_VSA8','VSA_EState9','NHOHCount','NumAliphaticHeterocycles','NumAromaticHeterocycles','MolLogP','fr_Ar_COO','fr_C_O','fr_Imine','fr_NH1','fr_Ndealkylation2','fr_amide','fr_aryl_methyl','fr_ester','fr_ether','fr_furan','fr_imidazole','fr_methoxy','fr_piperzine','fr_pyridine','fr_sulfide','fr_thiazole','fr_urea']
+
 # drop infinite values
 df = df.drop(df[df.sval == np.inf].index)
+df = df.drop(df[df.sval == -np.inf].index)
+df = df.drop(df[df.sval == np.nan].index)
 
 print('Feature selection:')
 
@@ -94,6 +119,7 @@ def update_df(df, removed_descriptors, inplace=True):
         # print(new_df.shape)
         return new_df
 
+'''
 # find the names of the columns with zero variance
 var_sel = VarianceThreshold()
 var_sel.fit(df.iloc[:,1:])
@@ -101,6 +127,8 @@ removed_descriptors = get_removed_feats(df, var_sel)
 
 # update the data frame
 update_df(df, removed_descriptors)
+
+
 
 # correlation filter
 def find_correlated(data):
@@ -134,7 +162,21 @@ update_df(df, removed_descriptors)
 
 # print selected features
 # print(df.columns.tolist())
+'''
 
+#
+cols = ['MinAbsPartialCharge','HeavyAtomMolWt','MaxAbsPartialCharge','MinAbsEStateIndex','Chi3n','HallKierAlpha','PEOE_VSA1','PEOE_VSA10','PEOE_VSA11','PEOE_VSA12','PEOE_VSA13','PEOE_VSA14','PEOE_VSA2','PEOE_VSA3','PEOE_VSA6','PEOE_VSA8','PEOE_VSA9','SMR_VSA1','SMR_VSA10','SMR_VSA3','SMR_VSA6','SMR_VSA9','SlogP_VSA10','SlogP_VSA3','SlogP_VSA4','SlogP_VSA6','TPSA','EState_VSA3','EState_VSA5','EState_VSA7','EState_VSA8','VSA_EState9','NHOHCount','NumAliphaticHeterocycles','NumAromaticHeterocycles','MolLogP','fr_Ar_COO','fr_C_O','fr_Imine','fr_NH1','fr_Ndealkylation2','fr_amide','fr_aryl_methyl','fr_ester','fr_ether','fr_furan','fr_imidazole','fr_methoxy','fr_piperzine','fr_pyridine','fr_sulfide','fr_thiazole','fr_urea']
+# dcols = ['MinAbsPartialCharge']
+
+
+
+for col in cols:
+    df = df.drop(df[np.isinf(df[col])].index)
+    df = df.drop(df[np.isnan(df[col])].index)
+
+# df.drop(cols,axis=1,inplace=True)
+
+# print(df)
 
 from sklearn.preprocessing import StandardScaler
 
