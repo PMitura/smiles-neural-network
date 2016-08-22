@@ -32,13 +32,13 @@ params:
     td_layer_multiplier: 2
     gru_layer_multiplier: 2
 
-    classify: true
+    classify: false
     classify_threshold: 0.5
     classify_label_pos: 1
     classify_label_neg: 0
     classify_activation: 'hard_sigmoid'
 
-    objective: 'binary_crossentropy'
+    objective: 'mse'
 
     label_binning: false
     label_binning_after_train: false
@@ -61,4 +61,4 @@ params:
     label_idxs: 'range(166)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[SAVING_MODEL] MACCS keys, classify, 100k rows, len(canonical_smiles) <= 80'
+    comment: '[SAVING_MODEL] MACCS keys, regression, 100k rows, len(canonical_smiles) <= 80'
