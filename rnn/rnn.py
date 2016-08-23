@@ -38,8 +38,6 @@ RP['freeze_idxs'] = eval(str(cc.exp['params']['rnn']['freeze_idxs']))
 RP['label_idxs'] = eval(str(cc.exp['params']['rnn']['label_idxs']))
 
 OPTIMIZER = Adam(lr = RP['learning_rate'])
-# OPTIMIZER = Adadelta()
-# OPTIMIZER = Adagrad()
 
 def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(RP['label_idxs'])):
     print('  Initializing and compiling...')
@@ -631,9 +629,18 @@ def run(grid = None):
     # Initialize using the same seed (to get stable results on comparisons)
     np.random.seed(RP['seed'])
 
-    fullIn, labels, alphaSize, nomiSize, testFlags = data.prepareData()
+    df = db.getData()
 
-    trainIn, trainLabel, testIn, testLabel = preprocess(fullIn, labels, testFlags)
+    alphaSize = data.SMILES_ALPHABET_LEN
+    nomiSize = len(RD['nominals']) if RD['nominals'] else 0
+
+    trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessData(df)
+
+
+    # fullIn, labels, alphaSize, nomiSize, testFlags = data.prepareData()
+    # trainIn, trainLabel, testIn, testLabel = preprocess(fullIn, labels, testFlags)
+
+
 
 
     if RP['load_model']:

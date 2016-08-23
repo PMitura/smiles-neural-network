@@ -1,7 +1,7 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/target_10576_ki/rnn_10576_ki_vanilla.yml']
+experiments: ['local/experiments/test/rnn_test.yml']
 
 model: 'rnn'
 
