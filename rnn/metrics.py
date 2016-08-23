@@ -61,12 +61,12 @@ def predict(model, input, labels, meta):
         part = partitioner.get()
 
         partIn = input[part]
-        partLabels = labels[part]
-        partPred = model.predict(partIn, batch_size = RP['batch'])
+        partLabelsT = labels[part].T
+        partPredT = model.predict(partIn, batch_size = RP['batch']).T
 
         for i in range(labels.shape[1]):
-            metrics['r2'][i][iteration] = computeR2(partPred.T[i], partLabels.T[i])
-            metrics['mse'][i][iteration] = computeMSE(partPred.T[i], partLabels.T[i])
+            metrics['r2'][i][iteration] = computeR2(partPredT[i], partLabelsT[i])
+            metrics['mse'][i][iteration] = computeMSE(partPredT[i], partLabelsT[i])
 
     metricsPerLabel = {
         'r2_avg': np.nanmean(metrics['r2'], axis = 1),
@@ -132,16 +132,16 @@ def classify(model, input, labels, meta):
         part = partitioner.get()
 
         partIn = input[part]
-        partLabels = labels[part]
-        partPred = model.predict(partIn, batch_size = RP['batch'])
+        partLabelsT = labels[part].T
+        partPredT = model.predict(partIn, batch_size = RP['batch']).T
 
         for i in range(labels.shape[1]):
-            confusion = computeConfusion(partPred.T[i], partLabels.T[i])
+            confusion = computeConfusion(partPredT[i], partLabelsT[i])
 
             metrics['confusion'][i][iteration] = confusion
             metrics['acc'][i][iteration] = (confusion[0][0]+confusion[1][1]) / confusion.sum()
-            metrics['log_loss'][i][iteration] = utility.logloss(partPred.T[i],partLabels.T[i],RP['classify_label_neg'],RP['classify_label_pos'])
-            metrics['auc'][i][iteration] = computeAUC(partPred.T[i], partLabels.T[i])
+            metrics['log_loss'][i][iteration] = utility.logloss(partPredT[i],partLabelsT[i],RP['classify_label_neg'],RP['classify_label_pos'])
+            metrics['auc'][i][iteration] = computeAUC(partPredT[i], partLabelsT[i])
 
     metricsPerLabel = {
         'acc_avg': np.nanmean(metrics['acc'], axis = 1),
