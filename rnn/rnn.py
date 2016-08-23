@@ -1,4 +1,4 @@
-import data, utility, metrics
+import data, utility, metrics, statistics
 import time
 
 import numpy as np
@@ -104,6 +104,7 @@ def train(model, nnInput, labels, validation, makePlot = True,
 
 
     # needed format is orthogonal to ours
+    '''
     formattedLabels = np.zeros((len(labels[0]), len(labelIndexes)))
     formattedValid = np.zeros((len(validation[1][labelIndexes[0]]),
         len(labelIndexes)))
@@ -112,7 +113,7 @@ def train(model, nnInput, labels, validation, makePlot = True,
             formattedLabels[j][i] = labels[labelIndexes[i]][j]
         for j in range(len(validation[1][labelIndexes[i]])):
             formattedValid[j][i] = validation[1][labelIndexes[i]][j]
-
+    '''
     early = keras.callbacks.EarlyStopping(monitor = 'val_loss',
             patience = RP['early_stop'])
 
@@ -120,9 +121,9 @@ def train(model, nnInput, labels, validation, makePlot = True,
 
     modelLogger = visualization.ModelLogger()
 
-    history = model.fit(nnInput, formattedLabels, nb_epoch = RP['epochs'],
+    history = model.fit(nnInput, labels, nb_epoch = RP['epochs'],
             batch_size = RP['batch'], callbacks = [early],
-            validation_data = (validation[0], formattedValid))
+            validation_data = (validation[0], validation[1]))
 
     if makePlot:
         values = np.zeros((len(history.history['loss']), 2))
@@ -590,7 +591,8 @@ def modelOnLabels(trainIn, trainLabel, testIn, testLabel, alphaSize, nomiSize,
 
 
 def run(grid = None):
-    startTime = time.time()
+    stats = {}
+    stats['runtime_second'] = time.time()
 
     # initialize using the same seed (to get stable results on comparisons)
     np.random.seed(RP['seed'])
@@ -598,132 +600,82 @@ def run(grid = None):
     # get the training and testing datasets along with some meta info
     trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessData(db.getData())
 
+    stats['training_row_count'] = len(trainIn)
+    stats['testing_row_count'] = len(testIn)
+
+    # load model from file or create and train one from scratch
     if RP['load_model']:
         model = utility.loadModel(RP['load_model'])
-        epochsDone = None
     else:
         model = configureModel(trainIn)
-        epochsDone = train(model, trainIn, trainLabel, (testIn, testLabel))
+        stats['epoch_count'] = train(model, trainIn, trainLabel, (testIn, testLabel))
 
-    metrics.predict(model, trainIn, trainLabel, preprocessMeta)
 
-    return
-
+    # compute metrics for the model based on the task for both testing and training data
+    print('\n   Getting metrics for training data:')
     if RP['classify']:
-        if RP['label_binning_after_train'] and not RP['label_binning']:
-            for idx in RP['label_idxs']:
-                trainLabel[idx] = utility.bin(trainLabel[idx], RP['label_binning_ratio'],
-                        classA = RP['classify_label_neg'],
-                        classB = RP['classify_label_pos'])
-                testLabel[idx] = utility.bin(testLabel[idx], RP['label_binning_ratio'],
-                        classA = RP['classify_label_neg'],
-                        classB = RP['classify_label_pos'])
-            model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
-                alphaSize, nomiSize, [0], model.get_weights())
-        elif not RP['label_binning_after_train'] and not RP['label_binning']:
-            for idx in RP['label_idxs']:
-                testLabel[idx] = utility.bin(testLabel[idx], RP['label_binning_ratio'],
-                        classA = RP['classify_label_neg'],
-                        classB = RP['classify_label_pos'])
-
-    if RP['scatter_visualize']:
-        utility.visualize2D(model, 1, testIn, testLabel[RP['label_idxs'][0]])
-
-    print("\n  Prediction of training data:")
-    if RP['classify']:
-        if RP['use_partitions']:
-            relevanceTrain, stdTrain, loglossTrain, loglossStdTrain, aucTrain, aucStdTrain = classifySplit(model, trainIn, trainLabel)
-        else:
-            relevanceTrain = classify(model, trainIn, trainLabel)
+        trainMetrics = metrics.classify(model, trainIn, trainLabel, preprocessMeta)
     else:
-        if RP['use_partitions']:
-            relevanceTrain, stdTrain = predictSplit(model, trainIn, trainLabel)
-        else:
-            relevanceTrain = predict(model, trainIn, trainLabel)
+        trainMetrics = metrics.predict(model, trainIn, trainLabel, preprocessMeta)
 
-    print("\n  Prediction of testing data:")
+    print('\n   Getting metrics for test data:')
     if RP['classify']:
-        if RP['use_partitions']:
-            relevanceTest, stdTest, loglossTest, loglossStdTest, aucTest, aucStdTest = classifySplit(model, testIn, testLabel)
-        else:
-            relevanceTest = classify(model, testIn, testLabel)
+        testMetrics = metrics.classify(model, testIn, testLabel, preprocessMeta)
     else:
-        if RP['use_partitions']:
-            relevanceTest, stdTest = predictSplit(model, testIn, testLabel)
-        else:
-            relevanceTest = predict(model, testIn, testLabel)
+        testMetrics = metrics.predict(model, testIn, testLabel, preprocessMeta)
 
 
-    visualization.layerActivations(model, testIn, testLabel)
-
+    # utilities and visualizations
+    if cc.cfg['plots']['layer_activations']:
+        visualization.layerActivations(model, testIn, testLabel)
 
     if cc.cfg['persistence']['model']:
         utility.saveModel(model)
 
+    # statistics to send to journal
+    stats['runtime_second'] = time.time() - stats['runtime_second']
+    stats['memory_pm_mb'], stats['memory_vm_mb'] = utility.getMemoryUsage()
+    stats['git_commit'] = utility.getGitCommitHash()
+    stats['comment'] = RP['comment']
+    stats['hostname'] = socket.gethostname()
+    stats['experiment_config'] = yaml.dump(cc.exp,default_flow_style=False)
 
-    endTime = time.time()
-    deltaTime = endTime - startTime
+    stats['model'] = utility.modelToString(model)
+    stats['loaded_model'] = RP['load_model']
+    stats['parameter_count'] = model.count_params()
+    stats['task'] = 'classification' if RP['classify'] else 'regression'
 
-    modelSummary = utility.modelToString(model)
+    stats['dataset_name'] = cc.exp['fetch']['table']
+    stats['split_name'] = RD['testing']
+    stats['label_name'] = ','.join(RD['labels'])
 
-    memRss, memVms = utility.getMemoryUsage()
+    stats['epoch_max'] = RP['epochs']
+    stats['learning_rate'] = RP['learning_rate']
+    stats['optimization_method'] = OPTIMIZER.__class__.__name__
+    stats['batch_size'] = RP['batch']
+    stats['seed'] = RP['seed']
+    stats['objective'] = RP['objective']
+    stats['learning_curve'] = {'val':open('{}/{}'.format(cc.cfg['plots']['dir'], utility.PLOT_NAME),'rb').read(),'type':'bin'}
 
-    if np.isnan(relevanceTest):
-        relevanceTest = None
-    if np.isnan(relevanceTrain):
-        relevanceTrain = None
-    if np.isnan(stdTest):
-        stdTest = None
-    if np.isnan(stdTrain):
-        stdTrain = None
+    # metric statistics to send
+    metricStats = {}
 
+    if RP['classify']:
+        metricStats['relevance_training'] = trainMetrics['acc_avg']
+        metricStats['relevance_training_std'] = trainMetrics['acc_std']
+        metricStats['relevance_testing'] = testMetrics['acc_avg']
+        metricStats['relevance_testing_std'] = testMetrics['acc_std']
+        metricStats['log_loss'] = testMetrics['log_loss_avg']
+        metricStats['log_loss_std'] = testMetrics['log_loss_std']
+        metricStats['auc'] = testMetrics['auc_avg']
+        metricStats['auc_std'] = testMetrics['auc_std']
+    else:
+        metricStats['relevance_training'] = trainMetrics['r2_avg']
+        metricStats['relevance_training_std'] = trainMetrics['r2_std']
+        metricStats['relevance_testing'] = testMetrics['r2_avg']
+        metricStats['relevance_testing_std'] = testMetrics['r2_std']
+        metricStats['mse'] = testMetrics['mse_avg']
+        metricStats['mse_std'] = testMetrics['mse_std']
 
-
-    try:
-        gitCommit = subprocess.check_output('git rev-parse HEAD', shell=True).strip()
-    except:
-        gitCommit = 'default'
-
-
-
-    # TODO: add memory_pm_mb, memory_vm_bm
-
-    if not RP['classify']:
-        loglossTest = None
-        loglossStdTest = None
-        aucTest = None
-        aucStdTest = None
-
-    db.sendStatistics(
-        dataset_name = cc.exp['fetch']['table'],
-        split_name = cc.exp['params']['data']['testing'],
-        training_row_count = len(trainLabel[0]),
-        testing_row_count = len(testLabel[0]),
-        task = 'classification' if RP['classify'] else 'regression',
-        relevance_training = relevanceTrain,
-        relevance_training_std = stdTrain,
-        relevance_testing = relevanceTest,
-        relevance_testing_std = stdTest,
-        log_loss = loglossTest,
-        log_loss_std = loglossStdTest,
-        auc = aucTest,
-        auc_std = aucStdTest,
-        epoch_max = RP['epochs'],
-        epoch_count = epochsDone,
-        runtime_second = deltaTime,
-        parameter_count = model.count_params(),
-        learning_rate = RP['learning_rate'],
-        optimization_method = OPTIMIZER.__class__.__name__,
-        batch_size = RP['batch'],
-        comment = RP['comment'],
-        label_name = ','.join(cc.exp['params']['data']['labels']),
-        model = modelSummary,
-        seed = RP['seed'],
-        memory_pm_mb = memRss,
-        memory_vm_mb = memVms,
-        learning_curve = {'val':open('{}/{}'.format(cc.cfg['plots']['dir'], utility.PLOT_NAME),'rb').read(),'type':'bin'},
-        hostname = socket.gethostname(),
-        experiment_config = yaml.dump(cc.exp,default_flow_style=False),
-        git_commit = gitCommit,
-        objective = RP['objective'],
-        loaded_model = RP['load_model'])
+    stats.update(metricStats)
+    db.sendStatistics(**stats)

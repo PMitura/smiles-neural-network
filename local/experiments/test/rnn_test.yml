@@ -11,7 +11,7 @@ fetch:
   cols: ['canonical_smiles','MaxAbsPartialCharge','MinAbsEStateIndex','is_testing']
   order: 'canonical_smiles'
   index_col: ~
-  limit: 100
+  limit: 1000
   where:  'length(canonical_smiles) <= 80'
 
 # Experiment params

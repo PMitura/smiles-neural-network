@@ -56,6 +56,8 @@ def predict(model, input, labels, meta):
     labels = data.denormalize(labels, meta)
 
     for iteration in range(iterations):
+        print('   iter: {}/{}'.format(iteration, iterations))
+
         part = partitioner.get()
 
         partIn = input[part]
@@ -63,22 +65,21 @@ def predict(model, input, labels, meta):
         partPred = model.predict(partIn, batch_size = RP['batch'])
 
         for i in range(labels.shape[1]):
-            metrics['r2'][i][iteration] = computeR2(partLabels.T[i],partPred.T[i])
-            metrics['mse'][i][iteration] = computeMSE(partLabels.T[i],partPred.T[i])
-
+            metrics['r2'][i][iteration] = computeR2(partPred.T[i], partLabels.T[i])
+            metrics['mse'][i][iteration] = computeMSE(partPred.T[i], partLabels.T[i])
 
     metricsPerLabel = {
-        'r2_avg': metrics['r2'].mean(axis = 1),
-        'r2_std': metrics['r2'].std(axis = 1),
-        'mse_avg': metrics['mse'].mean(axis = 1),
-        'mse_std': metrics['mse'].std(axis = 1)
+        'r2_avg': np.nanmean(metrics['r2'], axis = 1),
+        'r2_std': np.nanstd(metrics['r2'], axis = 1),
+        'mse_avg': np.nanmean(metrics['mse'], axis = 1),
+        'mse_std': np.nanstd(metrics['mse'], axis = 1)
     }
 
     metricsOverall = {
-        'r2_avg': metrics['r2'].mean(),
-        'r2_std': metrics['r2'].std(),
-        'mse_avg': metrics['mse'].mean(),
-        'mse_std': metrics['mse'].std(),
+        'r2_avg': np.nanmean(metrics['r2']),
+        'r2_std': np.nanstd(metrics['r2']),
+        'mse_avg': np.nanmean(metrics['mse']),
+        'mse_std': np.nanstd(metrics['mse']),
     }
 
     return metricsOverall
@@ -103,8 +104,13 @@ def computeConfusion(pred, truth):
                 confusion[0][0]+=1
             elif utility.equals(truth[i], neg):
                 confusion[1][0]+=1
-
     return confusion
+
+def computeAUC(pred, truth):
+    try:
+        return sk.metrics.roc_auc_score(truth, pred)
+    except:
+        return np.nan
 
 def classify(model, input, labels, meta):
     partitioner = PermutationPartitioner(len(input), len(input) / RP['num_partitions'])
@@ -112,7 +118,7 @@ def classify(model, input, labels, meta):
 
     metrics = {
         'acc': np.zeros((labels.shape[1], iterations)),
-        'logloss': np.zeros((labels.shape[1], iterations)),
+        'log_loss': np.zeros((labels.shape[1], iterations)),
         'auc': np.zeros((labels.shape[1], iterations)),
         'confusion': np.zeros((labels.shape[1], iterations, 2, 2)),
     }
@@ -121,6 +127,8 @@ def classify(model, input, labels, meta):
     labels = data.denormalize(labels, meta)
 
     for iteration in range(iterations):
+        print('   iter: {}/{}'.format(iteration, iterations))
+
         part = partitioner.get()
 
         partIn = input[part]
@@ -128,12 +136,29 @@ def classify(model, input, labels, meta):
         partPred = model.predict(partIn, batch_size = RP['batch'])
 
         for i in range(labels.shape[1]):
+            confusion = computeConfusion(partPred.T[i], partLabels.T[i])
 
+            metrics['confusion'][i][iteration] = confusion
+            metrics['acc'][i][iteration] = (confusion[0][0]+confusion[1][1]) / confusion.sum()
+            metrics['log_loss'][i][iteration] = utility.logloss(partPred.T[i],partLabels.T[i],RP['classify_label_neg'],RP['classify_label_pos'])
+            metrics['auc'][i][iteration] = computeAUC(partPred.T[i], partLabels.T[i])
 
-            metrics['confusion'][i][iteration] = computeConfusion(partLabels.T[i],partPred.T[i])
+    metricsPerLabel = {
+        'acc_avg': np.nanmean(metrics['acc'], axis = 1),
+        'acc_std': np.nanstd(metrics['acc'], axis = 1),
+        'log_loss_avg': np.nanmean(metrics['log_loss'], axis = 1),
+        'log_loss_std': np.nanstd(metrics['log_loss'], axis = 1),
+        'auc_avg': np.nanmean(metrics['auc'], axis = 1),
+        'auc_std': np.nanstd(metrics['auc'], axis = 1)
+    }
 
+    metricsOverall = {
+        'acc_avg': np.nanmean(metrics['acc']),
+        'acc_std': np.nanstd(metrics['acc']),
+        'log_loss_avg': np.nanmean(metrics['log_loss']),
+        'log_loss_std': np.nanstd(metrics['log_loss']),
+        'auc_avg': np.nanmean(metrics['auc']),
+        'auc_std': np.nanstd(metrics['auc'])
+    }
 
-
-            metrics['acc'][i][iteration] = computeAcc(partLabels.T[i],partPred.T[i])
-            metrics['logloss'][i][iteration] = computeLogloss(partLabels.T[i],partPred.T[i])
-            metrics['auc'][i][iteration] = computeAUC(partLabels.T[i],partPred.T[i])
+    return metricsOverall

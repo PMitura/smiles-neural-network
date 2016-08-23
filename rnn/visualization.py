@@ -140,9 +140,6 @@ def histograms(modelLogger):
 
 # data = [items][symbols][onehot]
 def layerActivations(model, data, labels):
-    if not cc.cfg['plots']['layer_activations']:
-        return
-
     print('Visualizing activations with tSNE...')
 
     if not os.path.exists(cc.cfg['plots']['layer_activations_dir']):
