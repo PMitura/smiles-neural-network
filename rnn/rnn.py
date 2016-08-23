@@ -1,4 +1,4 @@
-import data, utility, metrics, statistics
+import data, utility, metrics
 import time
 
 import numpy as np
