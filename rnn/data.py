@@ -1,20 +1,19 @@
-import numpy as np
 import random
+
 import pubchem as pc
 
+import numpy as np
 import pandas as pd
-import utility
-
 import sklearn as sk
+
+import utility
 
 import db.db as db
 from config import config as cc
 
-from math import floor, log, isnan, sqrt, ceil
-
-
-
 from sets import Set
+
+from math import ceil, log
 
 RD = cc.exp['params']['data']
 RP = cc.exp['params']['rnn']
@@ -97,6 +96,7 @@ def formatSequentialInput(df):
 
     seqInput = np.zeros((numSamples, smilesMaxLen, SMILES_ALPHABET_LEN))
 
+    # translate to one hot for smiles
     for i,smiles in enumerate(smilesDf):
         for j in range(smilesMaxLen):
 
@@ -106,7 +106,7 @@ def formatSequentialInput(df):
 
             seqInput[i][j][transChar] = 1
 
-
+    # translate to one hot for nominals
     if RD['nominals'] and len(RD['nominals']) > 0:
         inputs = [seqInput]
 
@@ -121,13 +121,10 @@ def formatSequentialInput(df):
 
             inputs.append(nominalInput)
 
+        # concatenate one hot representations
         seqInput = np.concatenate(tuple(inputs), axis = 2)
 
     return seqInput
-
-def formatLabels(df):
-    labelsDf = df[RD['labels']]
-    return labelsDf.values.T
 
 def normalize(arr):
     meta = {}
@@ -139,13 +136,13 @@ def normalize(arr):
 
     if RP['zscore_norm']:
         meta['scaler'] = sk.preprocessing.StandardScaler()
-        arr = meta['scaler'].fit_transform(arr.T).T
+        arr = meta['scaler'].fit_transform(arr)
 
     return arr, meta
 
 def denormalize(arr, meta):
     if RP['zscore_norm']:
-        arr = meta['scaler'].inverse_transform(arr.T).T
+        arr = meta['scaler'].inverse_transform(arr)
 
     if RP['logarithm']:
         arr = np.exp(-arr)
@@ -171,7 +168,7 @@ def preprocessData(df):
 
     # nicely split data
     input = formatSequentialInput(df)
-    labels = formatLabels(df)
+    labels = df[RD['labels']].values
     testing = df[RD['testing']].values.astype(bool)
 
     # preprocessing
@@ -182,12 +179,12 @@ def preprocessData(df):
 
     # create training and testing sets
     if RP['flag_based_hold']:
-        trainIn, trainLabel = input[~testing], labels[:,~testing]
-        testIn, testLabel = input[testing], labels[:,testing]
+        trainIn, trainLabel = input[~testing], labels[~testing]
+        testIn, testLabel = input[testing], labels[testing]
     else:
         split = len(input) * RP['holdout_ratio']
 
-        trainIn, trainLabel = input[:split], labels[:,:split]
-        testIn, testLabel = input[split:], labels[:,split:]
+        trainIn, trainLabel = input[:split], labels[:split]
+        testIn, testLabel = input[split:], labels[split:]
 
     return trainIn,trainLabel,testIn,testLabel,meta

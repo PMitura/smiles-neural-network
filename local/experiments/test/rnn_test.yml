@@ -27,7 +27,9 @@ params:
   rnn:
     # RNN parameters
     learning_rate: 0.0001
-    epochs: 30
+    epochs: 1
+
+    load_model: 'a30e36db2b16862be88d75e0b8fe62b79e868b53'
 
     td_layer_multiplier: 2
     gru_layer_multiplier: 2
@@ -48,7 +50,7 @@ params:
     chained_models: false
     trainable_inner: true
 
-    zscore_norm: false
+    zscore_norm: true
     logarithm: false
 
     # learning rate decay settings
@@ -58,7 +60,7 @@ params:
     holdout_ratio: 0.2
 
     # preprocessing switches
-    label_idxs: 'range(1)'      # indexes of columns to use as label
+    label_idxs: 'range(2)'      # indexes of columns to use as label
 
     # statistics settings
     comment: '[REFACTOR]'

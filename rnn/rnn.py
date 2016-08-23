@@ -1,4 +1,4 @@
-import data, utility
+import data, utility, metrics
 import time
 
 import numpy as np
@@ -39,21 +39,26 @@ RP['label_idxs'] = eval(str(cc.exp['params']['rnn']['label_idxs']))
 
 OPTIMIZER = Adam(lr = RP['learning_rate'])
 
-def configureModel(alphaSize, nomiSize = (0, 0), outputLen = len(RP['label_idxs'])):
+def configureModel(input):
     print('  Initializing and compiling...')
+
+    alphaSize = input.shape[2]
+    outputLen = len(RD['labels'])
 
     model = Sequential()
 
-
+    '''
     if RD['use_embedding']:
         # second value in nomiSize tuple is shift while using embedding
         model.add(Embedding(1 << nomiSize[1], RP['embedding_outputs']))
         model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * (alphaSize +
             nomiSize[0])), activation = 'tanh', trainable = RP['trainable_inner'])))
     else:
-        model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * (alphaSize+nomiSize)), W_regularizer=l2(0.01), activity_regularizer=activity_l2(0.01), activation = 'tanh',
-            trainable = RP['trainable_inner']),
-            input_shape = (None, alphaSize + nomiSize)))
+    '''
+
+    model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * alphaSize), activation = 'tanh',
+        trainable = RP['trainable_inner']),
+        input_shape = (None, alphaSize )))
 
 
     # model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'], return_sequences = True ))
@@ -584,72 +589,25 @@ def modelOnLabels(trainIn, trainLabel, testIn, testLabel, alphaSize, nomiSize,
     return model, epochsDone
 
 
-# Do preprocessing and train/test data division
-def preprocess(fullIn, labels, testFlags):
-
-    if RP['logarithm']:
-        for idx in RP['label_idxs']:
-            labels[idx] = data.logarithm(labels[idx])
-
-    global zMean, zDev
-    zMean = {}
-    zDev = {}
-    if RP['zscore_norm']:
-        for idx in RP['label_idxs']:
-            labels[idx], m, d = data.zScoreNormalize(labels[idx])
-            zMean[idx] = m
-            zDev[idx] = d
-
-
-    # check for NaN or inf values, which break our RNN
-    for idx in RP['label_idxs']:
-        for label in labels[idx]:
-            if np.isnan(label) or np.isinf(label):
-                raise ValueError('Preprocess error: bad value in data: {}'
-                        .format(label))
-
-    if RP['label_binning'] and RP['classify']:
-        for idx in RP['label_idxs']:
-            labels[idx] = utility.bin(labels[idx], RP['label_binning_ratio'],
-                    classA = RP['classify_label_neg'], classB = RP['classify_label_pos'])
-
-    if RP['flag_based_hold']:
-        trainIn, trainLabel, testIn, testLabel = data.holdoutBased(testFlags,
-                fullIn, labels)
-    else:
-        trainIn, trainLabel, testIn, testLabel = data.holdout(RP['holdout_ratio'],
-                fullIn, labels)
-
-    return trainIn, trainLabel, testIn, testLabel
-
-
 def run(grid = None):
     startTime = time.time()
 
-    # Initialize using the same seed (to get stable results on comparisons)
+    # initialize using the same seed (to get stable results on comparisons)
     np.random.seed(RP['seed'])
 
-    df = db.getData()
-
-    alphaSize = data.SMILES_ALPHABET_LEN
-    nomiSize = len(RD['nominals']) if RD['nominals'] else 0
-
-    trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessData(df)
-
-
-    # fullIn, labels, alphaSize, nomiSize, testFlags = data.prepareData()
-    # trainIn, trainLabel, testIn, testLabel = preprocess(fullIn, labels, testFlags)
-
-
-
+    # get the training and testing datasets along with some meta info
+    trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessData(db.getData())
 
     if RP['load_model']:
         model = utility.loadModel(RP['load_model'])
-        epochsDone = RP['epochs']
+        epochsDone = None
     else:
-        model = configureModel(alphaSize, nomiSize)
+        model = configureModel(trainIn)
         epochsDone = train(model, trainIn, trainLabel, (testIn, testLabel))
 
+    metrics.predict(model, trainIn, trainLabel, preprocessMeta)
+
+    return
 
     if RP['classify']:
         if RP['label_binning_after_train'] and not RP['label_binning']:
