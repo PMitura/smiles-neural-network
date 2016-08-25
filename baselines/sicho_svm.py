@@ -20,7 +20,8 @@ cc.loadConfig('../local/config.yml')
 # data = db.getTarget_206_1977()
 # data = db.getTarget_206_1977_features_wide()
 # data = db.getTarget_geminin()
-data = db.getTarget_a549()
+# data = db.getTarget_a549()
+data = db.getTarget_206_1977_features_computed()
 
 '''
 duplicates = {}
@@ -215,7 +216,8 @@ from sklearn.grid_search import GridSearchCV
 param_grid = [
 #  {'C': [1, 10, 100, 1000], 'epsilon': [0.0, 0.1, 0.2, 0.3, 0.4], 'kernel': ['linear']},
 #  {'C': [1, 10, 100, 1000], 'epsilon': [0.0, 0.1, 0.2, 0.3, 0.4], 'kernel': ['poly'], 'degree' : [2, 3, 4, 5]},
-  {'C': [1, 10, 100, 1000], 'epsilon': [0.0, 0.1, 0.2, 0.3, 0.4], 'gamma': [0.01, 0.001, 0.0001], 'kernel': ['rbf']},
+  # {'C': [1,10,100,1000], 'epsilon': [0.0, 0.1, 0.2, 0.3, 0.4], 'gamma': [0.01, 0.001, 0.0001], 'kernel': ['rbf']},
+  {'C': [10], 'epsilon': [0.0], 'gamma': [0.01], 'kernel': ['rbf']},
  ]
 
 # {'kernel': 'rbf', 'C': 1, 'verbose': False, 'degree': 3, 'epsilon': 0.0, 'shrinking': True, 'max_iter': -1,
