@@ -26,6 +26,7 @@ params:
     # RNN parameters
     learning_rate: 0.0005
     epochs: 150
+    batch: 1000
 
     td_layer_multiplier: 4
     gru_layer_multiplier: 4
