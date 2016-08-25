@@ -60,4 +60,4 @@ params:
     label_idxs: 'range(53)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[REFACTOR]'
+    comment: '[PRETRAINED][WIDE_FEATURES] rerun of pretrained model on 350k rows, wide features with new metrics'
