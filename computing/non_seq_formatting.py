@@ -57,7 +57,6 @@ def getData(con):
     return df
 
 def formatNonSequential(smilesDf):
-
     smilesMaxLen = 80
     nonSeq = np.zeros((len(smilesDf), smilesMaxLen, data.SMILES_ALPHABET_LEN))
 
@@ -75,13 +74,30 @@ def formatNonSequential(smilesDf):
 
     return nonSeq
 
+def formatBackOff(smilesDf):
+    smilesMaxLen = 80
+    nonSeq = np.zeros((len(smilesDf),data.SMILES_ALPHABET_LEN))
+
+    for i,smiles in enumerate(smilesDf):
+        for j in range(smilesMaxLen):
+            transChar = data.SMILES_ALPHABET_LOOKUP_TABLE[data.SMILES_ALPHABET_UNKNOWN]
+            if j < len(smiles) and smiles[j] in data.SMILES_ALPHABET_LOOKUP_TABLE:
+                transChar = data.SMILES_ALPHABET_LOOKUP_TABLE[smiles[j]]
+            nonSeq[i][transChar]+=1
+
+    return nonSeq
+
 con = db.getCon()
 df = getData(con)
 con.close()
 
 
-nonSeq = formatNonSequential(df.canonical_smiles)
+# nonSeq = formatNonSequential(df.canonical_smiles)
+nonSeq = formatBackOff(df.canonical_smiles)
 
 dfNonSeq = pd.concat((pd.DataFrame(nonSeq), df.standard_value_log), axis = 1)
 
-dfNonSeq.to_csv('target_206_1977_nonseq_smiles.csv')
+# print(df.canonical_smiles)
+# print(dfNonSeq.values)
+
+dfNonSeq.to_csv('target_206_1977_nonseq_smiles_backoff.csv')

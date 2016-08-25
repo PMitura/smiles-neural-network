@@ -1,4 +1,4 @@
-import data, utility
+import data, utility, metrics
 import time
 
 import numpy as np
@@ -10,7 +10,6 @@ from sklearn import preprocessing
 from keras.regularizers import l2, activity_l2
 import matplotlib
 import matplotlib.pyplot as plt
-
 
 import pandas as pd
 import db.db as db
@@ -53,6 +52,9 @@ def rsqrComp(pred, truth):
     return pearCr[0][1] * pearCr[0][1]
 
 def run():
+    stats = {}
+    stats['runtime_second'] = time.time()
+
     startTime = time.time()
 
     # Initialize using the same seed (to get stable results on comparisons)
@@ -77,7 +79,6 @@ def run():
     X_raw = rawData.iloc[:, 2:-1]
     y_raw = rawData.iloc[:, 1:2]
 
-
     scalerX = preprocessing.StandardScaler(copy=False)
     scalerX.fit(X_raw)
     scalery = preprocessing.StandardScaler(copy=False)
@@ -95,7 +96,7 @@ def run():
     model = Sequential()
 
     # hidden
-    model.add(Dense(50, W_regularizer=l2(0.01), input_shape=(X.shape[1], )))
+    model.add(Dense(50, W_regularizer=l2(0.05), input_shape=(X.shape[1], )))
     model.add(Activation('relu'))
     model.add(Dense(1))
 
@@ -121,6 +122,16 @@ def run():
         trainX, testX = X.iloc[:split], X.iloc[split:]
         trainy, testy = y.iloc[:split], y.iloc[split:]
 
+    trainX.reset_index(drop=True,inplace=True)
+    testX.reset_index(drop=True,inplace=True)
+    trainy.reset_index(drop=True,inplace=True)
+    testy.reset_index(drop=True,inplace=True)
+
+
+
+    stats['training_row_count'] = len(trainX)
+    stats['testing_row_count'] = len(testX)
+
 
     print(trainX.shape, testX.shape, trainy.shape, testy.shape)
 
@@ -130,54 +141,22 @@ def run():
             validation_data = (testX.values, testy.values))
 
 
-    predTrain = model.predict(trainX.values, batch_size = RP['batch'])
-    if RP['zscore_norm']:
-        predTrainScaled = pd.DataFrame(scalery.inverse_transform(predTrain),columns=['pred'])
-        testTrainScaled = pd.DataFrame(scalery.inverse_transform(trainy),columns=['true'])
+    preprocessMeta = {
+        'scaler': scalery
+    }
+
+    # compute metrics for the model based on the task for both testing and training data
+    print('\nGetting metrics for training data:')
+    if RP['classify']:
+        trainMetrics = metrics.classify(model, trainX.values, trainy.values, preprocessMeta)
     else:
-        predTrainScaled = pd.DataFrame(predTrain,columns=['pred'])
-        testTrainScaled = pd.DataFrame(trainy,columns=['true'])
+        trainMetrics = metrics.predict(model, trainX.values, trainy.values, preprocessMeta)
 
-    predByTruthTrain = pd.concat([predTrainScaled, testTrainScaled],axis=1)
-    print(predByTruthTrain.head())
-
-    trainRsqr = rsqrComp(predTrainScaled,testTrainScaled)
-    print('train R2: {}'.format(trainRsqr))
-
-
-    rsqrs = []
-
-    for i in range(RP['num_partitions']):
-        partSize = int(len(testX)/RP['num_partitions'])+1
-        lo = i*partSize
-        hi = min((i+1)*partSize, len(testX))
-
-        testXpart = testX.iloc[lo:hi].copy()
-        testypart = testy.iloc[lo:hi].copy()
-
-        pred = model.predict(testXpart.values, batch_size = RP['batch'])
-
-        if RP['zscore_norm']:
-            predScaled = pd.DataFrame(scalery.inverse_transform(pred), columns=['pred'])
-            testScaled = pd.DataFrame(scalery.inverse_transform(testypart), columns=['true'])
-        else:
-            predScaled = pd.DataFrame(pred,columns=['pred'])
-            testScaled = pd.DataFrame(testypart,columns=['true'])
-
-        predByTruth = pd.concat([predScaled, testScaled],axis=1)
-
-        print(predByTruth.head())
-
-        rsqr = rsqrComp(predScaled, testScaled)
-        rsqrs.append(rsqr)
-
-        print('test R2: {}'.format(rsqr))
-
-    rsqrAvg = np.mean(rsqrs)
-    rsqrDev = np.std(rsqrs)
-
-
-    print('test R2: {} +/- {}'.format(rsqrAvg,rsqrDev))
+    print('\nGetting metrics for test data:')
+    if RP['classify']:
+        testMetrics = metrics.classify(model, testX.values, testy.values, preprocessMeta)
+    else:
+        testMetrics = metrics.predict(model, testX.values, testy.values, preprocessMeta)
 
 
     print('Plot:')
@@ -205,726 +184,50 @@ def run():
     # predByTruth.to_csv('local/pred.csv')
 
 
-    import subprocess
-    try:
-        gitCommit = subprocess.check_output('git rev-parse HEAD', shell=True).strip()
-    except:
-        gitCommit = None
-
-    db.sendStatistics(
-        dataset_name = cc.exp['fetch']['table'],
-        split_name = cc.exp['params']['data']['testing'],
-        training_row_count = len(trainX),
-        testing_row_count = len(testX),
-        task = 'regression',
-        relevance_training = trainRsqr,
-        relevance_testing = rsqrAvg,
-        relevance_testing_std = rsqrDev,
-        epoch_max = RP['epochs'],
-        epoch_count = RP['epochs'],
-        parameter_count = model.count_params(),
-        learning_rate = RP['learning_rate'],
-        optimization_method = OPTIMIZER.__class__.__name__,
-        batch_size = RP['batch'],
-        comment = RP['comment'],
-        label_name = ','.join(cc.exp['params']['data']['labels']),
-        model = utility.modelToString(model),
-        seed = RP['seed'],
-        learning_curve = {'val':open('{}/{}'.format(cc.cfg['plots']['dir'], utility.PLOT_NAME),'rb').read(),'type':'bin'},
-        hostname = socket.gethostname(),
-        experiment_config = yaml.dump(cc.exp,default_flow_style=False),
-        git_commit = gitCommit,
-        objective = RP['objective'])
-
-
-def train(model, nnInput, labels, validation, makePlot = True,
-        labelIndexes = RP['label_idxs']):
-    print('  Training model...')
-
-
- # train(model, trainIn, trainLabel, (testIn, testLabel))
-
-    # needed format is orthogonal to ours
-    formattedLabels = np.zeros((len(labels[0]), len(labelIndexes)))
-    formattedValid = np.zeros((len(validation[1][labelIndexes[0]]),
-        len(labelIndexes)))
-    for i in range(len(labelIndexes)):
-        for j in range(len(labels[0])):
-            formattedLabels[j][i] = labels[labelIndexes[i]][j]
-        for j in range(len(validation[1][labelIndexes[i]])):
-            formattedValid[j][i] = validation[1][labelIndexes[i]][j]
-
-    early = keras.callbacks.EarlyStopping(monitor = 'val_loss',
-            patience = RP['early_stop'])
-
-    learningRateScheduler = keras.callbacks.LearningRateScheduler(learningRateDecayer)
-
-    modelLogger = visualization.ModelLogger()
-
-    history = model.fit(nnInput, formattedLabels, nb_epoch = RP['epochs'],
-            batch_size = RP['batch'], callbacks = [early,learningRateScheduler,modelLogger],
-            validation_data = (validation[0], formattedValid))
-
-    if makePlot:
-        values = np.zeros((len(history.history['loss']), 2))
-        for i in range(len(history.history['loss'])):
-            values[i][0] = history.history['loss'][i]
-            values[i][1] = history.history['val_loss'][i]
-        utility.plotLoss(values)
-
-    visualization.histograms(modelLogger)
-
-    print('    Model weights:')
-    print(model.summary())
-    # print(model.get_weights())
-    print('  ...done')
-    return len(history.history['loss'])
-
-
-# Serves as extended version of test, gives statistics
-def predict(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
-    preRaw = model.predict(nnInput, batch_size = RP['batch'])
-
-    for labCtr,labidx in enumerate(labelIndexes):
-        print '  Predictions for label {}'.format(labidx)
-
-        pre = []
-        label = []
-        for i in range(len(preRaw)):
-            pre.append(preRaw[i][labCtr])
-            label.append(rawLabel[labidx][i])
-
-        # temporarily undo z-score normalization, if applied
-        if RP['zscore_norm']:
-            pre = data.zScoreDenormalize(pre, zMean[labidx], zDev[labidx])
-            label = data.zScoreDenormalize(label, zMean[labidx], zDev[labidx])
-
-        if RP['logarithm']:
-            for i in range(len(pre)):
-                pre[i] = exp(-pre[i])
-                label[i] = exp(-label[i])
-
-        # print samples of predictions
-        for i in range(min(RP['predict_print_samples'], len(pre))):
-            print("    prediction: {}, label: {}".format(pre[i],
-                label[i]))
-
-        # array of errors
-        error = []
-        errorSqr = []
-        for i in range(len(pre)):
-            e = abs(pre[i] - label[i])
-            error.append(e)
-            errorSqr.append(e * e)
-
-        # averages of everything
-        preAvg = utility.mean(pre, len(pre))
-        refAvg = utility.mean(label, len(pre))
-        errAvg = utility.mean(error, len(pre))
-        errSqr = 0.0
-        for i in range(len(pre)):
-            errSqr += errorSqr[i]
-        errSqr = sqrt(errSqr / len(pre))
-
-        merged = np.zeros((2, len(pre)))
-        for i in range(len(pre)):
-            merged[0][i] = pre[i]
-            merged[1][i] = label[i]
-        pearCr = np.corrcoef(merged)
-
-        # std. deviation of error
-        errDev = 0.0
-        for i in range(len(pre)):
-            errDev += (error[i] - errAvg) * (error[i] - errAvg)
-        errDev = sqrt(errDev / len(pre))
-
-        print("      prediction mean:         {}".format(preAvg))
-        print("      label mean:              {}".format(refAvg))
-        print("      mean absolute error:     {}".format(errAvg))
-        print("      error std. deviation:    {}".format(errDev))
-        print("      root mean square error:  {}".format(errSqr))
-        print("      correlation coefficient: {}".format(pearCr[0][1]))
-        print("      R2:                      {}".format(pearCr[0][1] * pearCr[0][1]))
-
-    return pearCr[0][1] * pearCr[0][1]
-
-
-# Modification of predict, divides data and computes avg and dev of R2
-def predictSplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
-    partSize = len(nnInput) / RP['num_partitions']
-    rsqrs = np.zeros((len(labelIndexes), RP['num_partitions']))
-    for i in range(RP['num_partitions']):
-        print '\n    Partition {}'.format(i)
-        if RD['use_embedding']:
-            partInput = np.zeros([partSize, len(nnInput[0])])
-        else:
-            partInput = np.zeros([partSize, len(nnInput[0]), len(nnInput[0][0])])
-        base = i * partSize
-        for j in range(base, base + partSize):
-            partInput[j - base] = nnInput[j]
-
-        preRaw = model.predict(partInput, batch_size = RP['batch'])
-
-        ctr = 0
-        labCtr = 0
-        for labidx in labelIndexes:
-            print '      Prediction for label {}'.format(labidx)
-
-            pre = []
-            label = []
-            for j in range(len(preRaw)):
-                pre.append(preRaw[j][labCtr])
-                label.append(rawLabel[labidx][base + j])
-            labCtr += 1
-
-            if RP['zscore_norm']:
-                pre = data.zScoreDenormalize(pre, zMean[labidx], zDev[labidx])
-                label = data.zScoreDenormalize(label, zMean[labidx], zDev[labidx])
-
-            if RP['logarithm']:
-                for j in range(len(pre)):
-                    pre[j] = exp(-pre[j])
-                    label[j] = exp(-label[j])
-
-            # print samples of predictions
-            for j in range(min(RP['predict_print_samples'] / RP['num_partitions'], len(pre))):
-                print("        prediction: {}, label: {}".format(pre[j],
-                    label[j]))
-
-            merged = np.zeros((2, len(pre)))
-            for j in range(len(pre)):
-                merged[0][j] = pre[j]
-                merged[1][j] = label[j]
-            pearCr = np.corrcoef(merged)
-            rsqr = pearCr[0][1] * pearCr[0][1]
-            rsqrs[ctr][i] = rsqr
-            ctr += 1
-            print '      R2 Value: {}'.format(rsqr)
-
-    print '\n    R2 Statistics:'
-    rsqrAvg = []
-    rsqrDev = []
-
-    for lab in range(len(rsqrs)):
-        rsqrSum = 0.0
-        for sqr in rsqrs[lab]:
-            rsqrSum += sqr
-        rsqrAvg.append(rsqrSum / RP['num_partitions'])
-
-        rsqrDev.append(0.0)
-        for i in range(RP['num_partitions']):
-            rsqrDev[lab] += (rsqrs[lab][i] - rsqrAvg[lab]) * (rsqrs[lab][i] -
-                    rsqrAvg[lab])
-        rsqrDev[lab] = sqrt(rsqrDev[lab] / RP['num_partitions'])
-
-        print '      label {} R2 Average:   {}'.format(labelIndexes[lab],
-                rsqrAvg[lab])
-        print '      label {} R2 Deviation: {}'.format(labelIndexes[lab],
-                rsqrDev[lab])
-
-
-
-    for i in range(len(rsqrAvg)):
-        if np.isnan(rsqrAvg[i]) or np.isnan(rsqrDev[i]):
-            rsqrAvg[i] = np.nan
-            rsqrDev[i] = np.nan
-
-    rsqrAvg = [x for x in rsqrAvg if not np.isnan(x)]
-    rsqrDev = [x for x in rsqrDev if not np.isnan(x)]
-
-    rsqrAvgOverall = utility.mean(rsqrAvg, len(rsqrAvg))
-    rsqrDevOverall = utility.mean(rsqrDev, len(rsqrDev))
-    print '\n  R2 mean of avgs: {}'.format(rsqrAvgOverall)
-    print '  R2 mean of devs: {}'.format(rsqrDevOverall)
-    return rsqrAvgOverall, rsqrDevOverall
-
-
-# Classification task
-# pos class defined by RP['classify_label_pos']
-# neg class defined by RP['classify_label_neg']
-# decision threshold defined by RP['classify_threshold']
-# activation function defined by RP['classify_activation']
-def classify(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
-
-    preRaw = model.predict(nnInput, batch_size = RP['batch'])
-
-    for labCtr, labidx in enumerate(labelIndexes):
-        print '  Predictions for label {}'.format(labidx)
-
-        pre = []
-        label = []
-        for i in range(len(preRaw)):
-            pre.append(preRaw[i][0])
-            label.append(rawLabel[labidx][i])
-        if len(pre) <= 0:
-            raise ValueError('Cannot predict on zero or negative size set')
-
-        falseNegative = 0.0
-        falsePositive = 0.0
-        truePositive  = 0.0
-        trueNegative  = 0.0
-
-        for i in range(len(pre)):
-            if i < RP['predict_print_samples']:
-                print "    Predicted: {} Label: {}".format(pre[i], label[i])
-            if pre[i] < RP['classify_threshold'] and utility.equals(label[i],
-                    RP['classify_label_pos']):
-                falseNegative += 1
-            elif pre[i] > RP['classify_threshold'] and utility.equals(label[i],
-                    RP['classify_label_neg']):
-                falsePositive += 1
-            elif pre[i] > RP['classify_threshold'] and utility.equals(label[i],
-                    RP['classify_label_pos']):
-                truePositive += 1
-            elif pre[i] < RP['classify_threshold'] and utility.equals(label[i],
-                    RP['classify_label_neg']):
-                trueNegative += 1
-
-        errors = falseNegative + falsePositive
-
-        # array of errors
-        error = []
-        errorSqr = []
-        for i in range(len(pre)):
-            e = abs(pre[i] - label[i])
-            error.append(e)
-            errorSqr.append(e * e)
-
-        # averages of everything
-        preAvg = utility.mean(pre, len(pre))
-        refAvg = utility.mean(label, len(pre))
-        errAvg = utility.mean(error, len(pre))
-        errSqr = 0.0
-        for i in range(len(pre)):
-            errSqr += errorSqr[i]
-        errSqr = sqrt(errSqr / len(pre))
-        pearCr = pearsonr(pre, label)
-
-        # std. deviation of error
-        errDev = 0.0
-        for i in range(len(pre)):
-            errDev += (error[i] - errAvg) * (error[i] - errAvg)
-        errDev = sqrt(errDev / len(pre))
-
-        if truePositive + falseNegative != 0:
-            sensitivity = truePositive / (truePositive + falseNegative)
-        else:
-            sensitivity = np.nan
-        if trueNegative + falsePositive != 0:
-            specificity = trueNegative / (trueNegative + falsePositive)
-        else:
-            specificity = np.nan
-        if truePositive + trueNegative != 0:
-            precision = truePositive / (truePositive + trueNegative)
-        else:
-            precision = np.nan
-        accuracy = (1 - (errors / len(pre))) # sanitized earlier
-        if precision + sensitivity != 0:
-            fmeasure = (2 * precision * sensitivity) / (precision + sensitivity)
-        else:
-            fmeasure = np.nan
-
-        logloss = utility.logloss(pre,label)
-
-        print("    prediction mean:         {}".format(preAvg))
-        print("    label mean:              {}".format(refAvg))
-        print("    mean absolute error:     {}".format(errAvg))
-        print("    error std. deviation:    {}".format(errDev))
-        print("    root mean square error:  {}".format(errSqr))
-        print("    correlation coefficient: {}".format(pearCr[0]))
-        print("    R2:                      {}".format(pearCr[0] * pearCr[0]))
-        print("    logloss:                      {}".format(logloss))
-
-        print("    Classification accuracy: {}%"
-                .format(accuracy * 100))
-        # Temporarily disabled, not working because of wrong label format
-        # print("    ROC AUC score:           {}".format(roc_auc_score(label, pre)))
-        print("    Sensitivity:             {}".format(sensitivity))
-        print("    Specificity:             {}".format(specificity))
-        print("    Precision:               {}".format(precision))
-        print("    F-measure:               {}".format(fmeasure))\
-
-        return accuracy
-
-def classifySplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
-    partSize = len(nnInput) / RP['num_partitions']
-    loglosses = np.zeros((len(labelIndexes), RP['num_partitions']))
-    accuracies = np.zeros((len(labelIndexes), RP['num_partitions']))
-    aucs = np.zeros((len(labelIndexes), RP['num_partitions']))
-
-    # print(rawLabel)
-
-    for i in range(RP['num_partitions']):
-        print '\n    Partition {}'.format(i)
-        if RD['use_embedding']:
-            partInput = np.zeros([partSize, len(nnInput[0])])
-        else:
-            partInput = np.zeros([partSize, len(nnInput[0]), len(nnInput[0][0])])
-        base = i * partSize
-        for j in range(base, base + partSize):
-            partInput[j - base] = nnInput[j]
-
-        preRaw = model.predict(partInput, batch_size = RP['batch'])
-
-        metricidx = 0
-        labCtr = 0
-        for labidx in labelIndexes:
-            print '      Prediction for label {}'.format(labidx)
-
-            pre = []
-            label = []
-            for j in range(len(preRaw)):
-                pre.append(preRaw[j][labCtr])
-                label.append(rawLabel[labidx][base + j])
-            labCtr += 1
-
-            # print samples of predictions
-            for j in range(min(RP['predict_print_samples'] / RP['num_partitions'], len(pre))):
-                print("        prediction: {}, label: {}".format(pre[j],label[j]))
-
-            falseNegative = 0.0
-            falsePositive = 0.0
-            truePositive  = 0.0
-            trueNegative  = 0.0
-
-            for j in range(len(pre)):
-                if j < RP['predict_print_samples']:
-                    print "    Predicted: {} Label: {}".format(pre[j], label[j])
-                if pre[j] < RP['classify_threshold'] and utility.equals(label[j],
-                        RP['classify_label_pos']):
-                    falseNegative += 1
-                elif pre[j] > RP['classify_threshold'] and utility.equals(label[j],
-                        RP['classify_label_neg']):
-                    falsePositive += 1
-                elif pre[j] > RP['classify_threshold'] and utility.equals(label[j],
-                        RP['classify_label_pos']):
-                    truePositive += 1
-                elif pre[j] < RP['classify_threshold'] and utility.equals(label[j],
-                        RP['classify_label_neg']):
-                    trueNegative += 1
-
-            loglosses[metricidx][i] = utility.logloss(pre,label)
-            accuracies[metricidx][i] = 1 - (falseNegative + falsePositive) / len(label)
-
-
-            # we need to normalize the confidences to [0,1]?
-            try:
-                aucs[metricidx][i] = roc_auc_score(label, pre)
-            except:
-                aucs[metricidx][i] = np.nan
-
-            print '      Logloss Value: {}'.format(loglosses[metricidx][i])
-            print '      Accuracy: {}'.format(accuracies[metricidx][i])
-            print '      AUC: {}'.format(aucs[metricidx][i])
-
-            metricidx += 1
-
-    print '\n    Classification Statistics:'
-    loglossAvg = []
-    loglossDev = []
-
-    accuracyAvg = []
-    accuracyDev = []
-
-    aucAvg = []
-    aucDev = []
-
-    for lab in range(len(loglosses)):
-        loglossAvg.append(np.sum(loglosses[lab]) / RP['num_partitions'])
-        accuracyAvg.append(np.sum(accuracies[lab]) / RP['num_partitions'])
-        aucAvg.append(np.sum(aucs[lab]) / RP['num_partitions'])
-
-        loglossDev.append(0.0)
-        accuracyDev.append(0.0)
-        aucDev.append(0.0)
-        for i in range(RP['num_partitions']):
-            loglossDev[lab] += (loglosses[lab][i] - loglossAvg[lab])**2
-            accuracyDev[lab] += (accuracies[lab][i] - accuracyAvg[lab])**2
-            aucDev[lab] += (aucs[lab][i] - aucAvg[lab])**2
-        loglossDev[lab] = sqrt(loglossDev[lab] / RP['num_partitions'])
-        accuracyDev[lab] = sqrt(accuracyDev[lab] / RP['num_partitions'])
-        aucDev[lab] = sqrt(aucDev[lab] / RP['num_partitions'])
-
-        print '      label {} Logloss Average:   {}'.format(lab, loglossAvg[lab])
-        print '      label {} Logloss Deviation: {}'.format(lab, loglossDev[lab])
-        print '      label {} Accuracy Average:   {}'.format(lab, accuracyAvg[lab])
-        print '      label {} Accuracy Deviation: {}'.format(lab, accuracyDev[lab])
-        print '      label {} AUC Average:   {}'.format(lab, aucAvg[lab])
-        print '      label {} AUC Deviation: {}'.format(lab, aucDev[lab])
-
-
-    loglossAvgOverall = utility.mean(loglossAvg, len(loglossAvg))
-    loglossDevOverall = utility.mean(loglossDev, len(loglossDev))
-    accuracyAvgOverall = utility.mean(accuracyAvg, len(accuracyAvg))
-    accuracyDevOverall = utility.mean(accuracyDev, len(accuracyDev))
-    aucAvgOverall = utility.mean(aucAvg, len(aucAvg))
-    aucDevOverall = utility.mean(aucDev, len(aucDev))
-
-    print '\n  Logloss mean of avgs: {}'.format(loglossAvgOverall)
-    print '  Logloss mean of devs: {}'.format(loglossDevOverall)
-    print '\n  Accuracy mean of avgs: {}'.format(accuracyAvgOverall)
-    print '  Accuracy mean of devs: {}'.format(accuracyDevOverall)
-    print '\n  AUC mean of avgs: {}'.format(aucAvgOverall)
-    print '  AUC mean of devs: {}'.format(aucDevOverall)
-    return accuracyAvgOverall, accuracyDevOverall, loglossAvgOverall, loglossDevOverall, aucAvgOverall, aucDevOverall
-
-
-# TODO: encapsulate training rnn on a label to a function, not working yet
-def modelOnLabels(trainIn, trainLabel, testIn, testLabel, alphaSize, nomiSize,
-        indexes, weights = None, uniOutput = False):
-    model = configureModel(alphaSize, nomiSize, outputLen = len(indexes))
-
-    if uniOutput:
-        if weights == None:
-            weights = model.get_weights()
-        # uniform output layer weights
-        for i in range(len(weights[11])):
-            for j in range(len(weights[11][i])):
-                weights[11][i][j] = 0.1
-        model.set_weights(weights)
-    elif weights != None:
-        oriW = model.get_weights()
-        weights[11] = oriW[11]
-        model.set_weights(weights)
-
-    epochsDone = train(model, trainIn, trainLabel, (testIn, testLabel),
-            labelIndexes = indexes)
-    return model, epochsDone
-
-
-# Do preprocessing and train/test data division
-def preprocess(fullIn, labels, testFlags):
-
-    if RP['logarithm']:
-        for idx in RP['label_idxs']:
-            labels[idx] = data.logarithm(labels[idx])
-
-    global zMean, zDev
-    zMean = {}
-    zDev = {}
-    if RP['zscore_norm']:
-        for idx in RP['label_idxs']:
-            labels[idx], m, d = data.zScoreNormalize(labels[idx])
-            zMean[idx] = m
-            zDev[idx] = d
-
-    # check for NaN or inf values, which break our RNN
-    for idx in RP['label_idxs']:
-        for label in labels[idx]:
-            if np.isnan(label) or np.isinf(label):
-                raise ValueError('Preprocess error: bad value in data: {}'
-                        .format(label))
-
-    if RP['label_binning'] and RP['classify']:
-        for idx in RP['label_idxs']:
-            labels[idx] = utility.bin(labels[idx], RP['label_binning_ratio'],
-                    classA = RP['classify_label_neg'], classB = RP['classify_label_pos'])
-
-    if RP['flag_based_hold']:
-        trainIn, trainLabel, testIn, testLabel = data.holdoutBased(testFlags,
-                fullIn, labels)
+    # statistics to send to journal
+    stats['runtime_second'] = time.time() - stats['runtime_second']
+    stats['memory_pm_mb'], stats['memory_vm_mb'] = utility.getMemoryUsage()
+    stats['git_commit'] = utility.getGitCommitHash()
+    stats['comment'] = RP['comment']
+    stats['hostname'] = socket.gethostname()
+    stats['experiment_config'] = yaml.dump(cc.exp,default_flow_style=False)
+
+    stats['model'] = utility.modelToString(model)
+    stats['loaded_model'] = RP['load_model']
+    stats['parameter_count'] = model.count_params()
+    stats['task'] = 'classification' if RP['classify'] else 'regression'
+
+    stats['dataset_name'] = cc.exp['fetch']['table']
+    stats['split_name'] = RD['testing']
+    stats['label_name'] = ','.join(RD['labels'])
+
+    stats['epoch_max'] = RP['epochs']
+    stats['learning_rate'] = RP['learning_rate']
+    stats['optimization_method'] = OPTIMIZER.__class__.__name__
+    stats['batch_size'] = RP['batch']
+    stats['seed'] = RP['seed']
+    stats['objective'] = RP['objective']
+    stats['learning_curve'] = {'val':open('{}/{}'.format(cc.cfg['plots']['dir'], utility.PLOT_NAME),'rb').read(),'type':'bin'}
+
+    # metric statistics to send
+    metricStats = {}
+
+    if RP['classify']:
+        metricStats['relevance_training'] = trainMetrics['acc_avg']
+        metricStats['relevance_training_std'] = trainMetrics['acc_std']
+        metricStats['relevance_testing'] = testMetrics['acc_avg']
+        metricStats['relevance_testing_std'] = testMetrics['acc_std']
+        metricStats['log_loss'] = testMetrics['log_loss_avg']
+        metricStats['log_loss_std'] = testMetrics['log_loss_std']
+        metricStats['auc'] = testMetrics['auc_avg']
+        metricStats['auc_std'] = testMetrics['auc_std']
     else:
-        trainIn, trainLabel, testIn, testLabel = data.holdout(RP['holdout_ratio'],
-                fullIn, labels)
+        metricStats['relevance_training'] = trainMetrics['r2_avg']
+        metricStats['relevance_training_std'] = trainMetrics['r2_std']
+        metricStats['relevance_testing'] = testMetrics['r2_avg']
+        metricStats['relevance_testing_std'] = testMetrics['r2_std']
+        metricStats['mse'] = testMetrics['mse_avg']
+        metricStats['mse_std'] = testMetrics['mse_std']
 
-    return trainIn, trainLabel, testIn, testLabel
-
-
-def runx(grid = None):
-    startTime = time.time()
-
-    # Initialize using the same seed (to get stable results on comparisons)
-    np.random.seed(RP['seed'])
-
-    fullIn, labels, alphaSize, nomiSize, testFlags = data.prepareData()
-
-    trainIn, trainLabel, testIn, testLabel = preprocess(fullIn, labels, testFlags)
-
-    if not RP['chained_models']:
-        model = configureModel(alphaSize, nomiSize)
-        epochsDone = train(model, trainIn, trainLabel, (testIn, testLabel))
-
-        if RP['classify']:
-            if RP['label_binning_after_train'] and not RP['label_binning']:
-                for idx in RP['label_idxs']:
-                    trainLabel[idx] = utility.bin(trainLabel[idx], RP['label_binning_ratio'],
-                            classA = RP['classify_label_neg'],
-                            classB = RP['classify_label_pos'])
-                    testLabel[idx] = utility.bin(testLabel[idx], RP['label_binning_ratio'],
-                            classA = RP['classify_label_neg'],
-                            classB = RP['classify_label_pos'])
-                model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
-                    alphaSize, nomiSize, [0], model.get_weights())
-            elif not RP['label_binning_after_train'] and not RP['label_binning']:
-                for idx in RP['label_idxs']:
-                    testLabel[idx] = utility.bin(testLabel[idx], RP['label_binning_ratio'],
-                            classA = RP['classify_label_neg'],
-                            classB = RP['classify_label_pos'])
-
-        if RP['scatter_visualize']:
-            utility.visualize2D(model, 1, testIn, testLabel[RP['label_idxs'][0]])
-
-        print("\n  Prediction of training data:")
-        if RP['classify']:
-            relevanceTrain = classify(model, trainIn, trainLabel)
-
-        else:
-            relevanceTrain = predict(model, trainIn, trainLabel)
-
-        print("\n  Prediction of testing data:")
-        if RP['classify']:
-            if RP['use_partitions']:
-                relevanceTest, stdTest, loglossTest, loglossStdTest, aucTest, aucStdTest = classifySplit(model, testIn, testLabel)
-            else:
-                relevanceTest = classify(model, testIn, testLabel)
-        else:
-            if RP['use_partitions']:
-                relevanceTest, stdTest = predictSplit(model, testIn, testLabel)
-            else:
-                relevanceTest = predict(model, testIn, testLabel)
-    else:
-        model = None
-        for idx in range(len(RP['chained_labels'])):
-            if idx in RP['freeze_idxs']:
-                print '    Freezing inner layers.'
-                RP['trainable_inner'] = False
-            else:
-                RP['trainable_inner'] = True
-
-            if idx == 0:
-                model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn, testLabel,
-                    alphaSize, nomiSize, RP['chained_labels'][idx], uniOutput = True)
-            elif idx == len(RP['chained_labels']) - 1:
-                model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn,
-                    testLabel, alphaSize, nomiSize, RP['chained_labels'][idx],
-                    model.get_weights(), uniOutput = True)
-            else:
-                model, epochsDone = modelOnLabels(trainIn, trainLabel, testIn,
-                    testLabel, alphaSize, nomiSize, RP['chained_labels'][idx],
-                    model.get_weights())
-
-            print("\n  Prediction of training data:")
-            if RP['classify']:
-                relevanceTrain = classify(model, trainIn, trainLabel,
-                        labelIndexes = RP['chained_labels'][idx])
-            else:
-                relevanceTrain = predict(model, trainIn, trainLabel,
-                        labelIndexes = RP['chained_labels'][idx])
-
-            print("\n  Prediction of testing data:")
-            if RP['classify']:
-                if RP['use_partitions']:
-                    relevanceTest, stdTest, loglossTest, loglossStdTest, \
-                        aucTest, aucStdTest = classifySplit(model, \
-                        testIn, testLabel, labelIndexes = RP['chained_labels'][idx])
-                else:
-                    relevanceTest = classify(model, testIn, testLabel, labelIndexes
-                        = RP['chained_labels'][idx])
-            else:
-                if RP['use_partitions']:
-                    relevanceTest, stdTest = predictSplit(model, testIn, testLabel,
-                        labelIndexes = RP['chained_labels'][idx])
-                else:
-                    relevanceTest = predict(model, testIn, testLabel, labelIndexes
-                        = RP['chained_labels'][idx])
-
-        # Permafreeze for last training. Not sure if good idea.
-        RP['trainable_inner'] = False
-
-        # Train and test on split testing data
-        nTrainIn, nTrainLabel, nTestIn, nTestLabel = data.holdout(RP['holdout_ratio'],
-                testIn, testLabel)
-        for idxes in RP['chained_test_labels']:
-            model, epochsDone = modelOnLabels(nTrainIn, nTrainLabel, nTestIn,
-                nTestLabel, alphaSize, nomiSize, idxes,
-                model.get_weights(), uniOutput = True)
-
-            print("\n  Prediction of training data:")
-            if RP['classify']:
-                relevanceTrain = classify(model, nTrainIn, nTrainLabel,
-                        labelIndexes = idxes)
-            else:
-                relevanceTrain = predict(model, nTrainIn, nTrainLabel,
-                        labelIndexes = idxes)
-
-            print("\n  Prediction of testing data:")
-            if RP['classify']:
-                if RP['use_partitions']:
-                    relevanceTest, stdTest, loglossTest, loglossStdTest, \
-                        aucTest, aucStdTest = classifySplit(model, nTestIn, \
-                        nTestLabel, labelIndexes = idxes)
-                else:
-                    relevanceTest = classify(model, nTestIn, nTestLabel,
-                        labelIndexes = idxes)
-            else:
-                if RP['use_partitions']:
-                    relevanceTest, stdTest = predictSplit(model, nTestIn,
-                        nTestLabel, labelIndexes = idxes)
-                else:
-                    relevanceTest = predict(model, nTestIn, nTestLabel,
-                        labelIndexes = idxes)
-
-        if RP['scatter_visualize']:
-            utility.visualize2D(model, 1, testIn,
-                    testLabel[RP['chained_predict'][0]])
-
-    endTime = time.time()
-    deltaTime = endTime - startTime
-
-    modelSummary = utility.modelToString(model)
-
-    memRss, memVms = utility.getMemoryUsage()
-
-    if np.isnan(relevanceTest):
-        relevanceTest = -1
-    if np.isnan(relevanceTrain):
-        relevanceTrain = -1
-    if np.isnan(stdTest):
-        stdTest = -1
-
-    import subprocess
-    try:
-        gitCommit = subprocess.check_output('git rev-parse HEAD', shell=True).strip()
-    except:
-        gitCommit = None
-
-
-    # TODO: add memory_pm_mb, memory_vm_bm
-
-    if not RP['classify']:
-        loglossTest = None
-        loglossStdTest = None
-        aucTest = None
-        aucStdTest = None
-
-    db.sendStatistics(
-        dataset_name = cc.exp['fetch']['table'],
-        split_name = cc.exp['params']['data']['testing'],
-        training_row_count = len(trainLabel[0]),
-        testing_row_count = len(testLabel[0]),
-        task = 'classification' if RP['classify'] else 'regression',
-        relevance_training = relevanceTrain,
-        relevance_testing = relevanceTest,
-        relevance_testing_std = stdTest,
-        log_loss = loglossTest,
-        log_loss_std = loglossStdTest,
-        auc = aucTest,
-        auc_std = aucStdTest,
-        epoch_max = RP['epochs'],
-        epoch_count = epochsDone,
-        runtime_second = deltaTime,
-        parameter_count = model.count_params(),
-        learning_rate = RP['learning_rate'],
-        optimization_method = OPTIMIZER.__class__.__name__,
-        batch_size = RP['batch'],
-        comment = RP['comment'],
-        label_name = ','.join(cc.exp['params']['data']['labels']),
-        model = modelSummary,
-        seed = RP['seed'],
-        memory_pm_mb = memRss,
-        memory_vm_mb = memVms,
-        learning_curve = {'val':open('{}/{}'.format(cc.cfg['plots']['dir'], utility.PLOT_NAME),'rb').read(),'type':'bin'},
-        hostname = socket.gethostname(),
-        experiment_config = yaml.dump(cc.exp,default_flow_style=False),
-        git_commit = gitCommit,
-        objective = RP['objective'])
+    stats.update(metricStats)
+    db.sendStatistics(**stats)

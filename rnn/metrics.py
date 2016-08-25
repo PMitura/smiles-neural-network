@@ -45,7 +45,7 @@ def computeMSE(pred, truth):
 
 def predict(model, input, labels, meta):
     partitioner = PermutationPartitioner(len(input), len(input) / RP['num_partitions'])
-    iterations = RP['num_partitions']#**2
+    iterations = RP['num_partitions']**2
 
     metrics = {
         'r2': np.zeros((labels.shape[1], iterations)),
@@ -59,7 +59,6 @@ def predict(model, input, labels, meta):
         print('\titer:\t{}/{}'.format(iteration+1, iterations))
 
         part = partitioner.get()
-
         partIn = input[part]
         partLabelsT = labels[part].T
         partPredT = model.predict(partIn, batch_size = RP['batch']).T
