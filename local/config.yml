@@ -1,10 +1,10 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/dnn_rapidminer/dnn_rapidminer.yml']
+experiments: ['local/experiments/pretraining/rnn_all_features_pretrained.yml']
 
-model: 'dnn'
+model: 'rnn'
 
 # Persistence of models
 persistence:
-  model: false
+  model: true
