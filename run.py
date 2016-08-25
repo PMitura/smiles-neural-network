@@ -3,6 +3,7 @@
 import sys, getopt
 from config import config as cc
 from keras.optimizers import Adam, Adadelta, Adagrad, Nadam, Adamax
+import theano
 
 def main(argv):
     path = 'local/config.yml'

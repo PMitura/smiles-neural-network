@@ -567,29 +567,6 @@ def classifySplit(model, nnInput, rawLabel, labelIndexes = RP['label_idxs']):
     return accuracyAvgOverall, accuracyDevOverall, loglossAvgOverall, loglossDevOverall, aucAvgOverall, aucDevOverall
 
 
-# TODO: encapsulate training rnn on a label to a function, not working yet
-def modelOnLabels(trainIn, trainLabel, testIn, testLabel, alphaSize, nomiSize,
-        indexes, weights = None, uniOutput = False):
-    model = configureModel(alphaSize, nomiSize, outputLen = len(indexes))
-
-    if uniOutput:
-        if weights == None:
-            weights = model.get_weights()
-        # uniform output layer weights
-        for i in range(len(weights[11])):
-            for j in range(len(weights[11][i])):
-                weights[11][i][j] = 0.1
-        model.set_weights(weights)
-    elif weights != None:
-        oriW = model.get_weights()
-        weights[11] = oriW[11]
-        model.set_weights(weights)
-
-    epochsDone = train(model, trainIn, trainLabel, (testIn, testLabel),
-            labelIndexes = indexes)
-    return model, epochsDone
-
-
 def run(grid = None):
     stats = {}
     stats['runtime_second'] = time.time()
@@ -612,13 +589,13 @@ def run(grid = None):
 
 
     # compute metrics for the model based on the task for both testing and training data
-    print('\n   Getting metrics for training data:')
+    print('\nGetting metrics for training data:')
     if RP['classify']:
         trainMetrics = metrics.classify(model, trainIn, trainLabel, preprocessMeta)
     else:
         trainMetrics = metrics.predict(model, trainIn, trainLabel, preprocessMeta)
 
-    print('\n   Getting metrics for test data:')
+    print('\nGetting metrics for test data:')
     if RP['classify']:
         testMetrics = metrics.classify(model, testIn, testLabel, preprocessMeta)
     else:

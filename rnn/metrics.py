@@ -45,7 +45,7 @@ def computeMSE(pred, truth):
 
 def predict(model, input, labels, meta):
     partitioner = PermutationPartitioner(len(input), len(input) / RP['num_partitions'])
-    iterations = RP['num_partitions']**2
+    iterations = RP['num_partitions']#**2
 
     metrics = {
         'r2': np.zeros((labels.shape[1], iterations)),
@@ -56,7 +56,7 @@ def predict(model, input, labels, meta):
     labels = data.denormalize(labels, meta)
 
     for iteration in range(iterations):
-        print('   iter: {}/{}'.format(iteration, iterations))
+        print('\titer:\t{}/{}'.format(iteration+1, iterations))
 
         part = partitioner.get()
 
@@ -81,6 +81,15 @@ def predict(model, input, labels, meta):
         'mse_avg': np.nanmean(metrics['mse']),
         'mse_std': np.nanstd(metrics['mse']),
     }
+
+    for i,labelName in enumerate(RD['labels']):
+        print('{}/{} - {}:'.format(i+1, len(RD['labels']),labelName))
+        print('\tR2:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsPerLabel['r2_avg'][i],metricsPerLabel['r2_std'][i]))
+        print('\tMSE:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsPerLabel['mse_avg'][i],metricsPerLabel['mse_std'][i]))
+
+    print('Overall metrics:')
+    print('\tR2:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['r2_avg'],metricsOverall['r2_std']))
+    print('\tMSE:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['mse_avg'],metricsOverall['mse_std']))
 
     return metricsOverall
 
@@ -127,7 +136,7 @@ def classify(model, input, labels, meta):
     labels = data.denormalize(labels, meta)
 
     for iteration in range(iterations):
-        print('   iter: {}/{}'.format(iteration, iterations))
+        print('\titer:\t{}/{}'.format(iteration, iterations))
 
         part = partitioner.get()
 
@@ -160,5 +169,16 @@ def classify(model, input, labels, meta):
         'auc_avg': np.nanmean(metrics['auc']),
         'auc_std': np.nanstd(metrics['auc'])
     }
+
+    for i,labelName in enumerate(RD['labels']):
+        print('{}/{} - {}:'.format(i+1, len(RD['labels']),labelName))
+        print('\tACC:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsPerLabel['acc_avg'][i],metricsPerLabel['acc_std'][i]))
+        print('\tLogLos:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsPerLabel['log_loss_avg'][i],metricsPerLabel['log_loss_std'][i]))
+        print('\tAUC:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsPerLabel['auc_avg'][i],metricsPerLabel['auc_std'][i]))
+
+    print('Overall metrics:')
+    print('\tACC:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['acc_avg'],metricsOverall['acc_std']))
+    print('\tLogLos:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['log_loss_avg'],metricsOverall['log_loss_std']))
+    print('\tAUC:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['auc_avg'],metricsOverall['auc_std']))
 
     return metricsOverall
