@@ -87,7 +87,7 @@ def computeMACCS(smilesDf):
 
 
 def getData(con, lo):
-    query = 'SELECT {} FROM {} LIMIT {} OFFSET {}'.format(
+    query = 'SELECT {} FROM {} where length(canonical_smiles) <= 80 LIMIT {} OFFSET {}'.format(
         ','.join(['"{}"'.format(x) for x in DOWNLOAD_COLS]),
         DOWNLOAD_TABLE,
         LELIMIT,
