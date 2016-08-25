@@ -182,7 +182,7 @@ def preprocessData(df):
         trainIn, trainLabel = input[~testing], labels[~testing]
         testIn, testLabel = input[testing], labels[testing]
     else:
-        split = len(input) * RP['holdout_ratio']
+        split = int(len(input) * RP['holdout_ratio'])
 
         trainIn, trainLabel = input[:split], labels[:split]
         testIn, testLabel = input[split:], labels[split:]
