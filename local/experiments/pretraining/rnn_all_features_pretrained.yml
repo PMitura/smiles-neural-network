@@ -11,7 +11,7 @@ fetch:
   order: ~ # 'canonical_smiles'
   index_col: ~
   limit: ~
-  where:  ~ # 'is_testing_all IS NOT NULL and length(canonical_smiles) <= 80'
+  where: 'is_in_206_1977 = 0'
 
 # Experiment params
 params:
