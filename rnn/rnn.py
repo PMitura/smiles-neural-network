@@ -587,6 +587,9 @@ def run(grid = None):
         model = configureModel(trainIn)
         stats['epoch_count'] = train(model, trainIn, trainLabel, (testIn, testLabel))
 
+    # persistence first
+    if cc.cfg['persistence']['model']:
+        utility.saveModel(model)
 
     # compute metrics for the model based on the task for both testing and training data
     print('\nGetting metrics for training data:')
@@ -601,13 +604,9 @@ def run(grid = None):
     else:
         testMetrics = metrics.predict(model, testIn, testLabel, preprocessMeta)
 
-
     # utilities and visualizations
     if cc.cfg['plots']['layer_activations']:
         visualization.layerActivations(model, testIn, testLabel)
-
-    if cc.cfg['persistence']['model']:
-        utility.saveModel(model)
 
     # statistics to send to journal
     stats['runtime_second'] = time.time() - stats['runtime_second']
