@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 
+import matplotlib
+matplotlib.use('PDF')
+
 import sys, getopt
 from config import config as cc
 from keras.optimizers import Adam, Adadelta, Adagrad, Nadam, Adamax
