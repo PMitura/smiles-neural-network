@@ -181,6 +181,9 @@ def run(grid = None):
     if cc.cfg['plots']['layer_activations']:
         visualization.layerActivations(model, testIn, testLabel)
 
+    if cc.cfg['plots']['seq_output']:
+        visualization.visualizeSequentialOutput(model, cc.cfg['plots']['seq_output_layer_idx'], cc.cfg['plots']['seq_output_smiles'])
+
     # statistics to send to journal
     stats['runtime_second'] = time.time() - stats['runtime_second']
     stats['memory_pm_mb'], stats['memory_vm_mb'] = utility.getMemoryUsage()
@@ -227,4 +230,4 @@ def run(grid = None):
         metricStats['mse_std'] = testMetrics['mse_std']
 
     stats.update(metricStats)
-    db.sendStatistics(**stats)
+    # db.sendStatistics(**stats)

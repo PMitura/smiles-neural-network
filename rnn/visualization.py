@@ -1,17 +1,27 @@
 import keras.callbacks
 from keras import backend as K
+from keras.models import Model,Sequential
+
 
 import numpy as np
-import matplotlib.pyplot as plt
+
+import prettyplotlib as ppl
+from prettyplotlib import plt
+
+#import seaborn as sns
+import scipy.cluster.hierarchy as sch
+
+
 import collections
 import pandas as pd
 
 from sklearn.manifold import TSNE
 
-
+import data
 from config import config as cc
 import os
 from math import ceil
+from sets import Set
 
 def flatten(x):
     if isinstance(x, collections.Iterable):
@@ -184,3 +194,66 @@ def layerActivations(model, data, labels):
     plt.close()
 
     print('...done')
+
+def visualizeSequentialOutput(model, layerIdx, smilesData):
+
+    if not os.path.exists(cc.cfg['plots']['seq_output_dir']):
+        os.makedirs(cc.cfg['plots']['seq_output_dir'])
+
+    smilesDf = pd.DataFrame(smilesData, columns=[cc.exp['params']['data']['smiles']])
+
+    input = data.formatSequentialInput(smilesDf)
+
+    # model.layers[layerIdx].return_sequences = True
+    # model.compile(loss="mean_squared_error", optimizer="rmsprop")
+
+    cfg = model.get_config()[:layerIdx+1]
+    cfg[layerIdx]['config']['return_sequences'] = True
+
+    seqModel = Sequential.from_config(cfg)
+    seqModel.set_weights(model.get_weights())
+    seqModel.layers[layerIdx].return_sequences = True
+
+
+    outputFunction = K.function([seqModel.layers[0].input],
+              [seqModel.layers[layerIdx].output])
+
+    output = outputFunction([input])[0]
+
+    '''
+    sns.set()
+    for i,smilesOutput in enumerate(output):
+        g = sns.clustermap(smilesOutput.T, col_cluster=False,  method='single',metric='cosine')
+        g.savefig('{}/seq_output.png'.format(cc.cfg['plots']['seq_output_dir']))
+    '''
+
+    dropSet = Set(cc.cfg['plots']['seq_output_ignore_neurons'])
+    if cc.cfg['plots']['seq_output_select_neurons']:
+        arrMask = cc.cfg['plots']['seq_output_select_neurons']
+    else:
+        arrMask = list(range(output.shape[2]))
+    arrMask = np.array([x for x in arrMask if not x in dropSet])
+
+    fig = plt.figure(figsize=(input.shape[1] * 0.8,len(arrMask) * len(smilesData) * 1.5))
+
+    for i,smilesOutput in enumerate(output):
+
+
+        selected = smilesOutput.T[arrMask]
+
+        Z = sch.linkage(selected, method='single', metric='cosine')
+        leaves = sch.leaves_list(Z)
+
+        reordered = selected[leaves]
+
+        ax = fig.add_subplot(len(smilesData),1,i+1)
+
+        ppl.pcolormesh(fig, ax, reordered,
+               xticklabels=list(smilesData[i]),
+               yticklabels=arrMask[leaves],
+               vmin=-1,
+               vmax=1)
+
+    fig.savefig('{}/seq_output.png'.format(cc.cfg['plots']['seq_output_dir']))
+
+

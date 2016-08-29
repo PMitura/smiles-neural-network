@@ -22,6 +22,12 @@ plots:
   layer_activations_points_cap: 1000
   layer_activations_label_cap: 10
 
+  seq_output: false
+  seq_output_dir: 'local/plots/seq_output'
+  seq_output_ignore_neurons: ~
+  seq_output_layer_idx: ~
+  seq_output_smiles: ~
+
 model: 'rnn'
 
 # Persistence of models
