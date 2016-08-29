@@ -1,20 +1,21 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/test/rnn_visual.yml']
+experiments: ['local/experiments/test/rnn_benzene.yml']
 
 model: 'rnn'
 
 # Persistence of models
 persistence:
-  model: false
+  model: true
 
 plots:
-  seq_output: true
+  seq_output: false
   seq_output_layer_idx: 1
   seq_output_ignore_neurons: ~ #[84,95,48,24,131,94,49,2,100,28,149,57,1,0,53,10,144,118,36,14,3,108,65,139,122,45,37,87,81,60,64,106]
-  seq_output_select_neurons: [5,5] #[140,98,55,22,113,145] # [55,8,69,116,68,70,130,41] #[140,116,114]
-  seq_output_smiles: ['?'
+  seq_output_select_neurons: ~
+  seq_output_smiles: [
+  '?'
   # ,'????F????'
   # ,'????Cl????'
   # ,'????Br????'
@@ -42,15 +43,16 @@ plots:
   # ,'????N=????'
   # ,'????P=????'
   # ,'????C=????'
-  ,'????(????)???(????)????'
-  ,'????(????)????????(????)????????????'
-  # ,'????c1cc(N)ccc1????c1cc(N)ccc1????'
-  ,'N[C@@H]([C@H](O)c1ccc(O)c(O)c1)C(=O)O'
+  ,'CC\C(=C(/c1ccccc1)\c2ccc(O)cc2)\c3ccccc3'
+  # ,'????c1????c1????????c1????c1????????????'
+  # ,'N[C@@H]c1cc(ccc1O)C2=CN[C@@H]c1cc(ccc1O)C2=CN[C@@H]c1cc(ccc1O)C2=C'
+  # ,'N[C@@H]c1(O)cc(cc(O)c1O)cc(O)cc(O)c1c(O)c(O)c(O)c(O)c1C2=CN[C@@H]c1cc(ccc1O)C2=CN[C@@H]c1cc(ccc1O)C2=C'
+  # ,'N[C@@H]([C@H](O)sc1ccc(O)c(O)c1)C(=O)O'
   # ,'O=n1ccccc1'
   # ,'OB1OCc2cc(F)ccc12'
-  ,'N[C@@H](C)C(=O)O'
+  # ,'N[C@@H](C)C(=O)O'
   # ,'CC1Oc2cc(O)cc(O)c2N=C1c3ccc(O)cc3'
   # ,'OCC1OC(O)C(O)C(O)C1O'
-  ,'COc1cc(ccc1O)C2=CC(=O)c3c(O)c(OC)c(O)c(OC)c3O2'
+  # ,'COc1cc(ccc1O)C2=CC(=O)c3c(O)c(OC)c(O)c(OC)c3O2'
   # ,'CC(=O)[C@@H](O)[C@@H](O)COP(=O)(O)O'
   ]
