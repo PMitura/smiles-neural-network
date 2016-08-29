@@ -23,6 +23,8 @@ params:
     use_test_flags: false
     testing: 'is_testing_80'
   rnn:
+    load_model: '18841772a1b37d985dc432eaca549d1b9c4b231c'
+
     # RNN parameters
     learning_rate: 0.0001
     epochs: 60
