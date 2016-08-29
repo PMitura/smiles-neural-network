@@ -10,7 +10,7 @@ fetch:
   cols: ['canonical_smiles','fr_benzene', 'is_testing']
   order: 'canonical_smiles'
   index_col: ~
-  limit: ~
+  limit: 10
   where: 'length(canonical_smiles) <= 80'
 
 # Experiment params
@@ -24,9 +24,9 @@ params:
     use_test_flags: true
     testing: 'is_testing'
   rnn:
-    # load_model: '6340d6800a8965e8ffa367459ae292c9f88d25dd'
+    load_model: '511e92772f436d8d80fc1cda5705079b21b0d07d'
 
-    num_partitions: 5
+    num_partitions: 1
     # RNN parameters
     learning_rate: 0.001
     epochs: 150
