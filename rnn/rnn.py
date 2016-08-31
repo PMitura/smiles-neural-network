@@ -56,13 +56,13 @@ def configureModel(input):
     else:
     '''
 
-    model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * alphaSize), activation = 'tanh',
-        trainable = RP['trainable_inner']),
-        input_shape = (None, alphaSize )))
+    # model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * alphaSize), activation = 'tanh',
+    #     trainable = RP['trainable_inner']),
+    #     input_shape = (None, alphaSize )))
 
-
+    model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'], input_shape = (None, alphaSize ), return_sequences=True))
     # model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'], return_sequences = True ))
-    model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), W_regularizer=l2(0.01), U_regularizer=l2(0.01),trainable = RP['trainable_inner']))
+    model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner']))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
     model.add(Dense(outputLen) )
 
@@ -230,4 +230,4 @@ def run(grid = None):
         metricStats['mse_std'] = testMetrics['mse_std']
 
     stats.update(metricStats)
-    # db.sendStatistics(**stats)
+    db.sendStatistics(**stats)
