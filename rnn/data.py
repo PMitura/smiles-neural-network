@@ -116,7 +116,7 @@ def formatSequentialInput(df):
     smilesDf = df[RD['smiles']]
     smilesMaxLen = max([len(x) for x in smilesDf])
 
-    seqInput = np.zeros((numSamples, smilesMaxLen, SMILES_ALPHABET_LEN))
+    seqInput = np.zeros((numSamples, smilesMaxLen, SMILES_ALPHABET_LEN), dtype=bool)
 
     # translate to one hot for smiles
     for i,smiles in enumerate(smilesDf):
@@ -136,7 +136,7 @@ def formatSequentialInput(df):
             nominalLookup = {x:i for (i,x) in enumerate(df[nominal].unique())}
             nominalSize = len(nominalLookup)
 
-            nominalInput = np.zeros((numSamples, smilesMaxLen, nominalSize))
+            nominalInput = np.zeros((numSamples, smilesMaxLen, nominalSize), dtype=bool)
             for i,nom in enumerate(df[nominal]):
                 for j in range(smilesMaxLen):
                     nominalInput[i][j][nominalLookup[nom]] = 1
@@ -146,7 +146,7 @@ def formatSequentialInput(df):
         # concatenate one hot representations
         seqInput = np.concatenate(tuple(inputs), axis = 2)
 
-    return seqInput.astype(bool)
+    return seqInput
 
 ########################################################################################################################
 
@@ -165,19 +165,19 @@ def formatFastaInput(df):
     fastaDf = df['sequence']
     fastaMaxLen = max([len(x) for x in fastaDf])
 
-    seqInput = np.zeros((numSamples, fastaMaxLen, FASTA_ALPHABET_LEN))
+    seqInput = np.zeros((numSamples, fastaMaxLen, FASTA_ALPHABET_LEN), dtype=bool)
 
     # translate to one hot for fasta
     for i,fasta in enumerate(fastaDf):
         for j in range(fastaMaxLen):
 
             transChar = FASTA_ALPHABET_LOOKUP_TABLE[FASTA_ALPHABET_UNKNOWN]
-            if j < len(fasta) and fasta[j] in FASTA_ALPHABET_LOOKUP_TABLE:
-                transChar = FASTA_ALPHABET_LOOKUP_TABLE[fasta[j]]
+            # if j < len(fasta) and fasta[j] in FASTA_ALPHABET_LOOKUP_TABLE:
+                # transChar = FASTA_ALPHABET_LOOKUP_TABLE[fasta[j]]
 
             seqInput[i][j][transChar] = 1
 
-    return seqInput.astype(bool)
+    return seqInput
 
 ########################################################################################################################
 

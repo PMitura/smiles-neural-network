@@ -53,4 +53,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[EDGE][IC50] full run of edge property prediction'
+    comment: '[EDGE][IC50] try only constant proteins'
