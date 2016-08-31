@@ -51,4 +51,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[A549][GRUGRUGRU] more grus, more power?'
+    comment: '[A549][GRUGRU] weight regularization with dropout'
