@@ -92,13 +92,17 @@ def configureEdgeModel(inputSmiles, inputFasta):
     mergedOutputLen = len(RD['labels'])
 
     smilesModel = Sequential()
-    smilesModel.add(GRU(smilesGRUSize, trainable = True, input_shape = smilesGRUInputShape, return_sequences = True))
-    smilesModel.add(GRU(smilesGRUSize, trainable = True))
+    smilesModel.add(GRU(smilesGRUSize, trainable = True, input_shape = smilesGRUInputShape))
+
+    # smilesModel.add(GRU(smilesGRUSize, trainable = True, input_shape = smilesGRUInputShape, return_sequences = True))
+    # smilesModel.add(GRU(smilesGRUSize, trainable = True))
     smilesModel.add(Activation('relu', trainable = True))
 
     fastaModel = Sequential()
-    fastaModel.add(GRU(100, trainable = True, input_shape = fastaGRUInputShape, return_sequences = True))
-    fastaModel.add(GRU(100, trainable = True))
+    fastaModel.add(GRU(100, trainable = True, input_shape = fastaGRUInputShape))
+
+    # fastaModel.add(GRU(100, trainable = True, input_shape = fastaGRUInputShape, return_sequences = True))
+    # fastaModel.add(GRU(100, trainable = True))
     fastaModel.add(Activation('relu', trainable = True))
 
     merged = Merge([smilesModel, fastaModel], mode='concat')
