@@ -257,8 +257,6 @@ def preprocessEdgeData(df):
     inputSmiles = formatSequentialInput(df)
     inputFasta = formatFastaInput(df)
 
-    print inputFasta.dtype
-
     labels = df[RD['labels']].values
     testing = df[RD['testing']].values.astype(bool)
 

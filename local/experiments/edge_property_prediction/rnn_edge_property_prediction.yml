@@ -43,7 +43,7 @@ params:
     chained_models: false
     trainable_inner: true
 
-    zscore_norm: false
+    zscore_norm: true
     logarithm: false
 
     # learning rate decay settings
