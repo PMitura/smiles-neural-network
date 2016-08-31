@@ -7,11 +7,11 @@ template: 'rnn.yml'
 # DB fetch params
 fetch:
   table: 'output.edge_ic50'
-  cols: ['canonical_smiles','sequence','standard_value_log','is_testing']
+  cols: ['canonical_smiles','sequence_600','standard_value_log','is_testing']
   order: 'canonical_smiles'
   index_col: ~
   limit: ~
-  where: length(sequence) <= 400
+  where: ~
 
 # Experiment params
 params:
@@ -53,4 +53,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[EDGE][IC50] try only constant proteins'
+    comment: '[EDGE][IC50] sequence 600 protein'

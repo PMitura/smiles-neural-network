@@ -99,7 +99,7 @@ def configureEdgeModel(inputSmiles, inputFasta):
     smilesModel.add(Activation('relu', trainable = True))
 
     fastaModel = Sequential()
-    fastaModel.add(GRU(100, trainable = True, input_shape = fastaGRUInputShape))
+    fastaModel.add(GRU(fastaGRUSize, trainable = True, input_shape = fastaGRUInputShape))
 
     # fastaModel.add(GRU(100, trainable = True, input_shape = fastaGRUInputShape, return_sequences = True))
     # fastaModel.add(GRU(100, trainable = True))

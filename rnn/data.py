@@ -162,7 +162,7 @@ def formatFastaInput(df):
     numSamples = len(df)
 
     # FIXME: hardcoded fasta
-    fastaDf = df['sequence']
+    fastaDf = df['sequence_600']
     fastaMaxLen = max([len(x) for x in fastaDf])
 
     seqInput = np.zeros((numSamples, fastaMaxLen, FASTA_ALPHABET_LEN), dtype=bool)
@@ -172,8 +172,8 @@ def formatFastaInput(df):
         for j in range(fastaMaxLen):
 
             transChar = FASTA_ALPHABET_LOOKUP_TABLE[FASTA_ALPHABET_UNKNOWN]
-            # if j < len(fasta) and fasta[j] in FASTA_ALPHABET_LOOKUP_TABLE:
-                # transChar = FASTA_ALPHABET_LOOKUP_TABLE[fasta[j]]
+            if j < len(fasta) and fasta[j] in FASTA_ALPHABET_LOOKUP_TABLE:
+                transChar = FASTA_ALPHABET_LOOKUP_TABLE[fasta[j]]
 
             seqInput[i][j][transChar] = 1
 
