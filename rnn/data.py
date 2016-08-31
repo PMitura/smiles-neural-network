@@ -148,6 +148,39 @@ def formatSequentialInput(df):
 
     return seqInput
 
+########################################################################################################################
+
+FASTA_ALPHABET_UNKNOWN = '?'
+FASTA_ALPHABET = [FASTA_ALPHABET_UNKNOWN,
+'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+
+FASTA_ALPHABET_LOOKUP_TABLE = { v:k for k,v in enumerate(FASTA_ALPHABET) }
+FASTA_ALPHABET_LEN = len(FASTA_ALPHABET)
+FASTA_ALPHABET_BITS = int(ceil(log(FASTA_ALPHABET_LEN,2)))
+
+def formatFastaInput(df):
+    numSamples = len(df)
+
+    # FIXME: hardcoded fasta
+    fastaDf = df['sequence']
+    fastaMaxLen = max([len(x) for x in fastaDf])
+
+    seqInput = np.zeros((numSamples, fastaMaxLen, FASTA_ALPHABET_LEN))
+
+    # translate to one hot for fasta
+    for i,fasta in enumerate(fastaDf):
+        for j in range(fastaMaxLen):
+
+            transChar = FASTA_ALPHABET_LOOKUP_TABLE[FASTA_ALPHABET_UNKNOWN]
+            if j < len(fasta) and fasta[j] in FASTA_ALPHABET_LOOKUP_TABLE:
+                transChar = FASTA_ALPHABET_LOOKUP_TABLE[fasta[j]]
+
+            seqInput[i][j][transChar] = 1
+
+    return seqInput
+
+########################################################################################################################
+
 def normalize(arr):
     meta = {}
 
@@ -210,3 +243,34 @@ def preprocessData(df):
         testIn, testLabel = input[split:], labels[split:]
 
     return trainIn,trainLabel,testIn,testLabel,meta
+
+def preprocessEdgeData(df):
+    # filter out inf and NaN (nulls) values
+    df = df.replace([np.inf, -np.inf],np.nan).dropna()
+    df.reset_index(drop=True, inplace=True)
+
+    # filter out rows with malformed test_flags, if we use them
+    if RD['use_test_flags']:
+        df = df[(df[RD['testing']] == 0) | (df[RD['testing']] == 1)]
+        df.reset_index(drop=True, inplace=True)
+
+    inputSmiles = formatSequentialInput(df)
+    inputFasta = formatFastaInput(df)
+
+    labels = df[RD['labels']].values
+    testing = df[RD['testing']].values.astype(bool)
+
+    # preprocessing
+    labels, meta = normalize(labels)
+
+    # create training and testing sets
+    if RP['flag_based_hold']:
+        trainSmilesIn, trainFastaIn, trainLabel = inputSmiles[~testing], inputFasta[~testing], labels[~testing]
+        testSmilesIn, testFastaIn, testLabel = inputSmiles[testing], inputFasta[testing], labels[testing]
+    else:
+        split = int(len(input) * RP['holdout_ratio'])
+
+        trainSmilesIn, trainFastaIn, trainLabel = inputSmiles[:split], inputFasta[:split], labels[:split]
+        testSmilesIn, testFastaIn, testLabel = inputSmiles[split:], inputFasta[split:], labels[split:]
+
+    return [trainSmilesIn, trainFastaIn], trainLabel, [testSmilesIn, testFastaIn], testLabel, meta

@@ -20,7 +20,7 @@ import socket
 from keras.models import Sequential
 from keras.layers import Activation, Dense, Dropout, LSTM, AveragePooling1D
 from keras.layers import TimeDistributed, SimpleRNN, GRU
-from keras.layers import BatchNormalization, Embedding, merge
+from keras.layers import BatchNormalization, Embedding, Merge
 from keras.optimizers import Adam, RMSprop, Adadelta, Adagrad
 from keras.regularizers import l2, activity_l2
 import keras.callbacks
@@ -79,6 +79,39 @@ def configureModel(input):
 
     print('  ...done')
     return model
+
+def configureEdgeModel(inputSmiles, inputFasta):
+    print('  Initializing edge model and compiling...')
+
+    smilesGRUInputShape = (None, inputSmiles.shape[2])
+    smilesGRUSize = int(RP['gru_layer_multiplier'] * smilesGRUInputShape[1])
+
+    fastaGRUInputShape = (None, inputFasta.shape[2])
+    fastaGRUSize = int(RP['fasta_gru_layer_multiplier'] * fastaGRUInputShape[1])
+
+    mergedOutputLen = len(RD['labels'])
+
+    smilesModel = Sequential()
+    smilesModel.add(GRU(smilesGRUSize, trainable = True, input_shape = smilesGRUInputShape, return_sequences = True))
+    smilesModel.add(GRU(smilesGRUSize, trainable = True))
+    smilesModel.add(Activation('relu', trainable = True))
+
+    fastaModel = Sequential()
+    fastaModel.add(GRU(100, trainable = True, input_shape = fastaGRUInputShape, return_sequences = True))
+    fastaModel.add(GRU(100, trainable = True))
+    fastaModel.add(Activation('relu', trainable = True))
+
+    merged = Merge([smilesModel, fastaModel], mode='concat')
+
+    mergedModel = Sequential()
+    mergedModel.add(merged)
+    mergedModel.add(Dense(100))
+    mergedModel.add(Dense(mergedOutputLen))
+
+    mergedModel.compile(loss = RP['objective'], optimizer = OPTIMIZER)
+
+    print('  ...done')
+    return mergedModel
 
 
 def learningRateDecayer(epoch):
@@ -147,17 +180,21 @@ def run(grid = None):
     # initialize using the same seed (to get stable results on comparisons)
     np.random.seed(RP['seed'])
 
-    # get the training and testing datasets along with some meta info
-    trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessData(db.getData())
 
-    stats['training_row_count'] = len(trainIn)
-    stats['testing_row_count'] = len(testIn)
+    # get the training and testing datasets along with some meta info
+    # trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessData(db.getData())
+    trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessEdgeData(db.getData())
+
+
+    stats['training_row_count'] = len(testLabel)
+    stats['testing_row_count'] = len(testLabel)
 
     # load model from file or create and train one from scratch
     if RP['load_model']:
         model = utility.loadModel(RP['load_model'])
     else:
-        model = configureModel(trainIn)
+        # model = configureModel(trainIn)
+        model = configureEdgeModel(trainIn[0],trainIn[1])
         stats['epoch_count'] = train(model, trainIn, trainLabel, (testIn, testLabel))
 
     # persistence first

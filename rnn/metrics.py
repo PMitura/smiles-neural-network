@@ -44,7 +44,8 @@ def computeMSE(pred, truth):
     return ((pred - truth)**2).mean()
 
 def predict(model, input, labels, meta):
-    partitioner = PermutationPartitioner(len(input), len(input) / RP['num_partitions'])
+    # FIXME: hardcoded edge
+    partitioner = PermutationPartitioner(len(input[0]), len(input[0]) / RP['num_partitions'])
     iterations = RP['num_partitions']**2
 
     metrics = {
@@ -59,7 +60,7 @@ def predict(model, input, labels, meta):
         print('\titer:\t{}/{}'.format(iteration+1, iterations))
 
         part = partitioner.get()
-        partIn = input[part]
+        partIn = [input[0][part],input[1][part]]
         partLabelsT = labels[part].T
         partPredT = model.predict(partIn, batch_size = RP['batch']).T
 
