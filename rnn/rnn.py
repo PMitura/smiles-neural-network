@@ -60,7 +60,7 @@ def configureModel(input):
     #     trainable = RP['trainable_inner']),
     #     input_shape = (None, alphaSize )))
 
-    model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'], input_shape = (None, alphaSize ), return_sequences=True, dropout_W=0.2, dropout_U=0.2))
+    model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'], input_shape = (None, alphaSize ), return_sequences=True))
     # model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'], return_sequences = True ))
     model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner']))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
