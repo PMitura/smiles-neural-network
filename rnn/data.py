@@ -146,7 +146,7 @@ def formatSequentialInput(df):
         # concatenate one hot representations
         seqInput = np.concatenate(tuple(inputs), axis = 2)
 
-    return seqInput
+    return seqInput.astype(bool)
 
 ########################################################################################################################
 
@@ -177,7 +177,7 @@ def formatFastaInput(df):
 
             seqInput[i][j][transChar] = 1
 
-    return seqInput
+    return seqInput.astype(bool)
 
 ########################################################################################################################
 
@@ -256,6 +256,8 @@ def preprocessEdgeData(df):
 
     inputSmiles = formatSequentialInput(df)
     inputFasta = formatFastaInput(df)
+
+    print inputFasta.dtype
 
     labels = df[RD['labels']].values
     testing = df[RD['testing']].values.astype(bool)
