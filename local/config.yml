@@ -7,4 +7,12 @@ model: 'rnn'
 
 # Persistence of models
 persistence:
-  model: true
+  model: false
+
+plots:
+  seq_output: true
+  seq_output_ignore_neurons: ~
+  seq_output_layer_idx: 1
+  seq_output_smiles: [
+  'BrC1=CC2(CCNC3=C2C(=O)c4cccnc4C3=O)C=C(Br)C1=O'
+  ]

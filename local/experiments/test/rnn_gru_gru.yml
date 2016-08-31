@@ -10,7 +10,7 @@ fetch:
   cols: ['canonical_smiles','standard_value_log','is_testing']
   order: 'canonical_smiles'
   index_col: ~
-  limit: ~
+  limit: 100
   where:  'length(canonical_smiles) <= 80'
 
 # Experiment params
@@ -22,6 +22,9 @@ params:
     use_test_flags: true
     testing: 'is_testing'
   rnn:
+    load_model: 'b482166ca6bfe6e6586e83dc52fe09c18a18d243'
+    num_partitions: 1
+
     # RNN parameters
     learning_rate: 0.001
     epochs: 150
@@ -48,4 +51,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[A549][GRUGRU] model testing'
+    comment: '[A549][GRUGRU][VISUAL] visualizing GRU layers'
