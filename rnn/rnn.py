@@ -230,4 +230,4 @@ def run(grid = None):
         metricStats['mse_std'] = testMetrics['mse_std']
 
     stats.update(metricStats)
-    db.sendStatistics(**stats)
+    # db.sendStatistics(**stats)
