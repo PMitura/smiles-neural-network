@@ -11,7 +11,7 @@ fetch:
   order: 'canonical_smiles'
   index_col: ~
   limit: ~
-  where:  ~
+  where: length(sequence) <= 100
 
 # Experiment params
 params:
