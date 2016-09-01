@@ -103,7 +103,7 @@ def configureEdgeModel(inputSmiles, inputFasta):
     # fastaModel.add(GRU(150, trainable = True, input_shape = fastaGRUInputShape))
 
     fastaModel.add(GRU(64, trainable = True, input_shape = fastaGRUInputShape, return_sequences = True))
-    smilesModel.add(Activation('relu', trainable = True))
+    fastaModel.add(Activation('relu', trainable = True))
     fastaModel.add(GRU(64, trainable = True))
     fastaModel.add(Activation('relu', trainable = True))
 
@@ -112,7 +112,7 @@ def configureEdgeModel(inputSmiles, inputFasta):
     mergedModel = Sequential()
     mergedModel.add(merged)
     mergedModel.add(Dense(64))
-    model.add(Activation('tanh'))
+    mergedModel.add(Activation('tanh'))
     mergedModel.add(Dense(mergedOutputLen))
 
     mergedModel.compile(loss = RP['objective'], optimizer = OPTIMIZER)
