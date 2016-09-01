@@ -94,22 +94,25 @@ def configureEdgeModel(inputSmiles, inputFasta):
     smilesModel = Sequential()
     # smilesModel.add(GRU(150, trainable = True, input_shape = smilesGRUInputShape))
 
-    smilesModel.add(GRU(150, trainable = True, input_shape = smilesGRUInputShape, return_sequences = True))
-    smilesModel.add(GRU(50, trainable = True))
+    smilesModel.add(GRU(64, trainable = True, input_shape = smilesGRUInputShape, return_sequences = True))
+    smilesModel.add(Activation('relu', trainable = True))
+    smilesModel.add(GRU(64, trainable = True))
     smilesModel.add(Activation('relu', trainable = True))
 
     fastaModel = Sequential()
     # fastaModel.add(GRU(150, trainable = True, input_shape = fastaGRUInputShape))
 
-    fastaModel.add(GRU(150, trainable = True, input_shape = fastaGRUInputShape, return_sequences = True))
-    fastaModel.add(GRU(50, trainable = True))
+    fastaModel.add(GRU(64, trainable = True, input_shape = fastaGRUInputShape, return_sequences = True))
+    smilesModel.add(Activation('relu', trainable = True))
+    fastaModel.add(GRU(64, trainable = True))
     fastaModel.add(Activation('relu', trainable = True))
 
     merged = Merge([smilesModel, fastaModel], mode='concat')
 
     mergedModel = Sequential()
     mergedModel.add(merged)
-    mergedModel.add(Dense(100))
+    mergedModel.add(Dense(64))
+    model.add(Activation('tanh'))
     mergedModel.add(Dense(mergedOutputLen))
 
     mergedModel.compile(loss = RP['objective'], optimizer = OPTIMIZER)
