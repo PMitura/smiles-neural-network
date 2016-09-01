@@ -1,7 +1,7 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/test/rnn_gru_gru.yml']
+experiments: ['local/experiments/pretraining/rnn_all_features_pretrained.yml']
 
 model: 'rnn'
 
