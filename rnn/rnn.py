@@ -92,29 +92,29 @@ def configureEdgeModel(inputSmiles, inputFasta):
     mergedOutputLen = len(RD['labels'])
 
     smilesModel = Sequential()
-    smilesModel.add(GRU(128, trainable = True, input_shape = smilesGRUInputShape))
+    # smilesModel.add(GRU(128, trainable = True, input_shape = smilesGRUInputShape))
+    # smilesModel.add(Activation('relu', trainable = True))
+
+    smilesModel.add(GRU(128, trainable = True, input_shape = smilesGRUInputShape, return_sequences = True))
+    smilesModel.add(Activation('relu', trainable = True))
+    smilesModel.add(GRU(96, trainable = True))
     smilesModel.add(Activation('relu', trainable = True))
 
-    # smilesModel.add(GRU(128, trainable = True, input_shape = smilesGRUInputShape, return_sequences = True))
-    # smilesModel.add(Activation('relu', trainable = True))
-    # smilesModel.add(GRU(128, trainable = True))
-    # smilesModel.add(Activation('relu', trainable = True))
-
     fastaModel = Sequential()
-    fastaModel.add(GRU(128, trainable = True, input_shape = fastaGRUInputShape))
-    fastaModel.add(Activation('relu', trainable = True))
+    # fastaModel.add(GRU(128, trainable = True, input_shape = fastaGRUInputShape))
+    # fastaModel.add(Activation('relu', trainable = True))
 
-    # fastaModel.add(GRU(128, trainable = True, input_shape = fastaGRUInputShape, return_sequences = True))
-    # fastaModel.add(Activation('relu', trainable = True))
-    # fastaModel.add(GRU(128, trainable = True))
-    # fastaModel.add(Activation('relu', trainable = True))
+    fastaModel.add(GRU(128, trainable = True, input_shape = fastaGRUInputShape, return_sequences = True))
+    fastaModel.add(Activation('relu', trainable = True))
+    fastaModel.add(GRU(96, trainable = True))
+    fastaModel.add(Activation('relu', trainable = True))
 
     merged = Merge([smilesModel, fastaModel], mode='concat')
 
     mergedModel = Sequential()
     mergedModel.add(merged)
 
-    mergedModel.add(Dense(64))
+    mergedModel.add(Dense(128))
     mergedModel.add(Activation('relu'))
     mergedModel.add(Dense(64))
     mergedModel.add(Activation('relu'))
