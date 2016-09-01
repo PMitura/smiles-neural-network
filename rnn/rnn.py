@@ -64,6 +64,8 @@ def configureModel(input):
     # model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'], dropout_W=0.2,  dropout_U=0.2, return_sequences = True ))
     model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'],W_regularizer=l2(0.01),U_regularizer=l2(0.01)))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
+    model.add(Dense(alphaSize) )
+    model.add(Activation('relu', trainable = RP['trainable_inner']))
     model.add(Dense(outputLen) )
 
     if RP['classify']:
