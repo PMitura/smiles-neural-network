@@ -53,4 +53,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[EDGE][IC50] sequence 600 protein'
+    comment: '[EDGE][IC50] sequence 600 (200len protein) protein with new model'
