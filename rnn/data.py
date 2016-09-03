@@ -116,7 +116,7 @@ def formatSequentialInput(df):
     smilesDf = df[RD['smiles']]
     smilesMaxLen = max([len(x) for x in smilesDf])
 
-    seqInput = np.zeros((numSamples, smilesMaxLen, SMILES_ALPHABET_LEN), dtype=bool)
+    seqInput = np.zeros((numSamples, smilesMaxLen, SMILES_ALPHABET_LEN), dtype=float)
 
     # translate to one hot for smiles
     for i,smiles in enumerate(smilesDf):
