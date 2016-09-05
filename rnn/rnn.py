@@ -62,11 +62,11 @@ def configureModel(input):
     # {'activation': 'relu', 'parameters_num': 0, 'name': 'activation_1'}{'parameters_num': 0, 'name': 'dropout_2'}
     # {'output_dim': 53, 'parameters_num': 15953, 'activation': 'linear', 'name': 'dense_2', 'input_dim': None}
 
-    model.add(TimeDistributed(Dense(300, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
+    model.add(TimeDistributed(Dense(152, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
     # model.add(Dropout(0.30))
-    model.add(GRU(300, trainable = True, ))
+    model.add(GRU(152, trainable = True, ))
     # model.add(Dropout(0.30))
-    model.add(Dense(150) )
+    model.add(Dense(100) )
     model.add(Dense(outputLen) )
 
     # for layer in model.layers:
@@ -75,7 +75,7 @@ def configureModel(input):
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
 
-    pretrainedModel = utility.loadModel('acde39bcb0b183bebba79cd69b42286c2c23eb56')
+    pretrainedModel = utility.loadModel('6340d6800a8965e8ffa367459ae292c9f88d25dd')
 
     # for i in range(2):
     model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
