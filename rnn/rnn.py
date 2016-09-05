@@ -74,8 +74,8 @@ def configureModel(input):
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
 
-    # pretrainedModel = utility.loadModel('6340d6800a8965e8ffa367459ae292c9f88d25dd')
-    # for i in range(2):
+    pretrainedModel = utility.loadModel('6340d6800a8965e8ffa367459ae292c9f88d25dd')
+    for i in range(2):
         model.layers[i].set_weights(pretrainedModel.layers[i].get_weights())
         model.layers[i].trainable = False
 
