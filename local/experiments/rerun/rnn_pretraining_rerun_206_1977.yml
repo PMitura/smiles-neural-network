@@ -47,4 +47,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[RERUN][BIGPRETRAINED][DROPOUT][206_1977] trying transfer with big model on 900k rows to 206_1977 with dropout'
+    comment: '[RERUN][BIGPRETRAINED][DROPOUT][206_1977] trying transfer with one more dense to 206_1977 '
