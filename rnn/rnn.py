@@ -80,8 +80,8 @@ def configureModel(input):
     # for i in range(2):
     model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
     model.layers[0].trainable = False
-    model.layers[2].set_weights(pretrainedModel.layers[2].get_weights())
-    model.layers[2].trainable = False
+    model.layers[1].set_weights(pretrainedModel.layers[2].get_weights())
+    model.layers[1].trainable = False
 
     model.compile(loss = RP['objective'], optimizer = OPTIMIZER)
 
