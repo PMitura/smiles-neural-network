@@ -63,9 +63,9 @@ def configureModel(input):
     # {'output_dim': 53, 'parameters_num': 15953, 'activation': 'linear', 'name': 'dense_2', 'input_dim': None}
 
     model.add(TimeDistributed(Dense(300, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
-    model.add(Dropout(0.40))
+    model.add(Dropout(0.30))
     model.add(GRU(300, trainable = True, ))
-    model.add(Dropout(0.40))
+    model.add(Dropout(0.30))
     model.add(Dense(outputLen) )
 
     # for layer in model.layers:
