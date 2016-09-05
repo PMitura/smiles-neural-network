@@ -63,9 +63,9 @@ def configureModel(input):
 
 
     model.add(TimeDistributed(Dense(152, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
-    model.add(Dropout(0.2))
+    model.add(Dropout(0.1))
     model.add(GRU(152, trainable = True, ))
-    model.add(Dropout(0.2))
+    model.add(Dropout(0.1))
     model.add(Dense(outputLen) )
 
     # for layer in model.layers:
