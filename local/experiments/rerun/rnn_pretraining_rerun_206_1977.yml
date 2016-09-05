@@ -47,4 +47,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[RERUN][PRETRAINED][FROZEN][206_1977] rerun properly transfer of knowledge to 206_1977 with frozen gru'
+    comment: '[RERUN][PRETRAINED][DROPOUT][206_1977] rerun properly transfer of knowledge to 206_1977 with dropout'
