@@ -63,10 +63,10 @@ def configureModel(input):
     # {'output_dim': 53, 'parameters_num': 15953, 'activation': 'linear', 'name': 'dense_2', 'input_dim': None}
 
     model.add(TimeDistributed(Dense(152, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
-    # model.add(Dropout(0.30))
+    model.add(Dropout(0.20))
     model.add(GRU(152, trainable = True, ))
-    # model.add(Dropout(0.30))
-    model.add(Dense(100) )
+    model.add(Dropout(0.20))
+    model.add(Dense(100, activation='relu') )
     model.add(Dense(outputLen) )
 
     # for layer in model.layers:
@@ -80,8 +80,8 @@ def configureModel(input):
     # for i in range(2):
     model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
     model.layers[0].trainable = True
-    model.layers[1].set_weights(pretrainedModel.layers[1].get_weights())
-    model.layers[1].trainable = True
+    model.layers[2].set_weights(pretrainedModel.layers[1].get_weights())
+    model.layers[2].trainable = True
 
     model.compile(loss = RP['objective'], optimizer = OPTIMIZER)
 
