@@ -56,15 +56,15 @@ def configureModel(input):
     else:
     '''
 
-    # {'parameters_num': 11704, 'name': 'timedistributed_1'}
-    # {'output_dim': 152, 'parameters_num': 139080, 'activation': 'tanh', 'name': 'gru_1', 'input_dim': 152}
-    # {'activation': 'relu', 'parameters_num': 0, 'name': 'activation_1'}
-    # {'output_dim': 53, 'parameters_num': 8109, 'activation': 'linear', 'name': 'dense_2', 'input_dim': None}
+    # {'parameters_num': 23100, 'name': 'timedistributed_1'}
+    # {'parameters_num': 0, 'name': 'dropout_1'}
+    # {'output_dim': 300, 'parameters_num': 540900, 'activation': 'tanh', 'name': 'gru_1', 'input_dim': 300}
+    # {'activation': 'relu', 'parameters_num': 0, 'name': 'activation_1'}{'parameters_num': 0, 'name': 'dropout_2'}
+    # {'output_dim': 53, 'parameters_num': 15953, 'activation': 'linear', 'name': 'dense_2', 'input_dim': None}
 
-
-    model.add(TimeDistributed(Dense(152, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
-    model.add(Dropout(0.40))
-    model.add(GRU(152, trainable = True, ))
+    model.add(TimeDistributed(Dense(300, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
+    model.add(Dropout(0.20))
+    model.add(GRU(300, trainable = True, ))
     model.add(Dropout(0.20))
     model.add(Dense(outputLen) )
 
@@ -74,12 +74,12 @@ def configureModel(input):
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
 
-    pretrainedModel = utility.loadModel('6340d6800a8965e8ffa367459ae292c9f88d25dd')
+    pretrainedModel = utility.loadModel('acde39bcb0b183bebba79cd69b42286c2c23eb56')
 
     # for i in range(2):
     model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
     model.layers[0].trainable = True
-    model.layers[2].set_weights(pretrainedModel.layers[1].get_weights())
+    model.layers[2].set_weights(pretrainedModel.layers[2].get_weights())
     model.layers[2].trainable = True
 
     model.compile(loss = RP['objective'], optimizer = OPTIMIZER)
