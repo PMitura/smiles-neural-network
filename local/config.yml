@@ -1,7 +1,8 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/edge_property_prediction/rnn_edge_property_prediction.yml']
+
+experiments: ['local/experiments/pretraining/rnn_all_features_pretrained.yml']
 
 model: 'rnn'
 
