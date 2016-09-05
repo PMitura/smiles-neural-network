@@ -66,7 +66,7 @@ def configureModel(input):
     model.add(Dropout(0.20))
     model.add(GRU(152, trainable = True, ))
     model.add(Dropout(0.20))
-    model.add(Dense(100, activation='relu') )
+    model.add(Dense(100) )
     model.add(Dense(outputLen) )
 
     # for layer in model.layers:
