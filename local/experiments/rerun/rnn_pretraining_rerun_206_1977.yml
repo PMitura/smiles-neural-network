@@ -47,4 +47,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[RERUN][BIGPRETRAINED][DROPOUT][206_1977] trying 900k unfrozen transfer with one more dense to 206_1977 '
+    comment: '[RERUN][PRETRAINED][DROPOUT][206_1977] trying 300k unfrozen transfer with one more dense to 206_1977 '
