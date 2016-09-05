@@ -62,17 +62,22 @@ def configureModel(input):
     # {'output_dim': 53, 'parameters_num': 8109, 'activation': 'linear', 'name': 'dense_2', 'input_dim': None}
 
 
-    model.add(TimeDistributed(Dense(152, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
-    model.add(GRU(152, trainable = True, ))
+    model.add(TimeDistributed(Dense(152, activation = 'tanh'), trainable = False, input_shape = (None, alphaSize )))
+    # model.add(Dropout(0.5))
+    model.add(GRU(152, trainable = False, ))
+    # model.add(Dropout(0.3))
     model.add(Dense(outputLen) )
+
+    # for layer in model.layers:
+        # print layer.name
 
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
 
     # pretrainedModel = utility.loadModel('6340d6800a8965e8ffa367459ae292c9f88d25dd')
     # for i in range(2):
-        # model.layers[i].set_weights(pretrainedModel.layers[i].get_weights())
-        # model.layers[i].trainable = True
+        model.layers[i].set_weights(pretrainedModel.layers[i].get_weights())
+        model.layers[i].trainable = False
 
     model.compile(loss = RP['objective'], optimizer = OPTIMIZER)
 
