@@ -207,7 +207,12 @@ def visualizeSequentialOutput(model, layerIdx, smilesData):
     # model.layers[layerIdx].return_sequences = True
     # model.compile(loss="mean_squared_error", optimizer="rmsprop")
 
+
+
     cfg = model.get_config()[:layerIdx+1]
+    del cfg[1]
+    layerIdx -= 1
+    # print cfg
     cfg[layerIdx]['config']['return_sequences'] = True
 
     seqModel = Sequential.from_config(cfg)

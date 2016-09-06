@@ -99,13 +99,19 @@ df = getData(con)
 con.close()
 
 
-# nonSeq = formatNonSequential(df.canonical_smiles)
-nonSeq = formatBagOfWrods(df.canonical_smiles)
+nonSeq = formatNonSequential(df.canonical_smiles)
+# nonSeq = formatBagOfWrods(df.canonical_smiles)
+
+# print nonSeq.shape
+nonSeq = nonSeq.loc[:,nonSeq.apply(pd.Series.nunique) != 1]
+# print nonSeq.shape
 
 dfNonSeq = pd.concat((nonSeq, df.standard_value_log), axis = 1)
+
+
 
 # print(df.canonical_smiles)
 # print(dfNonSeq.standard_value_log)
 
 # dfNonSeq.to_csv('target_206_1977_nonseq_smiles.csv')
-dfNonSeq.to_csv('../local/data/a549_bag_off_wrods.csv')
+dfNonSeq.to_csv('../local/data/a549_nonseq_smiles.csv')

@@ -76,13 +76,13 @@ def configureModel(input):
 
     model.compile(loss = RP['objective'], optimizer = OPTIMIZER)
 
-    pretrainedModel = utility.loadModel('6f7c468746e19ab2ed4c6adb4c15ab7ff50f9088')
+    # pretrainedModel = utility.loadModel('6f7c468746e19ab2ed4c6adb4c15ab7ff50f9088')
 
     # for i in range(2):
-    model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
-    model.layers[0].trainable = True
-    model.layers[2].set_weights(pretrainedModel.layers[2].get_weights())
-    model.layers[2].trainable = True
+    # model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
+    # model.layers[0].trainable = True
+    # model.layers[2].set_weights(pretrainedModel.layers[2].get_weights())
+    # model.layers[2].trainable = True
 
 
     print('  ...done')
@@ -237,4 +237,4 @@ def run(grid = None):
         metricStats['mse_std'] = testMetrics['mse_std']
 
     stats.update(metricStats)
-    db.sendStatistics(**stats)
+    # db.sendStatistics(**stats)
