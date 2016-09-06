@@ -10,7 +10,7 @@ fetch:
   cols: ['pfam_sequence','pfama_acc_max']
   order: 'pfam_sequence'
   index_col: ~
-  limit: 1000
+  limit: 100000
   where:  'length(pfam_sequence) <= 80'
 
 # Experiment params
@@ -30,7 +30,7 @@ params:
 
     # RNN parameters
     learning_rate: 0.001
-    epochs: 100
+    epochs: 50
 
     td_layer_multiplier: 2
     gru_layer_multiplier: 2
@@ -40,7 +40,7 @@ params:
     classify_label_pos: 1
     classify_label_neg: 0
     classify_activation: 'sigmoid'
-    num_partitions: 1
+    num_partitions: 5
 
     objective: 'categorical_crossentropy'
 

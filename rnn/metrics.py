@@ -202,6 +202,7 @@ def discreteClassify(model, input, labels, meta):
         'acc': np.zeros((iterations)),
         'log_loss': np.zeros((iterations)),
         'auc': np.zeros((iterations)),
+        'auc_micro': np.zeros((iterations))
     }
 
     # first denormalize labels, so we do it only once
@@ -220,9 +221,9 @@ def discreteClassify(model, input, labels, meta):
         for row in range(len(partLabels)):
             for idx, val in enumerate(partLabels[row]):
                 if val == 1:
-                    sys.stdout.write('{0:.3f}, '.format(idx))
+                    sys.stdout.write('{}, '.format(idx))
             for val in partPred[row]:
-                sys.stdout.write('{0:.3f}, '.format(val))
+                sys.stdout.write('{}, '.format(val))
             sys.stdout.write('\n')
             sys.stdout.flush()
 
@@ -259,6 +260,8 @@ def discreteClassify(model, input, labels, meta):
                 cutPreds[row][idx]  = binarizedPred[row][keep]
 
         metrics['auc'][iteration] = sk.metrics.roc_auc_score(cutLabels,
+                cutPreds, average = 'macro')
+        metrics['auc_micro'][iteration] = sk.metrics.roc_auc_score(cutLabels,
                 cutPreds, average = 'micro')
 
     metricsOverall = {
@@ -267,12 +270,15 @@ def discreteClassify(model, input, labels, meta):
         'log_loss_avg': np.nanmean(metrics['log_loss']),
         'log_loss_std': np.nanstd(metrics['log_loss']),
         'auc_avg': np.nanmean(metrics['auc']),
-        'auc_std': np.nanstd(metrics['auc'])
+        'auc_std': np.nanstd(metrics['auc']),
+        'auc_micro_avg': np.nanmean(metrics['auc_micro']),
+        'auc_micro_std': np.nanstd(metrics['auc_micro'])
     }
 
     print('Overall metrics:')
     print('\tACC:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['acc_avg'],metricsOverall['acc_std']))
     print('\tLogLos:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['log_loss_avg'],metricsOverall['log_loss_std']))
     print('\tAUC:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['auc_avg'],metricsOverall['auc_std']))
+    print('\tAUC Micro:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['auc_micro_avg'],metricsOverall['auc_micro_std']))
 
     return metricsOverall

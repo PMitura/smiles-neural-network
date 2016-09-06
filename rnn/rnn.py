@@ -289,6 +289,8 @@ def run(grid = None):
         metricStats['log_loss_std'] = testMetrics['log_loss_std']
         metricStats['auc'] = testMetrics['auc_avg']
         metricStats['auc_std'] = testMetrics['auc_std']
+        metricStats['auc_micro'] = testMetrics['auc_avg']
+        metricStats['auc_micro_std'] = testMetrics['auc_std']
     else:
         metricStats['relevance_training'] = trainMetrics['r2_avg']
         metricStats['relevance_training_std'] = trainMetrics['r2_std']
