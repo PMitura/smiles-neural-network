@@ -57,4 +57,4 @@ params:
     # preprocessing switches
 
     # statistics settings
-    comment: '[DRAFT][PRETRAIN][50FEATURES][MOLWEIGHT] train on molweight'
+    comment: '[DRAFT][PRETRAIN][50FEATURES][BIDIRECTIONAL] training bidirectional network'
