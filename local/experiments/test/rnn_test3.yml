@@ -10,7 +10,7 @@ fetch:
   cols: ['pfam_sequence','pfama_acc_max']
   order: 'pfam_sequence'
   index_col: ~
-  limit: 500
+  limit: 10000
   where:  'length(pfam_sequence) <= 80'
 
 # Experiment params
@@ -29,8 +29,8 @@ params:
     # load_model: '995fc11ffc271bda1de9395a423c0f811b06db0e'
 
     # RNN parameters
-    learning_rate: 0.0001
-    epochs: 1
+    learning_rate: 0.001
+    epochs: 30
 
     td_layer_multiplier: 2
     gru_layer_multiplier: 2
@@ -39,9 +39,9 @@ params:
     classify_threshold: 0.5
     classify_label_pos: 1
     classify_label_neg: 0
-    classify_activation: 'hard_sigmoid'
+    classify_activation: 'sigmoid'
 
-    objective: 'binary_crossentropy'
+    objective: 'categorical_crossentropy'
 
     label_binning: false
     label_binning_after_train: false
