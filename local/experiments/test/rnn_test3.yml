@@ -11,7 +11,7 @@ fetch:
   order: 'pfam_sequence'
   index_col: ~
   limit: 100000
-  where:  'length(pfam_sequence) <= 80'
+  where:  'length(pfam_sequence) <= 400'
 
 # Experiment params
 params:

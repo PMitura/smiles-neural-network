@@ -218,6 +218,7 @@ def discreteClassify(model, input, labels, meta):
         partPred = model.predict(partIn, batch_size = RP['batch'])
         binarizedPred = np.zeros((len(partPred), len(partPred[0])))
 
+        """
         for row in range(len(partLabels)):
             for idx, val in enumerate(partLabels[row]):
                 if val == 1:
@@ -226,6 +227,7 @@ def discreteClassify(model, input, labels, meta):
                 sys.stdout.write('{}, '.format(val))
             sys.stdout.write('\n')
             sys.stdout.flush()
+        """
 
         for i in range(len(partPred)):
             maxValue = 0
