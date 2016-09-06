@@ -5,7 +5,7 @@ db:
   user: 'postgres'
   pass: 'samurai'
   host: '147.32.233.145'
-  name: 'pfam_30'
+  name: 'chembl_21'
   driver: 'postgresql'
 
 # Statistics

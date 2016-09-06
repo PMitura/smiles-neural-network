@@ -231,7 +231,7 @@ def discreteClassify(model, input, labels, meta):
         metrics['log_loss'][iteration] = sk.metrics.log_loss(partLabels,
                 binarizedPred)
 
-        toDelete = []
+        delVec = []
         for col in range(len(partLabels[0])):
             wasOne = 0
             for row in range(len(partLabels)):
@@ -239,10 +239,10 @@ def discreteClassify(model, input, labels, meta):
                     wasOne = 1
                     break
             if not wasOne:
-                toDelete.append(col)
-        for col in reversed(toDelete):
-            partLabels = np.delete(partLabels, col, 1)
-            binarizedPred = np.delete(binarizedPred, col, 1)
+                delVec.append(col)
+        
+        partLabels = np.delete(partLabels, delVec, 1)
+        binarizedPred = np.delete(binarizedPred, delVec, 1)
 
         metrics['auc'][iteration] = sk.metrics.roc_auc_score(partLabels,
                 binarizedPred)
