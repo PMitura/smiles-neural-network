@@ -1,13 +1,13 @@
 # Local configuration
 
 # Experiments to run
-experiments: ['local/experiments/rerun/rnn_pretraining_rerun_206_1977.yml']
+experiments: ['local/experiments/pretraining/rnn_all_features_pretrained.yml']
 
 model: 'rnn'
 
 # Persistence of models
 persistence:
-  model: false
+  model: true
 
 plots:
   seq_output: false

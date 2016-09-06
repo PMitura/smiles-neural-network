@@ -56,32 +56,31 @@ def configureModel(input):
     else:
     '''
 
+
     # {'parameters_num': 23100, 'name': 'timedistributed_1'}
     # {'parameters_num': 0, 'name': 'dropout_1'}
     # {'output_dim': 300, 'parameters_num': 540900, 'activation': 'tanh', 'name': 'gru_1', 'input_dim': 300}
-    # {'activation': 'relu', 'parameters_num': 0, 'name': 'activation_1'}{'parameters_num': 0, 'name': 'dropout_2'}
+    # {'activation': 'relu', 'parameters_num': 0, 'name': 'activation_1'}
+    # {'parameters_num': 0, 'name': 'dropout_2'}
     # {'output_dim': 53, 'parameters_num': 15953, 'activation': 'linear', 'name': 'dense_2', 'input_dim': None}
 
-    model.add(TimeDistributed(Dense(152, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
+    model.add(TimeDistributed(Dense(300, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
     model.add(Dropout(0.20))
-    model.add(GRU(152, trainable = True, ))
+    model.add(GRU(300, trainable = True, ))
+    model.add(Activation('relu'))
     model.add(Dropout(0.20))
-    model.add(Dense(100) )
     model.add(Dense(outputLen) )
-
-    # for layer in model.layers:
-        # print layer.name
 
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
 
-    pretrainedModel = utility.loadModel('6340d6800a8965e8ffa367459ae292c9f88d25dd')
+    # pretrainedModel = utility.loadModel('6340d6800a8965e8ffa367459ae292c9f88d25dd')
 
     # for i in range(2):
-    model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
-    model.layers[0].trainable = True
-    model.layers[2].set_weights(pretrainedModel.layers[1].get_weights())
-    model.layers[2].trainable = True
+    # model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
+    # model.layers[0].trainable = True
+    # model.layers[2].set_weights(pretrainedModel.layers[1].get_weights())
+    # model.layers[2].trainable = True
 
     model.compile(loss = RP['objective'], optimizer = OPTIMIZER)
 
