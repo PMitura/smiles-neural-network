@@ -12,7 +12,7 @@ fetch:
   order: ~ # 'canonical_smiles'
   index_col: ~
   limit: ~ # 300000
-  where: 'where length(canonical_smiles) <= 120'
+  where: 'length(canonical_smiles) <= 120'
 
 # Experiment params
 params:
