@@ -82,10 +82,10 @@ def configureModel(input):
     model.layers[2].set_weights(pretrainedModel.layers[2].get_weights())
     model.layers[2].trainable = True
 
-    model.compile(loss = RP['objective'], optimizer = OPTIMIZER)
+    pretrainedModel.compile(loss = RP['objective'], optimizer = OPTIMIZER)
 
     print('  ...done')
-    return model
+    return pretrainedModel
 
 def learningRateDecayer(epoch):
     if not RP['learning_rate_decay']:
