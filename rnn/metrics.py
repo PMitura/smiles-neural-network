@@ -216,6 +216,14 @@ def discreteClassify(model, input, labels, meta):
         partPred = model.predict(partIn, batch_size = RP['batch'])
         binarizedPred = np.zeros((len(partPred), len(partPred[0])))
 
+        for row in range(len(partLabels)):
+            for idx, val in enumerate(partLabels[row], val):
+                if val == 1:
+                    print('{}, '.format(idx), end = '', flush = True)
+            for val in partPred[row]:
+                print('{}, '.format(val), end = '', flush = True)
+            print ''
+
         for i in range(len(partPred)):
             maxValue = 0
             maxIndex = 0
@@ -240,6 +248,8 @@ def discreteClassify(model, input, labels, meta):
                     break
             if wasOne:
                 keepVec.append(col)
+
+        print partLabels
         
         cutLabels = np.zeros((len(partLabels), len(keepVec)))
         cutPreds  = np.zeros((len(partLabels), len(keepVec)))
@@ -247,6 +257,8 @@ def discreteClassify(model, input, labels, meta):
             for row in range(len(partLabels)):
                 cutLabels[row][idx] = partLabels[row][keep]
                 cutPreds[row][idx]  = binarizedPred[row][keep]
+
+        print cutLabels
 
         metrics['auc'][iteration] = sk.metrics.roc_auc_score(cutLabels, cutPreds)
 

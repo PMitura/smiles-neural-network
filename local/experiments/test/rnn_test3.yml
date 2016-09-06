@@ -10,7 +10,7 @@ fetch:
   cols: ['pfam_sequence','pfama_acc_max']
   order: 'pfam_sequence'
   index_col: ~
-  limit: 10000
+  limit: 1000
   where:  'length(pfam_sequence) <= 80'
 
 # Experiment params
@@ -30,7 +30,7 @@ params:
 
     # RNN parameters
     learning_rate: 0.001
-    epochs: 30
+    epochs: 100
 
     td_layer_multiplier: 2
     gru_layer_multiplier: 2
@@ -46,7 +46,7 @@ params:
     label_binning: false
     label_binning_after_train: false
     label_binning_ratio: 0.5
-    early_stop: 20
+    early_stop: 100
 
     chained_models: false
     trainable_inner: true
@@ -61,7 +61,7 @@ params:
     learning_rate_decay: false
 
     flag_based_hold: false
-    holdout_ratio: 0.8
+    holdout_ratio: 0.5
 
     # preprocessing switches
     label_idxs: 'range(1)'      # indexes of columns to use as label
