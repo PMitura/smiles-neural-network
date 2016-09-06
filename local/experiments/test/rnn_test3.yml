@@ -6,7 +6,7 @@ template: 'rnn.yml'
 
 # DB fetch params
 fetch:
-  table: 'output.pfam_distinct'
+  table: 'output.pfam_top10'
   cols: ['pfam_sequence','pfama_acc_max']
   order: 'pfam_sequence'
   index_col: ~
@@ -40,6 +40,7 @@ params:
     classify_label_pos: 1
     classify_label_neg: 0
     classify_activation: 'sigmoid'
+    num_partitions: 1
 
     objective: 'categorical_crossentropy'
 

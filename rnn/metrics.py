@@ -10,9 +10,9 @@ import utility
 
 import db.db as db
 from config import config as cc
+import sys
 
 from sets import Set
-from __future__ import print_function
 import data
 
 RD = cc.exp['params']['data']
@@ -208,7 +208,7 @@ def discreteClassify(model, input, labels, meta):
     labels = data.denormalize(labels, meta)
 
     for iteration in range(iterations):
-        print('\titer:\t{}/{}'.format(iteration, iterations))
+        # print('\titer:\t{}/{}'.format(iteration, iterations))
 
         part = partitioner.get()
 
@@ -218,12 +218,13 @@ def discreteClassify(model, input, labels, meta):
         binarizedPred = np.zeros((len(partPred), len(partPred[0])))
 
         for row in range(len(partLabels)):
-            for idx, val in enumerate(partLabels[row], val):
+            for idx, val in enumerate(partLabels[row]):
                 if val == 1:
-                    print('{}, '.format(idx), end = '', flush = True)
+                    sys.stdout.write('{}, '.format(idx))
             for val in partPred[row]:
-                print('{}, '.format(val), end = '', flush = True)
-            print ''
+                sys.stdout.write('{}, '.format(val))
+            sys.stdout.write('\n')
+            sys.stdout.flush()
 
         for i in range(len(partPred)):
             maxValue = 0
@@ -250,16 +251,12 @@ def discreteClassify(model, input, labels, meta):
             if wasOne:
                 keepVec.append(col)
 
-        print partLabels
-        
         cutLabels = np.zeros((len(partLabels), len(keepVec)))
         cutPreds  = np.zeros((len(partLabels), len(keepVec)))
         for idx, keep in enumerate(keepVec):
             for row in range(len(partLabels)):
                 cutLabels[row][idx] = partLabels[row][keep]
                 cutPreds[row][idx]  = binarizedPred[row][keep]
-
-        print cutLabels
 
         metrics['auc'][iteration] = sk.metrics.roc_auc_score(cutLabels, cutPreds)
 
