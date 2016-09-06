@@ -220,9 +220,9 @@ def discreteClassify(model, input, labels, meta):
         for row in range(len(partLabels)):
             for idx, val in enumerate(partLabels[row]):
                 if val == 1:
-                    sys.stdout.write('{}, '.format(idx))
+                    sys.stdout.write('{0:.3f}, '.format(idx))
             for val in partPred[row]:
-                sys.stdout.write('{}, '.format(val))
+                sys.stdout.write('{0:.3f}, '.format(val))
             sys.stdout.write('\n')
             sys.stdout.flush()
 
@@ -258,7 +258,8 @@ def discreteClassify(model, input, labels, meta):
                 cutLabels[row][idx] = partLabels[row][keep]
                 cutPreds[row][idx]  = binarizedPred[row][keep]
 
-        metrics['auc'][iteration] = sk.metrics.roc_auc_score(cutLabels, cutPreds)
+        metrics['auc'][iteration] = sk.metrics.roc_auc_score(cutLabels,
+                cutPreds, average = 'micro')
 
     metricsOverall = {
         'acc_avg': np.nanmean(metrics['acc']),
