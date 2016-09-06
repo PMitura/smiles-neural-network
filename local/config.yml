@@ -2,6 +2,7 @@
 
 # Experiments to run
 experiments: ['local/experiments/pretraining/rnn_all_features_pretrained.yml']
+# experiments: ['local/experiments/rerun/dnn_rerun_206_1977.yml']
 
 model: 'rnn'
 

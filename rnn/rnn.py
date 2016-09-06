@@ -74,13 +74,13 @@ def configureModel(input):
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
 
-    # pretrainedModel = utility.loadModel('6340d6800a8965e8ffa367459ae292c9f88d25dd')
+    pretrainedModel = utility.loadModel('e5315b1d98d9751648c44378d1e8fa7a815e3f6c')
 
     # for i in range(2):
-    # model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
-    # model.layers[0].trainable = True
-    # model.layers[2].set_weights(pretrainedModel.layers[1].get_weights())
-    # model.layers[2].trainable = True
+    model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
+    model.layers[0].trainable = True
+    model.layers[2].set_weights(pretrainedModel.layers[2].get_weights())
+    model.layers[2].trainable = True
 
     model.compile(loss = RP['objective'], optimizer = OPTIMIZER)
 
