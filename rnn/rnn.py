@@ -20,6 +20,7 @@ import socket
 from keras.models import Sequential
 from keras.layers import Activation, Dense, Dropout, LSTM, AveragePooling1D
 from keras.layers import TimeDistributed, SimpleRNN, GRU
+from keras.layers.wrappers import Bidirectional
 from keras.layers import BatchNormalization, Embedding, merge
 from keras.optimizers import Adam, RMSprop, Adadelta, Adagrad
 from keras.regularizers import l2, activity_l2
@@ -66,7 +67,7 @@ def configureModel(input):
 
     model.add(TimeDistributed(Dense(300, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
     model.add(Dropout(0.5))
-    model.add(GRU(300, trainable = True, ))
+    model.add(Bidirectional(GRU(300, trainable = True, )))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
     model.add(Dense(outputLen) )
@@ -76,13 +77,13 @@ def configureModel(input):
 
     model.compile(loss = RP['objective'], optimizer = OPTIMIZER)
 
-    pretrainedModel = utility.loadModel('6f7c468746e19ab2ed4c6adb4c15ab7ff50f9088')
+    # pretrainedModel = utility.loadModel('6f7c468746e19ab2ed4c6adb4c15ab7ff50f9088')
 
     # for i in range(2):
-    model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
-    model.layers[0].trainable = True
-    model.layers[2].set_weights(pretrainedModel.layers[2].get_weights())
-    model.layers[2].trainable = True
+    # model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
+    # model.layers[0].trainable = True
+    # model.layers[2].set_weights(pretrainedModel.layers[2].get_weights())
+    # model.layers[2].trainable = True
 
 
     print('  ...done')
