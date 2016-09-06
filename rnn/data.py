@@ -86,7 +86,6 @@ def formatNominalEmbedded(rawData, timesteps, output, col, shift = 0):
     for item in rawData:
         nominals.add(item[col])
 
-
     # Map columns to nominals
     colMapping = {}
     size = 0
@@ -162,7 +161,7 @@ def formatFastaInput(df):
     numSamples = len(df)
 
     # FIXME: hardcoded fasta
-    fastaDf = df['sequence_600']
+    fastaDf = df[RD['fasta']]
     fastaMaxLen = max([len(x) for x in fastaDf])
 
     seqInput = np.zeros((numSamples, fastaMaxLen, FASTA_ALPHABET_LEN), dtype=bool)
@@ -254,23 +253,36 @@ def preprocessEdgeData(df):
         df = df[(df[RD['testing']] == 0) | (df[RD['testing']] == 1)]
         df.reset_index(drop=True, inplace=True)
 
-    inputSmiles = formatSequentialInput(df)
+    # inputSmiles = formatSequentialInput(df)
     inputFasta = formatFastaInput(df)
 
     labels = df[RD['labels']].values
-    testing = df[RD['testing']].values.astype(bool)
 
     # preprocessing
     labels, meta = normalize(labels)
 
+    # hardcoded PASTA stuff
+    pfSet = set()
+    for label in labels:
+        pfSet.add(label[0])
+    pfMapping = {}
+    size = 0
+    for value in pfSet:
+        pfMapping[value] = size
+        size += 1
+    for i in range(len(labels)):
+        labels[i][0] = pfMapping[labels[i][0]]
+    print labels
+
     # create training and testing sets
     if RP['flag_based_hold']:
-        trainSmilesIn, trainFastaIn, trainLabel = inputSmiles[~testing], inputFasta[~testing], labels[~testing]
-        testSmilesIn, testFastaIn, testLabel = inputSmiles[testing], inputFasta[testing], labels[testing]
+        testing = df[RD['testing']].values.astype(bool)
+        trainFastaIn, trainLabel = inputFasta[~testing], labels[~testing]
+        testFastaIn, testLabel   = inputFasta[testing],  labels[testing]
     else:
-        split = int(len(input) * RP['holdout_ratio'])
+        split = int(len(inputFasta) * RP['holdout_ratio'])
 
-        trainSmilesIn, trainFastaIn, trainLabel = inputSmiles[:split], inputFasta[:split], labels[:split]
-        testSmilesIn, testFastaIn, testLabel = inputSmiles[split:], inputFasta[split:], labels[split:]
+        trainFastaIn, trainLabel = inputFasta[:split], labels[:split]
+        testFastaIn, testLabel   = inputFasta[split:], labels[split:]
 
-    return [trainSmilesIn, trainFastaIn], trainLabel, [testSmilesIn, testFastaIn], testLabel, meta
+    return trainFastaIn, trainLabel, testFastaIn, testLabel, meta

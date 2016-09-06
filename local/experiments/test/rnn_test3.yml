@@ -1,27 +1,28 @@
 # Experiment rnn_test2
-name: 'rnn_test2'
+name: 'rnn_test3'
 
 # Template for default values
 template: 'rnn.yml'
 
 # DB fetch params
 fetch:
-  table: 'output.target_10576_ki'
-  cols: ['canonical_smiles','ki_33_0_1','is_testing']
-  order: 'canonical_smiles'
+  table: 'output.pfam_distinct'
+  cols: ['pfam_sequence','pfama_acc_max']
+  order: 'pfam_sequence'
   index_col: ~
-  limit: 30
-  where:  'length(canonical_smiles) <= 80'
+  limit: 10000
+  where:  'length(pfam_sequence) <= 80'
 
 # Experiment params
 params:
   data:
     # number of label columns to prepare
     smiles: 'canonical_smiles'
+    fasta: 'pfam_sequence'
     nominals: ~ # ['standard_type','ki_33']
-    labels: ['ki_33_0_1']
+    labels: ['pfama_acc_max']
 
-    use_test_flags: true
+    use_test_flags: false
     testing: 'is_testing'
   rnn:
 
@@ -30,7 +31,6 @@ params:
     # RNN parameters
     learning_rate: 0.0001
     epochs: 1
-
 
     td_layer_multiplier: 2
     gru_layer_multiplier: 2
@@ -57,11 +57,11 @@ params:
     # learning rate decay settings
     learning_rate_decay: false
 
-    flag_based_hold: true
-    holdout_ratio: 0.2
+    flag_based_hold: false
+    holdout_ratio: 0.8
 
     # preprocessing switches
     label_idxs: 'range(1)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[REFACTOR]'
+    comment: 'pfam tests'

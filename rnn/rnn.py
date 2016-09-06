@@ -216,8 +216,8 @@ def run(grid = None):
     if RP['load_model']:
         model = utility.loadModel(RP['load_model'])
     else:
-        # model = configureModel(trainIn)
-        model = configureEdgeModel(trainIn[0],trainIn[1])
+        model = configureModel(trainIn)
+        # model = configureEdgeModel(trainIn[0],trainIn[1])
         stats['epoch_count'] = train(model, trainIn, trainLabel, (testIn, testLabel))
 
     # persistence first

@@ -2,7 +2,7 @@
 
 # Experiments to run
 
-experiments: ['local/experiments/pretraining/rnn_all_features_pretrained.yml']
+experiments: ['local/experiments/test/rnn_test3.yml']
 
 model: 'rnn'
 
