@@ -270,9 +270,10 @@ def preprocessEdgeData(df):
     for value in pfSet:
         pfMapping[value] = size
         size += 1
+    print size
     newLabels = np.zeros((len(labels), size))
-    for label in labels:
-        newLabels[pfMapping[label[0]]] = 1
+    for i in range(len(labels)):
+        newLabels[i][pfMapping[labels[i][0]]] = 1
     labels = newLabels
 
     # create training and testing sets

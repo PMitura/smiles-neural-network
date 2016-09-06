@@ -125,6 +125,7 @@ def computeAUC(pred, truth):
     except:
         return np.nan
 
+
 def classify(model, input, labels, meta):
     partitioner = PermutationPartitioner(len(input), len(input) / RP['num_partitions'])
     iterations = RP['num_partitions']**2
@@ -183,6 +184,77 @@ def classify(model, input, labels, meta):
         print('\tACC:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsPerLabel['acc_avg'][i],metricsPerLabel['acc_std'][i]))
         print('\tLogLos:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsPerLabel['log_loss_avg'][i],metricsPerLabel['log_loss_std'][i]))
         print('\tAUC:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsPerLabel['auc_avg'][i],metricsPerLabel['auc_std'][i]))
+
+    print('Overall metrics:')
+    print('\tACC:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['acc_avg'],metricsOverall['acc_std']))
+    print('\tLogLos:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['log_loss_avg'],metricsOverall['log_loss_std']))
+    print('\tAUC:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['auc_avg'],metricsOverall['auc_std']))
+
+    return metricsOverall
+
+
+def discreteClassify(model, input, labels, meta):
+    partitioner = PermutationPartitioner(len(input), len(input) / RP['num_partitions'])
+    iterations = RP['num_partitions']**2
+
+    metrics = {
+        'acc': np.zeros((iterations)),
+        'log_loss': np.zeros((iterations)),
+        'auc': np.zeros((iterations)),
+    }
+
+    # first denormalize labels, so we do it only once
+    labels = data.denormalize(labels, meta)
+
+    for iteration in range(iterations):
+        print('\titer:\t{}/{}'.format(iteration, iterations))
+
+        part = partitioner.get()
+
+        partIn = input[part]
+        partLabels = labels[part]
+        partPred = model.predict(partIn, batch_size = RP['batch'])
+        binarizedPred = np.zeros((len(partPred), len(partPred[0])))
+
+        for i in range(len(partPred)):
+            maxValue = 0
+            maxIndex = 0
+            for index in range(len(partPred[i])):
+                value = partPred[i][index]
+                if value > maxValue:
+                    maxValue = value
+                    maxIndex = index
+            binarizedPred[i][maxIndex] = 1
+        
+        metrics['acc'][iteration] = sk.metrics.accuracy_score(partLabels,
+                binarizedPred)
+        metrics['log_loss'][iteration] = sk.metrics.log_loss(partLabels,
+                binarizedPred)
+
+        toDelete = []
+        for col in range(len(partLabels[0])):
+            wasOne = 0
+            for row in range(len(partLabels)):
+                if partLabels[row][col] == 1:
+                    wasOne = 1
+                    break
+            if not wasOne:
+                toDelete.append(col)
+        for col in reversed(toDelete):
+            partLabels = np.delete(partLabels, col, 1)
+            binarizedPred = np.delete(binarizedPred, col, 1)
+
+        metrics['auc'][iteration] = sk.metrics.roc_auc_score(partLabels,
+                binarizedPred)
+
+    metricsOverall = {
+        'acc_avg': np.nanmean(metrics['acc']),
+        'acc_std': np.nanstd(metrics['acc']),
+        'log_loss_avg': np.nanmean(metrics['log_loss']),
+        'log_loss_std': np.nanstd(metrics['log_loss']),
+        'auc_avg': np.nanmean(metrics['auc']),
+        'auc_std': np.nanstd(metrics['auc'])
+    }
 
     print('Overall metrics:')
     print('\tACC:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['acc_avg'],metricsOverall['acc_std']))
