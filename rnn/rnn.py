@@ -39,11 +39,10 @@ RP['label_idxs'] = eval(str(cc.exp['params']['rnn']['label_idxs']))
 
 OPTIMIZER = Adam(lr = RP['learning_rate'])
 
-def configureModel(input):
+def configureModel(input, outputLen = len(RD['labels'])):
     print('  Initializing and compiling...')
 
     alphaSize = input.shape[2]
-    outputLen = len(RD['labels'])
 
     model = Sequential()
 
@@ -75,7 +74,7 @@ def configureModel(input):
     # model.add(Dropout(0.2))
     # model.add(Dense(150) )
     # model.add(Activation('relu', trainable = RP['trainable_inner']))
-    model.add(Dense(outputLen) )
+    model.add(Dense(outputLen))
 
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
@@ -216,7 +215,10 @@ def run(grid = None):
     if RP['load_model']:
         model = utility.loadModel(RP['load_model'])
     else:
-        model = configureModel(trainIn)
+        if RP['discrete_label']:
+            model = configureModel(trainIn, len(trainLabel[0]))
+        else:
+            model = configureModel(trainIn)
         # model = configureEdgeModel(trainIn[0],trainIn[1])
         stats['epoch_count'] = train(model, trainIn, trainLabel, (testIn, testLabel))
 
@@ -227,13 +229,19 @@ def run(grid = None):
     # compute metrics for the model based on the task for both testing and training data
     print('\nGetting metrics for training data:')
     if RP['classify']:
-        trainMetrics = metrics.classify(model, trainIn, trainLabel, preprocessMeta)
+        if RP['discrete_label']:
+            trainMetrics = metrics.discreteClassify(model, trainIn, trainLabel, preprocessMeta)
+        else:
+            trainMetrics = metrics.classify(model, trainIn, trainLabel, preprocessMeta)
     else:
         trainMetrics = metrics.predict(model, trainIn, trainLabel, preprocessMeta)
 
     print('\nGetting metrics for test data:')
     if RP['classify']:
-        testMetrics = metrics.classify(model, testIn, testLabel, preprocessMeta)
+        if RP['discrete_label']:
+            testMetrics = metrics.discreteClassify(model, testIn, testLabel, preprocessMeta)
+        else:
+            testMetrics = metrics.classify(model, testIn, testLabel, preprocessMeta)
     else:
         testMetrics = metrics.predict(model, testIn, testLabel, preprocessMeta)
 

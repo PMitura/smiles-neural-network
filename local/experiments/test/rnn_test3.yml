@@ -10,7 +10,7 @@ fetch:
   cols: ['pfam_sequence','pfama_acc_max']
   order: 'pfam_sequence'
   index_col: ~
-  limit: 10000
+  limit: 500
   where:  'length(pfam_sequence) <= 80'
 
 # Experiment params
@@ -53,6 +53,9 @@ params:
 
     zscore_norm: false
     logarithm: false
+
+    # output to one-hot for classification over id based discrete label
+    discrete_label: true
 
     # learning rate decay settings
     learning_rate_decay: false

@@ -261,7 +261,7 @@ def preprocessEdgeData(df):
     # preprocessing
     labels, meta = normalize(labels)
 
-    # hardcoded PASTA stuff
+    # FIXME or abandon branch: hardcoded pasta stuff
     pfSet = set()
     for label in labels:
         pfSet.add(label[0])
@@ -270,9 +270,10 @@ def preprocessEdgeData(df):
     for value in pfSet:
         pfMapping[value] = size
         size += 1
-    for i in range(len(labels)):
-        labels[i][0] = pfMapping[labels[i][0]]
-    print labels
+    newLabels = np.zeros((len(labels), size))
+    for label in labels:
+        newLabels[pfMapping[label[0]]] = 1
+    labels = newLabels
 
     # create training and testing sets
     if RP['flag_based_hold']:
