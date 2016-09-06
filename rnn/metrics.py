@@ -231,21 +231,24 @@ def discreteClassify(model, input, labels, meta):
         metrics['log_loss'][iteration] = sk.metrics.log_loss(partLabels,
                 binarizedPred)
 
-        delVec = []
+        keepVec = []
         for col in range(len(partLabels[0])):
             wasOne = 0
             for row in range(len(partLabels)):
                 if partLabels[row][col] == 1:
                     wasOne = 1
                     break
-            if not wasOne:
-                delVec.append(col)
+            if wasOne:
+                keepVec.append(col)
         
-        partLabels = np.delete(partLabels, delVec, 1)
-        binarizedPred = np.delete(binarizedPred, delVec, 1)
+        cutLabels = np.zeros((len(partLabels), len(keepVec)))
+        cutPreds  = np.zeros((len(partLabels), len(keepVec)))
+        for idx, keep in enumerate(keepVec):
+            for row in range(len(partLabels)):
+                cutLabels[row][idx] = partLabels[row][keep]
+                cutPreds[row][idx]  = binarizedPred[row][keep]
 
-        metrics['auc'][iteration] = sk.metrics.roc_auc_score(partLabels,
-                binarizedPred)
+        metrics['auc'][iteration] = sk.metrics.roc_auc_score(cutLabels, cutPreds)
 
     metricsOverall = {
         'acc_avg': np.nanmean(metrics['acc']),
