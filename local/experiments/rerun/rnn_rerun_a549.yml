@@ -25,7 +25,7 @@ params:
   rnn:
     # RNN parameters
     learning_rate: 0.001
-    epochs: 50
+    epochs: 150
     early_stop: 20
 
     classify: false            # regression if false
@@ -46,4 +46,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[RERUN][BIDIRECTIONAL][A549][GRUGRU][SUM] two bidirectional grus with sum merge mode'
+    comment: '[RERUN][BIDIRECTIONAL][PRETRAINED] pretrained bidirectional on a549'
