@@ -57,7 +57,7 @@ def configureModel(input):
     else:
     '''
 
-    model.add(Bidirectional(GRU(300, trainable = True, activation='relu'), merge_mode='sum' , input_shape = (None, alphaSize )))
+    model.add(Bidirectional(GRU(300, trainable = True, activation='relu', return_sequences = True), merge_mode='sum' , input_shape = (None, alphaSize )))
     model.add(Dropout(0.50))
     model.add(Bidirectional(GRU(300, trainable = True, activation='relu'), merge_mode='sum'))
     model.add(Dropout(0.50))
