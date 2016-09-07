@@ -57,11 +57,11 @@ def configureModel(input):
     else:
     '''
 
-    model.add(Bidirectional(GRU(300, trainable = True, activation='relu', return_sequences = True), merge_mode='concat' , input_shape = (None, alphaSize )))
-    model.add(Dropout(0.50))
-    model.add(Bidirectional(GRU(300, trainable = True, activation='relu'), merge_mode='concat'))
-    model.add(Dropout(0.50))
-    model.add(Dense(outputLen) )
+    # model.add(Bidirectional(GRU(300, trainable = True, activation='relu'), merge_mode='sum' , input_shape = (None, alphaSize )))
+    # model.add(Dropout(0.50))
+    # model.add(Bidirectional(GRU(300, trainable = True, activation='relu'), merge_mode='sum'))
+    # model.add(Dropout(0.50))
+    # model.add(Dense(outputLen) )
 
 
 
@@ -73,12 +73,12 @@ def configureModel(input):
     # {'parameters_num': 0, 'name': 'dropout_2'}
     # {'output_dim': 53, 'parameters_num': 15953, 'activation': 'linear', 'name': 'dense_2', 'input_dim': None}
 
-    # model.add(TimeDistributed(Dense(300, activation = 'tanh', W_regularizer=l2(0.0)), trainable = True, input_shape = (None, alphaSize )))
-    # model.add(Dropout(0.0))
-    # model.add(Bidirectional(GRU(300, trainable = True, W_regularizer=l2(0.0),  b_regularizer=l2(0.0))))
-    # model.add(Activation('relu'))
-    # model.add(Dropout(0.0))
-    # model.add(Dense(outputLen) )
+    model.add(TimeDistributed(Dense(300, activation = 'tanh', W_regularizer=l2(0.00005)), trainable = True, input_shape = (None, alphaSize )))
+    model.add(Dropout(0.45))
+    model.add(Bidirectional(GRU(300, trainable = True, W_regularizer=l2(0.00005),  b_regularizer=l2(0.00005)), merge_mode = 'sum'))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.45))
+    model.add(Dense(outputLen) )
 
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
@@ -154,6 +154,7 @@ def train(model, nnInput, labels, validation, makePlot = True,
     visualization.histograms(modelLogger)
 
     print('    Model weights:')
+    print(model.summary())
     # print(model.get_weights())
     print('  ...done')
     return len(history.history['loss'])
