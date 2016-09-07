@@ -75,7 +75,7 @@ def configureModel(input):
 
     model.add(TimeDistributed(Dense(300, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
     model.add(Dropout(0.55))
-    model.add(Bidirectional(GRU(300, trainable = True), W_regularizer=l2(0.00005),  b_regularizer=l2(0.00005)))
+    model.add(Bidirectional(GRU(300, trainable = True, W_regularizer=l2(0.00005),  b_regularizer=l2(0.00005))))
     model.add(Activation('relu'))
     model.add(Dropout(0.55))
     model.add(Dense(outputLen) )
