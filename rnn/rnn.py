@@ -154,7 +154,7 @@ def train(model, nnInput, labels, validation, makePlot = True,
     visualization.histograms(modelLogger)
 
     print('    Model weights:')
-3    # print(model.get_weights())
+    # print(model.get_weights())
     print('  ...done')
     return len(history.history['loss'])
 
