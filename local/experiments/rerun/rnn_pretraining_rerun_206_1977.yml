@@ -47,4 +47,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[RERUN][PRETRAINED][BIDIRECTIONAL][206_1977] using new bidirectional model'
+    comment: '[RERUN][NONPRETRAINED][BIDIRECTIONAL][206_1977] using new bidirectional model'
