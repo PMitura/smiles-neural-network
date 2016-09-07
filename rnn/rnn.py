@@ -57,6 +57,14 @@ def configureModel(input):
     else:
     '''
 
+    model.add(Bidirectional(GRU(300, trainable = True, activation='relu'), merge_mode='sum' , input_shape = (None, alphaSize )))
+    model.add(Dropout(0.50))
+    model.add(Bidirectional(GRU(300, trainable = True, activation='relu'), merge_mode='sum'))
+    model.add(Dropout(0.50))
+    model.add(Dense(outputLen) )
+
+
+
 
     # {'parameters_num': 23100, 'name': 'timedistributed_1'}
     # {'parameters_num': 0, 'name': 'dropout_1'}
@@ -65,14 +73,12 @@ def configureModel(input):
     # {'parameters_num': 0, 'name': 'dropout_2'}
     # {'output_dim': 53, 'parameters_num': 15953, 'activation': 'linear', 'name': 'dense_2', 'input_dim': None}
 
-    # model.add(TimeDistributed(Dense(300, activation = 'tanh', W_regularizer=l2(0.01), activity_regularizer=activity_l2(0.00)), trainable = True, input_shape = (None, alphaSize )))
-    model.add(TimeDistributed(Dense(300, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
-    model.add(Dropout(0.50))
-    model.add(Bidirectional(GRU(300, trainable = True)))
-    # model.add(Bidirectional(GRU(300, trainable = True, W_regularizer=l2(0.01),U_regularizer=l2(0.0), b_regularizer=l2(0.00))))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.50))
-    model.add(Dense(outputLen) )
+    # model.add(TimeDistributed(Dense(300, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
+    # model.add(Dropout(0.50))
+    # model.add(Bidirectional(GRU(300, trainable = True)))
+    # model.add(Activation('relu'))
+    # model.add(Dropout(0.50))
+    # model.add(Dense(outputLen) )
 
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))

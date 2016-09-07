@@ -1,5 +1,5 @@
-# Experiment rnn_rerun_a549
-name: 'rnn_rerun_a549'
+# Experiment rnn_pretraining_rerun_a549
+name: 'rnn_pretraining_rerun_a549'
 
 # Template for default values
 template: 'rnn.yml'
@@ -23,6 +23,9 @@ params:
     testing: 'is_testing'
 
   rnn:
+
+    # load_model: '4b1958abcdf72ed6d6923d7c6fce2edb6e536ce3'
+
     # RNN parameters
     learning_rate: 0.001
     epochs: 50
