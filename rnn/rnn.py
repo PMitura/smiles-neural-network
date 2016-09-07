@@ -74,10 +74,10 @@ def configureModel(input):
     # {'output_dim': 53, 'parameters_num': 15953, 'activation': 'linear', 'name': 'dense_2', 'input_dim': None}
 
     model.add(TimeDistributed(Dense(300, activation = 'tanh', W_regularizer=l2(0.00005)), trainable = True, input_shape = (None, alphaSize )))
-    model.add(Dropout(0.45))
+    model.add(Dropout(0.50))
     model.add(Bidirectional(GRU(300, trainable = True, W_regularizer=l2(0.00005),  b_regularizer=l2(0.00005)), merge_mode = 'sum'))
     model.add(Activation('relu'))
-    model.add(Dropout(0.45))
+    model.add(Dropout(0.50))
     model.add(Dense(outputLen) )
 
     if RP['classify']:
