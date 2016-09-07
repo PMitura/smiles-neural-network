@@ -25,7 +25,7 @@ params:
 
   rnn:
     # RNN parameters
-    learning_rate: 0.00003
+    learning_rate: 0.001
     epochs: 150
     early_stop: 20
 

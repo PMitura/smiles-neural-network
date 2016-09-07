@@ -77,7 +77,7 @@ def configureModel(input):
     model.add(Dropout(0.50))
     model.add(Bidirectional(GRU(300, trainable = True)))
     model.add(Activation('relu'))
-    model.add(Dropout(0.50))
+    model.add(Dropout(0.20))
     model.add(Dense(outputLen) )
 
     if RP['classify']:
@@ -91,10 +91,10 @@ def configureModel(input):
         print layer.name
 
     # for i in range(2):
-    # model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
-    # model.layers[0].trainable = True
-    # model.layers[2].set_weights(pretrainedModel.layers[2].get_weights())
-    # model.layers[2].trainable = True
+    model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
+    model.layers[0].trainable = True
+    model.layers[2].set_weights(pretrainedModel.layers[2].get_weights())
+    model.layers[2].trainable = True
 
 
     print('  ...done')
