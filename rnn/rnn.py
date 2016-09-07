@@ -91,10 +91,10 @@ def configureModel(input):
         print layer.name
 
     # for i in range(2):
-    model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
-    model.layers[0].trainable = True
-    model.layers[2].set_weights(pretrainedModel.layers[2].get_weights())
-    model.layers[2].trainable = True
+    # model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
+    # model.layers[0].trainable = True
+    # model.layers[2].set_weights(pretrainedModel.layers[2].get_weights())
+    # model.layers[2].trainable = True
 
 
     print('  ...done')
