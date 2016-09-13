@@ -271,7 +271,7 @@ def preprocessEdgeData(df):
         pfMapping[value] = size
         size += 1
     print size
-    newLabels = np.zeros((len(labels), size))
+    newLabels = np.zeros((len(labels), size), dtype=bool)
     for i in range(len(labels)):
         newLabels[i][pfMapping[labels[i][0]]] = 1
     labels = newLabels
