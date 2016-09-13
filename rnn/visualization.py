@@ -16,6 +16,7 @@ import collections
 import pandas as pd
 
 from sklearn.manifold import TSNE
+from sklearn.metrics.pairwise import pairwise_distances
 
 import data
 from config import config as cc
@@ -248,7 +249,7 @@ def visualizeSequentialOutput(model, layerIdx, smilesData):
 
         Z = sch.linkage(selected, method='single', metric='cosine')
         leaves = sch.leaves_list(Z)
-
+        # leaves = range(len(selected))
         reordered = selected[leaves]
 
         ax = fig.add_subplot(len(smilesData),1,i+1)
@@ -259,6 +260,53 @@ def visualizeSequentialOutput(model, layerIdx, smilesData):
                vmin=-1,
                vmax=1)
 
-    fig.savefig('{}/seq_output.png'.format(cc.cfg['plots']['seq_output_dir']))
+    fig.savefig('{}/{}'.format(cc.cfg['plots']['seq_output_dir'],cc.cfg['plots']['seq_output_name']))
 
+def printPrediction(model, smilesData):
+    # FIXME hardcoded
+
+    smilesDf = pd.DataFrame(smilesData, columns=[cc.exp['params']['data']['smiles']])
+
+    input = data.formatSequentialInput(smilesDf)
+
+    output = model.predict(input)
+
+    for i, smiles in enumerate(smilesData):
+        print 'Prediction for {}'.format(smiles)
+        print output[i]
+
+    distanceMatrixCosine = pairwise_distances(output, metric='cosine')
+    distanceMatrixCorrel = pairwise_distances(output, metric='correlation')
+    distanceMatrixEuclid = pairwise_distances(output, metric='euclidean')
+
+    print 'Distance matrix cosine'
+    print distanceMatrixCosine
+    print 'Distance matrix correlation'
+    print distanceMatrixCorrel
+    print 'Distance matrix euclid'
+    print distanceMatrixEuclid
+
+    layerIdx = 2
+    cfg = model.get_config()[:layerIdx+1]
+    del cfg[1]
+    layerIdx -= 1
+    # print cfg
+    cfg[layerIdx]['config']['return_sequences'] = True
+
+    seqModel = Sequential.from_config(cfg)
+    seqModel.set_weights(model.get_weights())
+    seqModel.layers[layerIdx].return_sequences = True
+
+
+    outputFunction = K.function([seqModel.layers[0].input],
+              [seqModel.layers[layerIdx].output])
+
+    outputSymbols = outputFunction([input])[0]
+
+    outputLastSymbol = outputSymbols[:,outputSymbols.shape[1]-1,:]
+
+    distanceMatrixLastSymbolCorrel = np.corrcoef(outputLastSymbol)
+
+    print 'Distance matrix last symbol correlation'
+    print distanceMatrixLastSymbolCorrel
 

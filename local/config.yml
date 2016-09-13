@@ -11,11 +11,21 @@ persistence:
   model: false
 
 plots:
-  seq_output: true
+  seq_output: false
   seq_output_ignore_neurons: ~
-  seq_output_select_neurons: ~ # [66,78] # [51,100,137]
+  seq_output_select_neurons: ~
+  seq_output_name: 'seq_output_3.png'
   seq_output_layer_idx: 2
   seq_output_smiles: [
-  'BrC1=CC2(CCNC3=C2C(=O)c4cccnc4C3=O)C=C(Br)C1=O'
-  #'Brc1ccc2c3ccc(Br)cc3C4(c5cc(Br)ccc5c6ccc(Br)cc46)c2c1'
+  # 'NCC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=O'
+  # 'CCC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=O'
+  'CSC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=O'
+  ]
+
+
+  print_pred: true
+  print_pred_smiles: [
+  'CCC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=O',
+  'CCC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=N',
+  'CCC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=S'
   ]

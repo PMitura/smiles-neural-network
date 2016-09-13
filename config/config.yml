@@ -24,6 +24,7 @@ plots:
 
   seq_output: false
   seq_output_dir: 'local/plots/seq_output'
+  seq_output_name: 'seq_output.png'
   seq_output_select_neurons: ~
   seq_output_ignore_neurons: ~
   seq_output_layer_idx: ~
