@@ -127,6 +127,7 @@ def configureEdgeModel(inputSmiles, inputFasta):
     # smilesModel.add(Dropout(0.3))
 
     smilesModel = utility.loadModel('6f7c468746e19ab2ed4c6adb4c15ab7ff50f9088')
+    smilesModel.layers.pop()
 
     # fastaModel = Sequential()
     # fastaModel.add(TimeDistributed(Dense(300, activation = 'tanh'), input_shape = fastaGRUInputShape))
@@ -136,6 +137,7 @@ def configureEdgeModel(inputSmiles, inputFasta):
     # fastaModel.add(Dropout(0.3))
 
     fastaModel = utility.loadModel('7de8eec6b8c9496325212282646ae6414d2f4e7f')
+    fastaModel.layers.pop()
 
     merged = Merge([smilesModel, fastaModel], mode='concat')
 
