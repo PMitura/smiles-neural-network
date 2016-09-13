@@ -256,4 +256,35 @@ def visualizeSequentialOutput(model, layerIdx, smilesData):
 
     fig.savefig('{}/seq_output.png'.format(cc.cfg['plots']['seq_output_dir']))
 
+def printTrainTestPred(model, cnt, trainIn, trainLabel, testIn, testLabel, meta):
+    print('Printing train/test predictions:')
 
+    predTrain = data.denormalize(model.predict(trainIn[:cnt]), meta)
+    labelTrain = data.denormalize(trainLabel[:cnt], meta)
+
+    trainData = []
+    trainCols = []
+
+    for i in xrange(trainLabel.shape[1]):
+        trainData.append(list(predTrain[:,i]))
+        trainCols.append('train pred label{}'.format(i))
+        trainData.append(list(labelTrain[:,i]))
+        trainCols.append('train true label{}'.format(i))
+
+    traindf = pd.DataFrame(np.array(trainData).T, columns=trainCols)
+    print traindf
+
+    predTest = data.denormalize(model.predict(testIn[:cnt]), meta)
+    labelTest = data.denormalize(testLabel[:cnt], meta)
+
+    testData = []
+    testCols = []
+
+    for i in xrange(testLabel.shape[1]):
+        testData.append(list(predTest[:,i]))
+        testCols.append('test pred label{}'.format(i))
+        testData.append(list(labelTest[:,i]))
+        testCols.append('test true label{}'.format(i))
+
+    testdf = pd.DataFrame(np.array(testData).T, columns=testCols)
+    print testdf

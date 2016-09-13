@@ -29,6 +29,9 @@ plots:
   seq_output_layer_idx: ~
   seq_output_smiles: ~
 
+  print_train_test_pred: false
+  print_train_test_pred_cnt: 5
+
 model: 'rnn'
 
 # Persistence of models

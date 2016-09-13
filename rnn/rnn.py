@@ -282,6 +282,9 @@ def run(grid = None):
     if cc.cfg['plots']['seq_output']:
         visualization.visualizeSequentialOutput(model, cc.cfg['plots']['seq_output_layer_idx'], cc.cfg['plots']['seq_output_smiles'])
 
+    if cc.cfg['plots']['print_train_test_pred']:
+        visualization.printTrainTestPred(model, cc.cfg['plots']['print_train_test_pred_cnt'], trainIn, trainLabel, testIn, testLabel, preprocessMeta)
+
     # statistics to send to journal
     stats['runtime_second'] = time.time() - stats['runtime_second']
     stats['memory_pm_mb'], stats['memory_vm_mb'] = utility.getMemoryUsage()
