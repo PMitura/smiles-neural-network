@@ -25,7 +25,9 @@ plots:
 
   print_pred: true
   print_pred_smiles: [
-  'CCC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=O',
-  'CCC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=N',
-  'CCC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=S'
+  'FFF=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=CCC',
+  'OOO=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=CCC',
+  'NNN=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=CCC',
+  'CCC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=CCC',
+  'SSS=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=CCC'
   ]

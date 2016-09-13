@@ -286,6 +286,22 @@ def printPrediction(model, smilesData):
     print 'Distance matrix euclid'
     print distanceMatrixEuclid
 
+    '''
+
+    layerIdx = 1
+    cfg = model.get_config()[:layerIdx+1]
+    cfg[0]['config']['dropout_U'] = 0
+    cfg[0]['config']['dropout_W'] = 0
+
+    print cfg[0]
+    print cfg[1]
+    # del cfg[1]
+    # layerIdx -= 1
+    # print cfg
+    cfg[layerIdx]['config']['return_sequences'] = True
+    '''
+
+
     layerIdx = 2
     cfg = model.get_config()[:layerIdx+1]
     del cfg[1]
