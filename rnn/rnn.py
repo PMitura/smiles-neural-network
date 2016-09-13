@@ -330,6 +330,8 @@ def run(grid = None):
         metricStats['relevance_testing_std'] = testMetrics['r2_std']
         metricStats['mse'] = testMetrics['mse_avg']
         metricStats['mse_std'] = testMetrics['mse_std']
+        metricStats['mae'] = testMetrics['mae_avg']
+        metricStats['mae_std'] = testMetrics['mae_std']
 
     stats.update(metricStats)
     db.sendStatistics(**stats)
