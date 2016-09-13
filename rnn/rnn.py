@@ -112,39 +112,54 @@ def configureEdgeModel(inputSmiles, inputFasta):
     print('  Initializing edge model and compiling...')
 
     smilesGRUInputShape = (None, inputSmiles.shape[2])
-    smilesGRUSize = int(RP['gru_layer_multiplier'] * smilesGRUInputShape[1])
+    # smilesGRUSize = int(RP['gru_layer_multiplier'] * smilesGRUInputShape[1])
 
     fastaGRUInputShape = (None, inputFasta.shape[2])
-    fastaGRUSize = int(RP['fasta_gru_layer_multiplier'] * fastaGRUInputShape[1])
+    # fastaGRUSize = int(RP['fasta_gru_layer_multiplier'] * fastaGRUInputShape[1])
 
     mergedOutputLen = len(RD['labels'])
 
     smilesModel = Sequential()
+    smilesModel.add(TimeDistributed(Dense(300, activation = 'tanh'), input_shape = smilesGRUInputShape))
+    smilesModel.add(Dropout(0.5))
+    smilesModel.add(GRU(300))
+    smilesModel.add(Activation('relu'))
+    smilesModel.add(Dropout(0.3))
+
+
+
     # smilesModel.add(GRU(128, trainable = True, input_shape = smilesGRUInputShape))
     # smilesModel.add(Activation('relu', trainable = True))
 
-    smilesModel.add(GRU(128, trainable = True, input_shape = smilesGRUInputShape, return_sequences = True))
-    smilesModel.add(Activation('relu', trainable = True))
-    smilesModel.add(GRU(96, trainable = True))
-    smilesModel.add(Activation('relu', trainable = True))
+    # smilesModel.add(GRU(128, trainable = True, input_shape = smilesGRUInputShape, return_sequences = True))
+    # smilesModel.add(Activation('relu', trainable = True))
+    # smilesModel.add(GRU(96, trainable = True))
+    # smilesModel.add(Activation('relu', trainable = True))
 
     fastaModel = Sequential()
+    fastaModel.add(TimeDistributed(Dense(300, activation = 'tanh'), input_shape = fastaGRUInputShape))
+    fastaModel.add(Dropout(0.5))
+    fastaModel.add(GRU(300))
+    fastaModel.add(Activation('relu'))
+    fastaModel.add(Dropout(0.3))
+
+
     # fastaModel.add(GRU(128, trainable = True, input_shape = fastaGRUInputShape))
     # fastaModel.add(Activation('relu', trainable = True))
 
-    fastaModel.add(GRU(128, trainable = True, input_shape = fastaGRUInputShape, return_sequences = True))
-    fastaModel.add(Activation('relu', trainable = True))
-    fastaModel.add(GRU(96, trainable = True))
-    fastaModel.add(Activation('relu', trainable = True))
+    # fastaModel.add(GRU(128, trainable = True, input_shape = fastaGRUInputShape, return_sequences = True))
+    # fastaModel.add(Activation('relu', trainable = True))
+    # fastaModel.add(GRU(96, trainable = True))
+    # fastaModel.add(Activation('relu', trainable = True))
 
     merged = Merge([smilesModel, fastaModel], mode='concat')
 
     mergedModel = Sequential()
     mergedModel.add(merged)
 
-    mergedModel.add(Dense(128))
+    mergedModel.add(Dense(300))
     mergedModel.add(Activation('relu'))
-    mergedModel.add(Dense(64))
+    mergedModel.add(Dense(150))
     mergedModel.add(Activation('relu'))
     mergedModel.add(Dense(mergedOutputLen))
 
@@ -220,10 +235,12 @@ def run(grid = None):
     # initialize using the same seed (to get stable results on comparisons)
     np.random.seed(RP['seed'])
 
+    # grab the commit at start
+    stats['git_commit'] = utility.getGitCommitHash()
 
     # get the training and testing datasets along with some meta info
-    trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessData(db.getData())
-    # trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessEdgeData(db.getData())
+    # trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessData(db.getData())
+    trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessEdgeData(db.getData())
 
 
     stats['training_row_count'] = len(testLabel)
@@ -233,11 +250,12 @@ def run(grid = None):
     if RP['load_model']:
         model = utility.loadModel(RP['load_model'])
     else:
-        if RP['discrete_label']:
+        if RP['edge_prediction']:
+            model = configureEdgeModel(trainIn[0],trainIn[1])
+        elif RP['discrete_label']:
             model = configureModel(trainIn, len(trainLabel[0]))
         else:
             model = configureModel(trainIn)
-        # model = configureEdgeModel(trainIn[0],trainIn[1])
         stats['epoch_count'] = train(model, trainIn, trainLabel, (testIn, testLabel))
 
     # persistence first
@@ -273,7 +291,6 @@ def run(grid = None):
     # statistics to send to journal
     stats['runtime_second'] = time.time() - stats['runtime_second']
     stats['memory_pm_mb'], stats['memory_vm_mb'] = utility.getMemoryUsage()
-    stats['git_commit'] = utility.getGitCommitHash()
     stats['comment'] = RP['comment']
     stats['hostname'] = socket.gethostname()
     stats['experiment_config'] = yaml.dump(cc.exp,default_flow_style=False)
