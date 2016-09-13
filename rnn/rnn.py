@@ -65,7 +65,7 @@ def configureModel(input, outputLen = len(RD['labels'])):
     # model.add(Dropout(0.5))
     # model.add(GRU(150, trainable = RP['trainable_inner'], return_sequences=True))
     # model.add(Activation('relu', trainable = RP['trainable_inner']))
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.3))
     model.add(GRU(300, trainable = RP['trainable_inner']))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
     model.add(Dropout(0.3))
