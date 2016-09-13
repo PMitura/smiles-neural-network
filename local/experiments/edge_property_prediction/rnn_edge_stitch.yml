@@ -10,7 +10,7 @@ fetch:
   cols: ['smiles','fasta','score']
   order: 'smiles'
   index_col: ~
-  limit: 500000
+  limit: 100000
   where: length(fasta) <= 400 and length(smiles) <= 80
 
 # Experiment params
@@ -29,7 +29,7 @@ params:
 
     # RNN parameters
     learning_rate: 0.001
-    epochs: 150
+    epochs: 30
 
     objective: 'mse'
 
@@ -53,4 +53,4 @@ params:
     holdout_ratio: 0.5
 
     # statistics settings
-    comment: '[EDGE][STITCH][500K] fasta 400, smiles 80, predicting edge score'
+    comment: '[EDGE][STITCH][100K] fasta 400, smiles 80, predicting edge score, using pretrained models: smiles 6f7c46, fasta 7de8ee'

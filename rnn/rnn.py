@@ -119,38 +119,23 @@ def configureEdgeModel(inputSmiles, inputFasta):
 
     mergedOutputLen = len(RD['labels'])
 
-    smilesModel = Sequential()
-    smilesModel.add(TimeDistributed(Dense(300, activation = 'tanh'), input_shape = smilesGRUInputShape))
-    smilesModel.add(Dropout(0.5))
-    smilesModel.add(GRU(300))
-    smilesModel.add(Activation('relu'))
-    smilesModel.add(Dropout(0.3))
+    # smilesModel = Sequential()
+    # smilesModel.add(TimeDistributed(Dense(300, activation = 'tanh'), input_shape = smilesGRUInputShape))
+    # smilesModel.add(Dropout(0.5))
+    # smilesModel.add(GRU(300))
+    # smilesModel.add(Activation('relu'))
+    # smilesModel.add(Dropout(0.3))
 
+    smilesModel = utility.loadModel('6f7c468746e19ab2ed4c6adb4c15ab7ff50f9088')
 
+    # fastaModel = Sequential()
+    # fastaModel.add(TimeDistributed(Dense(300, activation = 'tanh'), input_shape = fastaGRUInputShape))
+    # fastaModel.add(Dropout(0.5))
+    # fastaModel.add(GRU(300))
+    # fastaModel.add(Activation('relu'))
+    # fastaModel.add(Dropout(0.3))
 
-    # smilesModel.add(GRU(128, trainable = True, input_shape = smilesGRUInputShape))
-    # smilesModel.add(Activation('relu', trainable = True))
-
-    # smilesModel.add(GRU(128, trainable = True, input_shape = smilesGRUInputShape, return_sequences = True))
-    # smilesModel.add(Activation('relu', trainable = True))
-    # smilesModel.add(GRU(96, trainable = True))
-    # smilesModel.add(Activation('relu', trainable = True))
-
-    fastaModel = Sequential()
-    fastaModel.add(TimeDistributed(Dense(300, activation = 'tanh'), input_shape = fastaGRUInputShape))
-    fastaModel.add(Dropout(0.5))
-    fastaModel.add(GRU(300))
-    fastaModel.add(Activation('relu'))
-    fastaModel.add(Dropout(0.3))
-
-
-    # fastaModel.add(GRU(128, trainable = True, input_shape = fastaGRUInputShape))
-    # fastaModel.add(Activation('relu', trainable = True))
-
-    # fastaModel.add(GRU(128, trainable = True, input_shape = fastaGRUInputShape, return_sequences = True))
-    # fastaModel.add(Activation('relu', trainable = True))
-    # fastaModel.add(GRU(96, trainable = True))
-    # fastaModel.add(Activation('relu', trainable = True))
+    fastaModel = utility.loadModel('7de8eec6b8c9496325212282646ae6414d2f4e7f')
 
     merged = Merge([smilesModel, fastaModel], mode='concat')
 
