@@ -36,7 +36,7 @@ params:
     label_binning: false
     label_binning_after_train: false
     label_binning_ratio: 0.5
-    early_stop: 20
+    early_stop: 10
 
     chained_models: false
     trainable_inner: true
@@ -53,4 +53,4 @@ params:
     holdout_ratio: 0.5
 
     # statistics settings
-    comment: '[EDGE][STITCH][100K] fasta 400, smiles 80, predicting edge score, using pretrained models: smiles 6f7c46, fasta 7de8ee'
+    comment: '[EDGE][STITCH][100K] fasta 400, smiles 80, predicting edge score, using pretrained models: smiles 6f7c46, fasta 7de8ee, popped output layers'
