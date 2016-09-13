@@ -39,11 +39,10 @@ RP['label_idxs'] = eval(str(cc.exp['params']['rnn']['label_idxs']))
 
 OPTIMIZER = Adam(lr = RP['learning_rate'])
 
-def configureModel(input):
+def configureModel(input, outputLen = len(RD['labels'])):
     print('  Initializing and compiling...')
 
     alphaSize = input.shape[2]
-    outputLen = len(RD['labels'])
 
     model = Sequential()
 
@@ -56,17 +55,39 @@ def configureModel(input):
     else:
     '''
 
+
     # {'parameters_num': 11704, 'name': 'timedistributed_1'}
     # {'output_dim': 152, 'parameters_num': 139080, 'activation': 'tanh', 'name': 'gru_1', 'input_dim': 152}
     # {'activation': 'relu', 'parameters_num': 0, 'name': 'activation_1'}
     # {'output_dim': 53, 'parameters_num': 8109, 'activation': 'linear', 'name': 'dense_2', 'input_dim': None}
 
 
-    model.add(TimeDistributed(Dense(152, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
-    model.add(Dropout(0.25))
-    model.add(GRU(152, trainable = True, ))
-    model.add(Dropout(0.25))
-    model.add(Dense(outputLen) )
+    # model.add(TimeDistributed(Dense(152, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
+    # model.add(Dropout(0.25))
+    # model.add(GRU(152, trainable = True, ))
+    # model.add(Dropout(0.25))
+    # model.add(Dense(outputLen) )
+
+    # model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * alphaSize), activation = 'tanh',
+    #     trainable = RP['trainable_inner']),
+    #     input_shape = (None, alphaSize )))
+
+    # model.add(GRU(150, trainable = RP['trainable_inner'], input_shape = (None, alphaSize ), dropout_W=0.2,  dropout_U=0.2, return_sequences=True))
+    # model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'], dropout_W=0.2,  dropout_U=0.2, return_sequences = True ))
+    model.add(TimeDistributed(Dense(300, activation = 'tanh', trainable = RP['trainable_inner']), input_shape = (None, alphaSize )))
+    # model.add(Dropout(0.5))
+    # model.add(GRU(150, trainable = RP['trainable_inner'], return_sequences=True))
+    # model.add(Activation('relu', trainable = RP['trainable_inner']))
+    model.add(Dropout(0.5))
+    model.add(GRU(300, trainable = RP['trainable_inner']))
+    model.add(Activation('relu', trainable = RP['trainable_inner']))
+    model.add(Dropout(0.3))
+    # model.add(Dense(200) )
+    # model.add(Activation('relu', trainable = RP['trainable_inner']))
+    # model.add(Dropout(0.2))
+    # model.add(Dense(150) )
+    # model.add(Activation('relu', trainable = RP['trainable_inner']))
+    model.add(Dense(outputLen))
 
     # for layer in model.layers:
         # print layer.name
@@ -212,7 +233,10 @@ def run(grid = None):
     if RP['load_model']:
         model = utility.loadModel(RP['load_model'])
     else:
-        model = configureModel(trainIn)
+        if RP['discrete_label']:
+            model = configureModel(trainIn, len(trainLabel[0]))
+        else:
+            model = configureModel(trainIn)
         # model = configureEdgeModel(trainIn[0],trainIn[1])
         stats['epoch_count'] = train(model, trainIn, trainLabel, (testIn, testLabel))
 
@@ -223,13 +247,19 @@ def run(grid = None):
     # compute metrics for the model based on the task for both testing and training data
     print('\nGetting metrics for training data:')
     if RP['classify']:
-        trainMetrics = metrics.classify(model, trainIn, trainLabel, preprocessMeta)
+        if RP['discrete_label']:
+            trainMetrics = metrics.discreteClassify(model, trainIn, trainLabel, preprocessMeta)
+        else:
+            trainMetrics = metrics.classify(model, trainIn, trainLabel, preprocessMeta)
     else:
         trainMetrics = metrics.predict(model, trainIn, trainLabel, preprocessMeta)
 
     print('\nGetting metrics for test data:')
     if RP['classify']:
-        testMetrics = metrics.classify(model, testIn, testLabel, preprocessMeta)
+        if RP['discrete_label']:
+            testMetrics = metrics.discreteClassify(model, testIn, testLabel, preprocessMeta)
+        else:
+            testMetrics = metrics.classify(model, testIn, testLabel, preprocessMeta)
     else:
         testMetrics = metrics.predict(model, testIn, testLabel, preprocessMeta)
 
@@ -277,6 +307,8 @@ def run(grid = None):
         metricStats['log_loss_std'] = testMetrics['log_loss_std']
         metricStats['auc'] = testMetrics['auc_avg']
         metricStats['auc_std'] = testMetrics['auc_std']
+        metricStats['auc_micro'] = testMetrics['auc_avg']
+        metricStats['auc_micro_std'] = testMetrics['auc_std']
     else:
         metricStats['relevance_training'] = trainMetrics['r2_avg']
         metricStats['relevance_training_std'] = trainMetrics['r2_std']
