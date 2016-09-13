@@ -6,11 +6,11 @@ template: 'rnn.yml'
 
 # DB fetch params
 fetch:
-  table: 'output.pfam_top10'
+  table: 'output.pfam_distinct'
   cols: ['pfam_sequence','pfama_acc_max']
   order: 'pfam_sequence'
   index_col: ~
-  limit: 100000
+  limit: 200000
   where:  'length(pfam_sequence) <= 400'
 
 # Experiment params
@@ -30,7 +30,7 @@ params:
 
     # RNN parameters
     learning_rate: 0.001
-    epochs: 50
+    epochs: 30
 
     td_layer_multiplier: 2
     gru_layer_multiplier: 2
