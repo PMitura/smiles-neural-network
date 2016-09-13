@@ -201,8 +201,8 @@ def discreteClassify(model, input, labels, meta):
     metrics = {
         'acc': np.zeros((iterations)),
         'log_loss': np.zeros((iterations)),
-        'auc': np.zeros((iterations)),
-        'auc_micro': np.zeros((iterations))
+        # 'auc': np.zeros((iterations)),
+        # 'auc_micro': np.zeros((iterations))
     }
 
     # first denormalize labels, so we do it only once
@@ -238,12 +238,13 @@ def discreteClassify(model, input, labels, meta):
                     maxValue = value
                     maxIndex = index
             binarizedPred[i][maxIndex] = 1
-        
+
         metrics['acc'][iteration] = sk.metrics.accuracy_score(partLabels,
                 binarizedPred)
         metrics['log_loss'][iteration] = sk.metrics.log_loss(partLabels,
                 binarizedPred)
 
+        '''
         keepVec = []
         for col in range(len(partLabels[0])):
             wasOne = 0
@@ -265,22 +266,27 @@ def discreteClassify(model, input, labels, meta):
                 cutPreds, average = 'macro')
         metrics['auc_micro'][iteration] = sk.metrics.roc_auc_score(cutLabels,
                 cutPreds, average = 'micro')
+        '''
 
     metricsOverall = {
         'acc_avg': np.nanmean(metrics['acc']),
         'acc_std': np.nanstd(metrics['acc']),
         'log_loss_avg': np.nanmean(metrics['log_loss']),
         'log_loss_std': np.nanstd(metrics['log_loss']),
-        'auc_avg': np.nanmean(metrics['auc']),
-        'auc_std': np.nanstd(metrics['auc']),
-        'auc_micro_avg': np.nanmean(metrics['auc_micro']),
-        'auc_micro_std': np.nanstd(metrics['auc_micro'])
+        # 'auc_avg': np.nanmean(metrics['auc']),
+        # 'auc_std': np.nanstd(metrics['auc']),
+        # 'auc_micro_avg': np.nanmean(metrics['auc_micro']),
+        # 'auc_micro_std': np.nanstd(metrics['auc_micro'])
+        'auc_avg': None,
+        'auc_std': None,
+        'auc_micro_avg': None,
+        'auc_micro_std': None,
     }
 
     print('Overall metrics:')
     print('\tACC:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['acc_avg'],metricsOverall['acc_std']))
     print('\tLogLos:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['log_loss_avg'],metricsOverall['log_loss_std']))
-    print('\tAUC:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['auc_avg'],metricsOverall['auc_std']))
-    print('\tAUC Micro:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['auc_micro_avg'],metricsOverall['auc_micro_std']))
+    # print('\tAUC:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['auc_avg'],metricsOverall['auc_std']))
+    # print('\tAUC Micro:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['auc_micro_avg'],metricsOverall['auc_micro_std']))
 
     return metricsOverall
