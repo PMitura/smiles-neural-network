@@ -10,7 +10,7 @@ fetch:
   cols: ['pfam_sequence','pfama_acc_max','is_testing_50_strat']
   order: 'pfam_sequence'
   index_col: ~
-  limit: ~
+  limit: 500000
   where:  'length(pfam_sequence) <= 400'
 
 # Experiment params
@@ -30,7 +30,7 @@ params:
 
     # RNN parameters
     learning_rate: 0.001
-    epochs: 1
+    epochs: 30
     early_stop: 10
 
     td_layer_multiplier: 2
@@ -68,4 +68,4 @@ params:
     label_idxs: 'range(1)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[PFAM][TEST][1.6M]'
+    comment: '[PFAM][500K][BADSTRAT]'
