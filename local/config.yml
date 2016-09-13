@@ -11,5 +11,5 @@ persistence:
   model: false
 
 plots:
-  print_train_test_pred: true
+  print_train_test_pred: false
   print_train_test_pred_cnt: 15
