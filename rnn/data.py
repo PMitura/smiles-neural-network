@@ -243,7 +243,7 @@ def preprocessData(df):
 
     return trainIn,trainLabel,testIn,testLabel,meta
 
-def preprocessEdgeData(df):
+def preprocessFastaOneHotData(df):
     # filter out inf and NaN (nulls) values
     df = df.replace([np.inf, -np.inf],np.nan).dropna()
     df.reset_index(drop=True, inplace=True)
@@ -288,3 +288,38 @@ def preprocessEdgeData(df):
         testFastaIn, testLabel   = inputFasta[split:], labels[split:]
 
     return trainFastaIn, trainLabel, testFastaIn, testLabel, meta
+
+
+def preprocessEdgeData(df):
+    # filter out inf and NaN (nulls) values
+    df = df.replace([np.inf, -np.inf],np.nan).dropna()
+    df.reset_index(drop=True, inplace=True)
+
+    # filter out rows with malformed test_flags, if we use them
+    if RD['use_test_flags']:
+        df = df[(df[RD['testing']] == 0) | (df[RD['testing']] == 1)]
+        df.reset_index(drop=True, inplace=True)
+
+    # shuffle the data
+    df.reindex(np.random.permutation(df.index))
+
+    inputSmiles = formatSequentialInput(df)
+    inputFasta = formatFastaInput(df)
+
+    labels = df[RD['labels']].values
+
+    # preprocessing
+    labels, meta = normalize(labels)
+
+    # create training and testing sets
+    if RP['flag_based_hold']:
+        testing = df[RD['testing']].values.astype(bool)
+        trainSmilesIn, trainFastaIn, trainLabel = inputSmiles[~testing], inputFasta[~testing], labels[~testing]
+        testSmilesIn,  testFastaIn,  testLabel  = inputSmiles[testing], inputFasta[testing],  labels[testing]
+    else:
+        split = int(len(inputSmiles) * RP['holdout_ratio'])
+
+        trainSmilesIn, trainFastaIn, trainLabel = inputSmiles[:split], inputFasta[:split], labels[:split]
+        testSmilesIn,  testFastaIn,  testLabel  = inputSmiles[split:], inputFasta[split:], labels[split:]
+
+    return [trainSmilesIn, trainFastaIn], trainLabel, [testSmilesIn, testFastaIn], testLabel, meta

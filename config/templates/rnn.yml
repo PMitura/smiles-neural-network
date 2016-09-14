@@ -21,7 +21,8 @@ params:
   rnn:
     # Do not train, just load
     load_model: null
-
+    edge_prediction: false
+    discrete_label: false
 
     # RNN parameters
     seed: 12346

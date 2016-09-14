@@ -1,0 +1,50 @@
+
+# Experiment rnn_pretraining_rerun_206_1977
+name: 'rnn_pretraining_rerun_206_1977'
+
+# Template for default values
+template: 'rnn.yml'
+
+# DB fetch params
+fetch:
+  table: 'output.target_206_1977_features_computed'
+  cols: ['canonical_smiles','standard_value_log','is_testing']
+  order: 'canonical_smiles'
+  index_col: ~
+  limit: ~
+  where:  ~ # 'length(canonical_smiles) <= 80'
+
+# Experiment params
+params:
+  data:
+    smiles: 'canonical_smiles'
+    labels: ['standard_value_log']
+    nominals: ~
+    use_test_flags: true
+    testing: 'is_testing'
+
+  rnn:
+    # RNN parameters
+    learning_rate: 0.0001
+    epochs: 150
+    early_stop: 20
+
+    classify: false            # regression if false
+    label_binning: false
+    label_binning_after_train: false
+    label_binning_ratio: 0.5
+
+    chained_models: false
+    trainable_inner: true
+
+    zscore_norm: true
+    logarithm: false
+
+    # learning rate decay settings
+    learning_rate_decay: false
+
+    flag_based_hold: true
+    holdout_ratio: 0.2
+
+    # statistics settings
+    comment: '[RERUN][PRETRAINED][DROPOUT][206_1977] rerun properly transfer of knowledge to 206_1977 with dropout'

@@ -147,9 +147,14 @@ def saveModel(model):
     model.save_weights(os.path.join(cc.cfg['persistence']['model_dir'], gitCommit+'.h5'), overwrite=True)
 
 
-def loadModel(modelName):
+def loadModel(modelName, layerPrefix=None):
     model = model_from_yaml(open(os.path.join(cc.cfg['persistence']['model_dir'], modelName+'.yml')).read())
     model.load_weights(os.path.join(os.path.join(cc.cfg['persistence']['model_dir'], modelName+'.h5')))
+
+    if layerPrefix:
+        for i in xrange(len(model.layers)):
+            model.layers[i].name = layerPrefix + model.layers[i].name
+
     return model
 
 def plotLoss(values):

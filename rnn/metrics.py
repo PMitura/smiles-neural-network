@@ -44,14 +44,22 @@ def computeR2(pred, truth):
 def computeMSE(pred, truth):
     return ((pred - truth)**2).mean()
 
+def computeMAE(pred, truth):
+    return (np.absolute(pred - truth)).mean()
+
 def predict(model, input, labels, meta):
     # FIXME: hardcoded edge
-    partitioner = PermutationPartitioner(len(input[0]), len(input[0]) / RP['num_partitions'])
+
+    if RP['edge_prediction']:
+        partitioner = PermutationPartitioner(len(input[0]), len(input[0]) / RP['num_partitions'])
+    else:
+        partitioner = PermutationPartitioner(len(input), len(input) / RP['num_partitions'])
     iterations = RP['num_partitions']**2
 
     metrics = {
         'r2': np.zeros((labels.shape[1], iterations)),
-        'mse': np.zeros((labels.shape[1], iterations))
+        'mse': np.zeros((labels.shape[1], iterations)),
+        'mae': np.zeros((labels.shape[1], iterations)),
     }
 
     # first denormalize labels, so we do it only once
@@ -61,13 +69,18 @@ def predict(model, input, labels, meta):
         print('\titer:\t{}/{}'.format(iteration+1, iterations))
 
         part = partitioner.get()
-        partIn = [input[0][part],input[1][part]]
+
+        if RP['edge_prediction']:
+            partIn = [input[0][part],input[1][part]]
+        else:
+            partIn = input[part]
         partLabelsT = labels[part].T
         partPredT = model.predict(partIn, batch_size = RP['batch']).T
 
         for i in range(labels.shape[1]):
             metrics['r2'][i][iteration] = computeR2(partPredT[i], partLabelsT[i])
             metrics['mse'][i][iteration] = computeMSE(partPredT[i], partLabelsT[i])
+            metrics['mae'][i][iteration] = computeMAE(partPredT[i], partLabelsT[i])
 
         del partIn
         del partLabelsT
@@ -77,7 +90,9 @@ def predict(model, input, labels, meta):
         'r2_avg': np.nanmean(metrics['r2'], axis = 1),
         'r2_std': np.nanstd(metrics['r2'], axis = 1),
         'mse_avg': np.nanmean(metrics['mse'], axis = 1),
-        'mse_std': np.nanstd(metrics['mse'], axis = 1)
+        'mse_std': np.nanstd(metrics['mse'], axis = 1),
+        'mae_avg': np.nanmean(metrics['mae'], axis = 1),
+        'mae_std': np.nanstd(metrics['mae'], axis = 1),
     }
 
     metricsOverall = {
@@ -85,16 +100,20 @@ def predict(model, input, labels, meta):
         'r2_std': np.nanstd(metrics['r2']),
         'mse_avg': np.nanmean(metrics['mse']),
         'mse_std': np.nanstd(metrics['mse']),
+        'mae_avg': np.nanmean(metrics['mae']),
+        'mae_std': np.nanstd(metrics['mae']),
     }
 
     for i,labelName in enumerate(RD['labels']):
         print('{}/{} - {}:'.format(i+1, len(RD['labels']),labelName))
         print('\tR2:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsPerLabel['r2_avg'][i],metricsPerLabel['r2_std'][i]))
         print('\tMSE:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsPerLabel['mse_avg'][i],metricsPerLabel['mse_std'][i]))
+        print('\tMAE:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsPerLabel['mae_avg'][i],metricsPerLabel['mae_std'][i]))
 
     print('Overall metrics:')
     print('\tR2:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['r2_avg'],metricsOverall['r2_std']))
     print('\tMSE:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['mse_avg'],metricsOverall['mse_std']))
+    print('\tMAE:\t{0:.3f}\t+/-\t{1:.3f}'.format(metricsOverall['mae_avg'],metricsOverall['mae_std']))
 
     return metricsOverall
 
