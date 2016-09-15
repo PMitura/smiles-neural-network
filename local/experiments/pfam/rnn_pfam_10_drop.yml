@@ -30,8 +30,9 @@ params:
 
     # RNN parameters
     learning_rate: 0.001
-    epochs: 30
+    epochs: 1
     early_stop: 10
+    dropout: 0.30
 
     td_layer_multiplier: 2
     gru_layer_multiplier: 2

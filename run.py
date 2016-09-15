@@ -36,7 +36,17 @@ def main(argv):
             reload(rnn.rnn)
 
             print(cc.cfg,cc.exp)
-            rnn.rnn.run()
+
+            # REMOVEME: hardcoded grid
+            
+            grid = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+
+            for dropout in grid:
+                cc.exp['params']['rnn']['dropout'] = dropout
+                cc.exp['params']['rnn']['comment'] = 
+                    '[PFAM][10K][GOODSTRAT][GRU][GRU][DROP {}]'.format(dropout)
+                rnn.rnn.run()
+
         elif cc.cfg['model'] == 'dnn':
             import rnn.dnn
             reload(rnn.dnn)
