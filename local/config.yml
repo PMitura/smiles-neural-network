@@ -2,7 +2,7 @@
 
 # Experiments to run
 
-experiments: ['local/experiments/pfam/rnn_pfam_tests.yml']
+experiments: ['local/experiments/pfam/rnn_pfam_10_drop.yml']
 
 model: 'rnn'
 
