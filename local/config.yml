@@ -2,9 +2,12 @@
 
 # Experiments to run
 
-experiments: ['local/experiments/edge_property_prediction/rnn_edge_stitch.yml']
-model: 'rnn'
+# experiments: ['local/experiments/edge_property_prediction/rnn_edge_stitch.yml']
+# model: 'rnn'
+
+experiments: ['local/experiments/dnn_rapidminer/dnn_rapidminer.yml']
+model: 'dnn'
 
 # Persistence of models
 persistence:
-  model: true
+  model: false

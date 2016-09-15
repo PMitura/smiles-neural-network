@@ -96,8 +96,12 @@ def run():
     model = Sequential()
 
     # hidden
-    model.add(Dense(100, W_regularizer=l2(0.3),activity_regularizer=activity_l2(0.01), input_shape=(X.shape[1], )))
+    model.add(Dense(300, W_regularizer=l2(0.0),activity_regularizer=activity_l2(0.0), input_shape=(X.shape[1], )))
     model.add(Activation('relu'))
+    model.add(Dropout(0.300))
+    model.add(Dense(300, W_regularizer=l2(0.0),activity_regularizer=activity_l2(0.0)))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.200))
     model.add(Dense(1))
 
     model.compile(loss = 'mse', optimizer = OPTIMIZER)
@@ -135,9 +139,11 @@ def run():
 
     print(trainX.shape, testX.shape, trainy.shape, testy.shape)
 
+    early = keras.callbacks.EarlyStopping(monitor = 'val_loss',
+            patience = 20)
 
     history = model.fit(trainX.values, trainy.values, nb_epoch = RP['epochs'],
-            batch_size = RP['batch'],
+            batch_size = RP['batch'], callbacks = [early],
             validation_data = (testX.values, testy.values))
 
 
