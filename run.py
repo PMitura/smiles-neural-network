@@ -43,7 +43,7 @@ def main(argv):
 
             for dropout in grid:
                 cc.exp['params']['rnn']['dropout'] = dropout
-                cc.exp['params']['rnn']['comment'] = 
+                cc.exp['params']['rnn']['comment'] = \
                     '[PFAM][10K][GOODSTRAT][GRU][GRU][DROP {}]'.format(dropout)
                 rnn.rnn.run()
 
