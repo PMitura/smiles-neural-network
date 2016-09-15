@@ -121,7 +121,7 @@ def configureEdgeModel(inputSmiles, inputFasta):
     # smilesModel.add(Activation('relu'))
     # smilesModel.add(Dropout(0.3))
 
-    smilesModel = utility.loadModel('6f7c468746e19ab2ed4c6adb4c15ab7ff50f9088', 'smiles_')
+    smilesModel = utility.loadModel('24e62794bb6d5b5c562e41a3a2cccc3525fa625f', 'smiles_')
     smilesModel.pop() # output
     smilesModel.pop() # dropout
 
@@ -132,7 +132,7 @@ def configureEdgeModel(inputSmiles, inputFasta):
     # fastaModel.add(Activation('relu'))
     # fastaModel.add(Dropout(0.3))
 
-    fastaModel = utility.loadModel('7de8eec6b8c9496325212282646ae6414d2f4e7f', 'fasta_')
+    fastaModel = utility.loadModel('e6beb8b7e146b9ab46a71db8f3001bf62d96ff08', 'fasta_')
     fastaModel.pop() # activation
     fastaModel.pop() # output
     fastaModel.pop() # dropout
