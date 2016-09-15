@@ -144,9 +144,9 @@ def configureEdgeModel(inputSmiles, inputFasta):
 
     mergedModel.add(Dense(300))
     mergedModel.add(Activation('relu'))
-    mergedModel.add(Dropout(0.5))
+    mergedModel.add(Dropout(0.3))
 
-    mergedModel.add(Dense(150))
+    mergedModel.add(Dense(300))
     mergedModel.add(Activation('relu'))
     mergedModel.add(Dropout(0.3))
 
