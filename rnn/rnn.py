@@ -235,7 +235,8 @@ def run(grid = None):
     if RP['edge_prediction']:
         trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessEdgeData(db.getData())
     else:
-        trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessData(db.getData())
+        # trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessData(db.getData())
+        trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessFastaOneHotData(db.getData())
 
     stats['training_row_count'] = len(testLabel)
     stats['testing_row_count'] = len(testLabel)
@@ -280,7 +281,7 @@ def run(grid = None):
         visualization.layerActivations(model, testIn, testLabel)
 
     if cc.cfg['plots']['seq_output']:
-        df = pd.DataFrame(cc.cfg['plots']['seq_output_seq_input'], columns=[cc.cfg['plots']['seq_output_seq_input_name']])
+        df = pd.DataFrame(cc.cfg['plots']['seq_output_seq_input'], columns=[RD['fasta'] if cc.cfg['plots']['seq_output_seq_input_name'] == 'fasta' else RD['smiles']])
         visualization.visualizeSequentialOutput(model, cc.cfg['plots']['seq_output_layer_idx'], df)
 
     if cc.cfg['plots']['print_pred']:

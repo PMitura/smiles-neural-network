@@ -214,10 +214,14 @@ def visualizeSequentialOutput(model, layerIdx, df):
     # model.compile(loss="mean_squared_error", optimizer="rmsprop")
 
 
+    cfg = model.get_config()[:4]
 
-    cfg = model.get_config()[:layerIdx+1]
-    del cfg[1]
-    layerIdx -= 1
+    del cfg[2]
+
+    # import pprint
+    # pprint.pprint(cfg)
+
+    layerIdx = 2
     # print cfg
     cfg[layerIdx]['config']['return_sequences'] = True
 
@@ -245,27 +249,38 @@ def visualizeSequentialOutput(model, layerIdx, df):
         arrMask = list(range(output.shape[2]))
     arrMask = np.array([x for x in arrMask if not x in dropSet])
 
-    fig = plt.figure(figsize=(input.shape[1] * 0.8,len(arrMask) * len(smilesData) * 1.5))
-
-    for i,smilesOutput in enumerate(output):
+    fig = plt.figure(figsize=(input.shape[1] * 0.3,len(arrMask) * len(df) * 1.5))
 
 
-        selected = smilesOutput.T[arrMask]
+    for i,seqOutput in enumerate(output):
+
+        # print seqOutput.shape
+        # print seqOutput
+
+        selected = seqOutput.T[arrMask]
 
         Z = sch.linkage(selected, method='single', metric='cosine')
         leaves = sch.leaves_list(Z)
         # leaves = range(len(selected))
         reordered = selected[leaves]
 
-        ax = fig.add_subplot(len(smilesData),1,i+1)
+        ax = fig.add_subplot(len(df),1,i+1)
+
+        print 'foo'
 
         ppl.pcolormesh(fig, ax, reordered,
-               xticklabels=list(smilesData[i]),
+               xticklabels=list(df.values[i][0]),
                yticklabels=arrMask[leaves],
                vmin=-1,
                vmax=1)
 
+        print 'foo'
+
+    print 'bar'
+
     fig.savefig('{}/{}'.format(cc.cfg['plots']['seq_output_dir'],cc.cfg['plots']['seq_output_name']))
+
+    print 'bar'
 
 def printPrediction(model, smilesData):
     # FIXME hardcoded
