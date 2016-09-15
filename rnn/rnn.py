@@ -65,10 +65,10 @@ def configureModel(input, outputLen = len(RD['labels'])):
 
     model.add(GRU(300, trainable = RP['trainable_inner'], input_shape = (None, alphaSize ), return_sequences = True))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
-    model.add(Dropout(0.30))
+    model.add(Dropout(0.40))
     model.add(GRU(300, trainable = RP['trainable_inner']))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
-    model.add(Dropout(0.30))
+    model.add(Dropout(0.40))
     model.add(Dense(outputLen))
 
     if RP['classify']:
