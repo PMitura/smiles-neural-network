@@ -40,7 +40,7 @@ params:
     classify_threshold: 0.5
     classify_label_pos: 1
     classify_label_neg: 0
-    classify_activation: 'softmax'
+    classify_activation: 'sigmoid'
     num_partitions: 5
 
     objective: 'categorical_crossentropy'
