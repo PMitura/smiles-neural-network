@@ -1,9 +1,7 @@
 # Local configuration
 
 # Experiments to run
-# experiments: ['local/experiments/pretraining/rnn_all_features_pretrained.yml']
-experiments: ['local/experiments/rerun/rnn_visualizing_big_model.yml']
-
+experiments: ['local/experiments/visualization/rnn_visual_fasta_seq.yml']
 model: 'rnn'
 
 # Persistence of models
@@ -11,23 +9,17 @@ persistence:
   model: false
 
 plots:
-  seq_output: false
+  seq_output: true
+
   seq_output_ignore_neurons: ~
   seq_output_select_neurons: ~
-  seq_output_name: 'seq_output_3.png'
+  seq_output_name: 'seq_output.png'
   seq_output_layer_idx: 2
-  seq_output_smiles: [
+
+  seq_output_seq_input_name: 'fasta'
+  seq_output_seq_input: [
   # 'NCC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=O'
   # 'CCC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=O'
-  'CSC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=O'
-  ]
-
-
-  print_pred: true
-  print_pred_smiles: [
-  'FFF=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=CCC',
-  'OOO=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=CCC',
-  'NNN=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=CCC',
-  'CCC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=CCC',
-  'SSS=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=CCC'
+  # 'CSC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=O'
+  'MRLLGVLLCLVTGPHGVLSQVQLQESGPDLLKPSETLCLTCKVTGFSITASGYYWSWIRQSQGKSPEWMGYISYSGSTAYSPSLQRRISISRDMAKNEFSLCLNSVTPEDTAVYYCARYTVICYNWEHRHKPPCRENHNQQAARCTHWCREPT'
   ]

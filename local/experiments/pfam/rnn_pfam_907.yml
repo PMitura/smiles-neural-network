@@ -1,36 +1,37 @@
-# Experiment rnn_test2
-name: 'rnn_test2'
+# Experiment rnn_pfam_907
+name: 'rnn_pfam_907'
 
 # Template for default values
 template: 'rnn.yml'
 
 # DB fetch params
 fetch:
-  table: 'output.target_10576_ki'
-  cols: ['canonical_smiles','ki_33_0_1','is_testing']
-  order: 'canonical_smiles'
+  table: 'output.pfam_distinct_907'
+  cols: ['pfam_sequence','pfama_acc_max']
+  order: 'pfam_sequence'
   index_col: ~
-  limit: 30
-  where:  'length(canonical_smiles) <= 80'
+  limit: 200000
+  where:  'length(pfam_sequence) <= 400'
 
 # Experiment params
 params:
   data:
     # number of label columns to prepare
     smiles: 'canonical_smiles'
+    fasta: 'pfam_sequence'
     nominals: ~ # ['standard_type','ki_33']
-    labels: ['ki_33_0_1']
+    labels: ['pfama_acc_max']
 
-    use_test_flags: true
+    use_test_flags: false
     testing: 'is_testing'
   rnn:
 
     # load_model: '995fc11ffc271bda1de9395a423c0f811b06db0e'
 
     # RNN parameters
-    learning_rate: 0.0001
-    epochs: 1
-
+    learning_rate: 0.001
+    epochs: 60
+    early_stop: 10
 
     td_layer_multiplier: 2
     gru_layer_multiplier: 2
@@ -39,14 +40,14 @@ params:
     classify_threshold: 0.5
     classify_label_pos: 1
     classify_label_neg: 0
-    classify_activation: 'hard_sigmoid'
+    classify_activation: 'sigmoid'
+    num_partitions: 5
 
-    objective: 'binary_crossentropy'
+    objective: 'categorical_crossentropy'
 
     label_binning: false
     label_binning_after_train: false
     label_binning_ratio: 0.5
-    early_stop: 20
 
     chained_models: false
     trainable_inner: true
@@ -54,14 +55,17 @@ params:
     zscore_norm: false
     logarithm: false
 
+    # output to one-hot for classification over id based discrete label
+    discrete_label: true
+
     # learning rate decay settings
     learning_rate_decay: false
 
-    flag_based_hold: true
-    holdout_ratio: 0.2
+    flag_based_hold: false
+    holdout_ratio: 0.5
 
     # preprocessing switches
     label_idxs: 'range(1)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[REFACTOR]'
+    comment: '[PFAM][200K]'

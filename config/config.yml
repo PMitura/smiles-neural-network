@@ -28,7 +28,13 @@ plots:
   seq_output_select_neurons: ~
   seq_output_ignore_neurons: ~
   seq_output_layer_idx: ~
-  seq_output_smiles: ~
+  seq_output_seq_input_name: ~
+  seq_output_seq_input: ~
+
+  print_pred: false
+
+  print_train_test_pred: false
+  print_train_test_pred_cnt: 5
 
 model: 'rnn'
 

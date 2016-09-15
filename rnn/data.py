@@ -86,7 +86,6 @@ def formatNominalEmbedded(rawData, timesteps, output, col, shift = 0):
     for item in rawData:
         nominals.add(item[col])
 
-
     # Map columns to nominals
     colMapping = {}
     size = 0
@@ -136,7 +135,7 @@ def formatSequentialInput(df):
             nominalLookup = {x:i for (i,x) in enumerate(df[nominal].unique())}
             nominalSize = len(nominalLookup)
 
-            nominalInput = np.zeros((numSamples, smilesMaxLen, nominalSize))
+            nominalInput = np.zeros((numSamples, smilesMaxLen, nominalSize), dtype=bool)
             for i,nom in enumerate(df[nominal]):
                 for j in range(smilesMaxLen):
                     nominalInput[i][j][nominalLookup[nom]] = 1
@@ -147,6 +146,39 @@ def formatSequentialInput(df):
         seqInput = np.concatenate(tuple(inputs), axis = 2)
 
     return seqInput
+
+########################################################################################################################
+
+FASTA_ALPHABET_UNKNOWN = '?'
+FASTA_ALPHABET = [FASTA_ALPHABET_UNKNOWN,
+'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+
+FASTA_ALPHABET_LOOKUP_TABLE = { v:k for k,v in enumerate(FASTA_ALPHABET) }
+FASTA_ALPHABET_LEN = len(FASTA_ALPHABET)
+FASTA_ALPHABET_BITS = int(ceil(log(FASTA_ALPHABET_LEN,2)))
+
+def formatFastaInput(df):
+    numSamples = len(df)
+
+    # FIXME: hardcoded fasta
+    fastaDf = df[RD['fasta']]
+    fastaMaxLen = max([len(x) for x in fastaDf])
+
+    seqInput = np.zeros((numSamples, fastaMaxLen, FASTA_ALPHABET_LEN), dtype=bool)
+
+    # translate to one hot for fasta
+    for i,fasta in enumerate(fastaDf):
+        for j in range(fastaMaxLen):
+
+            transChar = FASTA_ALPHABET_LOOKUP_TABLE[FASTA_ALPHABET_UNKNOWN]
+            if j < len(fasta) and fasta[j] in FASTA_ALPHABET_LOOKUP_TABLE:
+                transChar = FASTA_ALPHABET_LOOKUP_TABLE[fasta[j]]
+
+            seqInput[i][j][transChar] = 1
+
+    return seqInput
+
+########################################################################################################################
 
 def normalize(arr):
     meta = {}
@@ -210,3 +242,84 @@ def preprocessData(df):
         testIn, testLabel = input[split:], labels[split:]
 
     return trainIn,trainLabel,testIn,testLabel,meta
+
+def preprocessFastaOneHotData(df):
+    # filter out inf and NaN (nulls) values
+    df = df.replace([np.inf, -np.inf],np.nan).dropna()
+    df.reset_index(drop=True, inplace=True)
+
+    # filter out rows with malformed test_flags, if we use them
+    if RD['use_test_flags']:
+        df = df[(df[RD['testing']] == 0) | (df[RD['testing']] == 1)]
+        df.reset_index(drop=True, inplace=True)
+
+    # inputSmiles = formatSequentialInput(df)
+    inputFasta = formatFastaInput(df)
+
+    labels = df[RD['labels']].values
+
+    # preprocessing
+    labels, meta = normalize(labels)
+
+    # FIXME or abandon branch: hardcoded pasta stuff
+    pfSet = set()
+    for label in labels:
+        pfSet.add(label[0])
+    pfMapping = {}
+    size = 0
+    for value in pfSet:
+        pfMapping[value] = size
+        size += 1
+    print size
+    newLabels = np.zeros((len(labels), size), dtype=bool)
+    for i in range(len(labels)):
+        newLabels[i][pfMapping[labels[i][0]]] = 1
+    labels = newLabels
+
+    # create training and testing sets
+    if RP['flag_based_hold']:
+        testing = df[RD['testing']].values.astype(bool)
+        trainFastaIn, trainLabel = inputFasta[~testing], labels[~testing]
+        testFastaIn, testLabel   = inputFasta[testing],  labels[testing]
+    else:
+        split = int(len(inputFasta) * RP['holdout_ratio'])
+
+        trainFastaIn, trainLabel = inputFasta[:split], labels[:split]
+        testFastaIn, testLabel   = inputFasta[split:], labels[split:]
+
+    return trainFastaIn, trainLabel, testFastaIn, testLabel, meta
+
+
+def preprocessEdgeData(df):
+    # filter out inf and NaN (nulls) values
+    df = df.replace([np.inf, -np.inf],np.nan).dropna()
+    df.reset_index(drop=True, inplace=True)
+
+    # filter out rows with malformed test_flags, if we use them
+    if RD['use_test_flags']:
+        df = df[(df[RD['testing']] == 0) | (df[RD['testing']] == 1)]
+        df.reset_index(drop=True, inplace=True)
+
+    # shuffle the data
+    df.reindex(np.random.permutation(df.index))
+
+    inputSmiles = formatSequentialInput(df)
+    inputFasta = formatFastaInput(df)
+
+    labels = df[RD['labels']].values
+
+    # preprocessing
+    labels, meta = normalize(labels)
+
+    # create training and testing sets
+    if RP['flag_based_hold']:
+        testing = df[RD['testing']].values.astype(bool)
+        trainSmilesIn, trainFastaIn, trainLabel = inputSmiles[~testing], inputFasta[~testing], labels[~testing]
+        testSmilesIn,  testFastaIn,  testLabel  = inputSmiles[testing], inputFasta[testing],  labels[testing]
+    else:
+        split = int(len(inputSmiles) * RP['holdout_ratio'])
+
+        trainSmilesIn, trainFastaIn, trainLabel = inputSmiles[:split], inputFasta[:split], labels[:split]
+        testSmilesIn,  testFastaIn,  testLabel  = inputSmiles[split:], inputFasta[split:], labels[split:]
+
+    return [trainSmilesIn, trainFastaIn], trainLabel, [testSmilesIn, testFastaIn], testLabel, meta

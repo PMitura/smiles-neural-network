@@ -12,6 +12,8 @@ import visualization
 from config import config as cc
 import yaml
 
+import pandas as pd
+
 import socket
 
 # not used to relieve MetaCentrum of some dependencies
@@ -20,7 +22,7 @@ import socket
 from keras.models import Sequential
 from keras.layers import Activation, Dense, Dropout, LSTM, AveragePooling1D
 from keras.layers import TimeDistributed, SimpleRNN, GRU
-from keras.layers import BatchNormalization, Embedding, merge
+from keras.layers import BatchNormalization, Embedding, Merge
 from keras.optimizers import Adam, RMSprop, Adadelta, Adagrad
 from keras.regularizers import l2, activity_l2
 import keras.callbacks
@@ -39,11 +41,10 @@ RP['label_idxs'] = eval(str(cc.exp['params']['rnn']['label_idxs']))
 
 OPTIMIZER = Adam(lr = RP['learning_rate'])
 
-def configureModel(input):
+def configureModel(input, outputLen = len(RD['labels'])):
     print('  Initializing and compiling...')
 
     alphaSize = input.shape[2]
-    outputLen = len(RD['labels'])
 
     model = Sequential()
 
@@ -56,7 +57,6 @@ def configureModel(input):
     else:
     '''
 
-
     # {'parameters_num': 23100, 'name': 'timedistributed_1'}
     # {'parameters_num': 0, 'name': 'dropout_1'}
     # {'output_dim': 300, 'parameters_num': 540900, 'activation': 'tanh', 'name': 'gru_1', 'input_dim': 300}
@@ -64,29 +64,102 @@ def configureModel(input):
     # {'parameters_num': 0, 'name': 'dropout_2'}
     # {'output_dim': 53, 'parameters_num': 15953, 'activation': 'linear', 'name': 'dense_2', 'input_dim': None}
 
-    model.add(TimeDistributed(Dense(300, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
-    model.add(Dropout(0.5))
-    model.add(GRU(300, trainable = True, ))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(outputLen) )
+    # model.add(TimeDistributed(Dense(300, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
+    # model.add(Dropout(0.5))
+    # model.add(GRU(300, trainable = True, ))
+    # model.add(Activation('relu'))
+    # model.add(Dropout(0.5))
+    # model.add(Dense(outputLen) )
+
+    # {'parameters_num': 11704, 'name': 'timedistributed_1'}
+    # {'output_dim': 152, 'parameters_num': 139080, 'activation': 'tanh', 'name': 'gru_1', 'input_dim': 152}
+    # {'activation': 'relu', 'parameters_num': 0, 'name': 'activation_1'}
+    # {'output_dim': 53, 'parameters_num': 8109, 'activation': 'linear', 'name': 'dense_2', 'input_dim': None}
+
+
+    # model.add(TimeDistributed(Dense(152, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
+    # model.add(Dropout(0.25))
+    # model.add(GRU(152, trainable = True, ))
+    # model.add(Dropout(0.25))
+    # model.add(Dense(outputLen) )
+
+    # model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * alphaSize), activation = 'tanh',
+    #     trainable = RP['trainable_inner']),
+    #     input_shape = (None, alphaSize )))
+
+    # model.add(GRU(150, trainable = RP['trainable_inner'], input_shape = (None, alphaSize ), dropout_W=0.2,  dropout_U=0.2, return_sequences=True))
+    # model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'], dropout_W=0.2,  dropout_U=0.2, return_sequences = True ))
+    # model.add(TimeDistributed(Dense(300, activation = 'tanh', trainable = RP['trainable_inner']), input_shape = (None, alphaSize )))
+
+    model.add(GRU(300, trainable = RP['trainable_inner'], input_shape = (None, alphaSize ), return_sequences = True))
+    model.add(Activation('relu', trainable = RP['trainable_inner']))
+    model.add(Dropout(0.30))
+    model.add(GRU(300, trainable = RP['trainable_inner']))
+    model.add(Activation('relu', trainable = RP['trainable_inner']))
+    model.add(Dropout(0.30))
+    model.add(Dense(outputLen))
 
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
 
-    model.compile(loss = RP['objective'], optimizer = OPTIMIZER)
-
-    # pretrainedModel = utility.loadModel('6f7c468746e19ab2ed4c6adb4c15ab7ff50f9088')
-
-    # for i in range(2):
-    # model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
-    # model.layers[0].trainable = True
-    # model.layers[2].set_weights(pretrainedModel.layers[2].get_weights())
-    # model.layers[2].trainable = True
-
 
     print('  ...done')
     return model
+
+def configureEdgeModel(inputSmiles, inputFasta):
+    print('  Initializing edge model and compiling...')
+
+    smilesGRUInputShape = (None, inputSmiles.shape[2])
+    # smilesGRUSize = int(RP['gru_layer_multiplier'] * smilesGRUInputShape[1])
+
+    fastaGRUInputShape = (None, inputFasta.shape[2])
+    # fastaGRUSize = int(RP['fasta_gru_layer_multiplier'] * fastaGRUInputShape[1])
+
+    mergedOutputLen = len(RD['labels'])
+
+    # smilesModel = Sequential()
+    # smilesModel.add(TimeDistributed(Dense(300, activation = 'tanh'), input_shape = smilesGRUInputShape))
+    # smilesModel.add(Dropout(0.5))
+    # smilesModel.add(GRU(300))
+    # smilesModel.add(Activation('relu'))
+    # smilesModel.add(Dropout(0.3))
+
+    smilesModel = utility.loadModel('24e62794bb6d5b5c562e41a3a2cccc3525fa625f', 'smiles_')
+    smilesModel.pop() # output
+    smilesModel.pop() # dropout
+
+    # fastaModel = Sequential()
+    # fastaModel.add(TimeDistributed(Dense(300, activation = 'tanh'), input_shape = fastaGRUInputShape))
+    # fastaModel.add(Dropout(0.5))
+    # fastaModel.add(GRU(300))
+    # fastaModel.add(Activation('relu'))
+    # fastaModel.add(Dropout(0.3))
+
+    fastaModel = utility.loadModel('e6beb8b7e146b9ab46a71db8f3001bf62d96ff08', 'fasta_')
+    fastaModel.pop() # activation
+    fastaModel.pop() # output
+    fastaModel.pop() # dropout
+
+    merged = Merge([smilesModel, fastaModel], mode='concat')
+
+    mergedModel = Sequential()
+    mergedModel.add(merged)
+
+    mergedModel.add(Dense(300))
+    mergedModel.add(Activation('relu'))
+    mergedModel.add(Dropout(0.3))
+
+    mergedModel.add(Dense(300))
+    mergedModel.add(Activation('relu'))
+    mergedModel.add(Dropout(0.3))
+
+    mergedModel.add(Dense(mergedOutputLen))
+
+    mergedModel.compile(loss = RP['objective'], optimizer = OPTIMIZER)
+
+    print('  ...done')
+    return mergedModel
+
 
 def learningRateDecayer(epoch):
     if not RP['learning_rate_decay']:
@@ -154,17 +227,29 @@ def run(grid = None):
     # initialize using the same seed (to get stable results on comparisons)
     np.random.seed(RP['seed'])
 
-    # get the training and testing datasets along with some meta info
-    trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessData(db.getData())
+    # grab the commit at start
+    stats['git_commit'] = utility.getGitCommitHash()
 
-    stats['training_row_count'] = len(trainIn)
-    stats['testing_row_count'] = len(testIn)
+    # get the training and testing datasets along with some meta info
+
+    if RP['edge_prediction']:
+        trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessEdgeData(db.getData())
+    else:
+        trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessData(db.getData())
+
+    stats['training_row_count'] = len(testLabel)
+    stats['testing_row_count'] = len(testLabel)
 
     # load model from file or create and train one from scratch
     if RP['load_model']:
         model = utility.loadModel(RP['load_model'])
     else:
-        model = configureModel(trainIn)
+        if RP['edge_prediction']:
+            model = configureEdgeModel(trainIn[0],trainIn[1])
+        elif RP['discrete_label']:
+            model = configureModel(trainIn, len(trainLabel[0]))
+        else:
+            model = configureModel(trainIn)
         stats['epoch_count'] = train(model, trainIn, trainLabel, (testIn, testLabel))
 
     # persistence first
@@ -174,13 +259,19 @@ def run(grid = None):
     # compute metrics for the model based on the task for both testing and training data
     print('\nGetting metrics for training data:')
     if RP['classify']:
-        trainMetrics = metrics.classify(model, trainIn, trainLabel, preprocessMeta)
+        if RP['discrete_label']:
+            trainMetrics = metrics.discreteClassify(model, trainIn, trainLabel, preprocessMeta)
+        else:
+            trainMetrics = metrics.classify(model, trainIn, trainLabel, preprocessMeta)
     else:
         trainMetrics = metrics.predict(model, trainIn, trainLabel, preprocessMeta)
 
     print('\nGetting metrics for test data:')
     if RP['classify']:
-        testMetrics = metrics.classify(model, testIn, testLabel, preprocessMeta)
+        if RP['discrete_label']:
+            testMetrics = metrics.discreteClassify(model, testIn, testLabel, preprocessMeta)
+        else:
+            testMetrics = metrics.classify(model, testIn, testLabel, preprocessMeta)
     else:
         testMetrics = metrics.predict(model, testIn, testLabel, preprocessMeta)
 
@@ -189,16 +280,18 @@ def run(grid = None):
         visualization.layerActivations(model, testIn, testLabel)
 
     if cc.cfg['plots']['seq_output']:
-        visualization.visualizeSequentialOutput(model, cc.cfg['plots']['seq_output_layer_idx'], cc.cfg['plots']['seq_output_smiles'])
+        df = pd.DataFrame(cc.cfg['plots']['seq_output_seq_input'], columns=[cc.cfg['plots']['seq_output_seq_input_name']])
+        visualization.visualizeSequentialOutput(model, cc.cfg['plots']['seq_output_layer_idx'], df)
 
     if cc.cfg['plots']['print_pred']:
         visualization.printPrediction(model, cc.cfg['plots']['print_pred_smiles'])
 
+    if cc.cfg['plots']['print_train_test_pred']:
+        visualization.printTrainTestPred(model, cc.cfg['plots']['print_train_test_pred_cnt'], trainIn, trainLabel, testIn, testLabel, preprocessMeta)
 
     # statistics to send to journal
     stats['runtime_second'] = time.time() - stats['runtime_second']
     stats['memory_pm_mb'], stats['memory_vm_mb'] = utility.getMemoryUsage()
-    stats['git_commit'] = utility.getGitCommitHash()
     stats['comment'] = RP['comment']
     stats['hostname'] = socket.gethostname()
     stats['experiment_config'] = yaml.dump(cc.exp,default_flow_style=False)
@@ -232,6 +325,8 @@ def run(grid = None):
         metricStats['log_loss_std'] = testMetrics['log_loss_std']
         metricStats['auc'] = testMetrics['auc_avg']
         metricStats['auc_std'] = testMetrics['auc_std']
+        metricStats['auc_micro'] = testMetrics['auc_avg']
+        metricStats['auc_micro_std'] = testMetrics['auc_std']
     else:
         metricStats['relevance_training'] = trainMetrics['r2_avg']
         metricStats['relevance_training_std'] = trainMetrics['r2_std']
@@ -239,6 +334,8 @@ def run(grid = None):
         metricStats['relevance_testing_std'] = testMetrics['r2_std']
         metricStats['mse'] = testMetrics['mse_avg']
         metricStats['mse_std'] = testMetrics['mse_std']
+        metricStats['mae'] = testMetrics['mae_avg']
+        metricStats['mae_std'] = testMetrics['mae_std']
 
     stats.update(metricStats)
     # db.sendStatistics(**stats)

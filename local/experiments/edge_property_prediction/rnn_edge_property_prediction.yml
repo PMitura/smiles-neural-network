@@ -1,17 +1,17 @@
-# Experiment rnn_test2
-name: 'rnn_test2'
+# Experiment rnn_edge_property_prediction
+name: 'rnn_edge_property_prediction'
 
 # Template for default values
 template: 'rnn.yml'
 
 # DB fetch params
 fetch:
-  table: 'output.target_10576_ki'
-  cols: ['canonical_smiles','ki_33_0_1','is_testing']
+  table: 'output.edge_ic50'
+  cols: ['canonical_smiles','sequence_600','standard_value_log','is_testing']
   order: 'canonical_smiles'
   index_col: ~
-  limit: 30
-  where:  'length(canonical_smiles) <= 80'
+  limit: ~
+  where: ~
 
 # Experiment params
 params:
@@ -19,29 +19,21 @@ params:
     # number of label columns to prepare
     smiles: 'canonical_smiles'
     nominals: ~ # ['standard_type','ki_33']
-    labels: ['ki_33_0_1']
+    labels: ['standard_value_log']
 
     use_test_flags: true
     testing: 'is_testing'
   rnn:
 
-    # load_model: '995fc11ffc271bda1de9395a423c0f811b06db0e'
-
     # RNN parameters
-    learning_rate: 0.0001
-    epochs: 1
+    learning_rate: 0.001
+    epochs: 150
 
 
-    td_layer_multiplier: 2
     gru_layer_multiplier: 2
+    fasta_gru_layer_multiplier: 2
 
-    classify: true            # regression if false
-    classify_threshold: 0.5
-    classify_label_pos: 1
-    classify_label_neg: 0
-    classify_activation: 'hard_sigmoid'
-
-    objective: 'binary_crossentropy'
+    objective: 'mse'
 
     label_binning: false
     label_binning_after_train: false
@@ -51,7 +43,7 @@ params:
     chained_models: false
     trainable_inner: true
 
-    zscore_norm: false
+    zscore_norm: true
     logarithm: false
 
     # learning rate decay settings
@@ -60,8 +52,5 @@ params:
     flag_based_hold: true
     holdout_ratio: 0.2
 
-    # preprocessing switches
-    label_idxs: 'range(1)'      # indexes of columns to use as label
-
     # statistics settings
-    comment: '[REFACTOR]'
+    comment: '[EDGE][IC50] sequence 600 (200len protein) protein with new model'

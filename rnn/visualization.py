@@ -196,14 +196,19 @@ def layerActivations(model, data, labels):
 
     print('...done')
 
-def visualizeSequentialOutput(model, layerIdx, smilesData):
+def visualizeSequentialOutput(model, layerIdx, df):
 
     if not os.path.exists(cc.cfg['plots']['seq_output_dir']):
         os.makedirs(cc.cfg['plots']['seq_output_dir'])
 
-    smilesDf = pd.DataFrame(smilesData, columns=[cc.exp['params']['data']['smiles']])
 
-    input = data.formatSequentialInput(smilesDf)
+    if cc.cfg['plots']['seq_output_seq_input_name'] == 'smiles':
+        input = data.formatSequentialInput(df)
+    elif cc.cfg['plots']['seq_output_seq_input_name'] == 'fasta':
+        input = data.formatFastaInput(df)
+    else:
+        raise 'visual err'
+
 
     # model.layers[layerIdx].return_sequences = True
     # model.compile(loss="mean_squared_error", optimizer="rmsprop")
@@ -326,3 +331,36 @@ def printPrediction(model, smilesData):
     print 'Distance matrix last symbol correlation'
     print distanceMatrixLastSymbolCorrel
 
+def printTrainTestPred(model, cnt, trainIn, trainLabel, testIn, testLabel, meta):
+    print('Printing train/test predictions:')
+
+
+    predTrain = data.denormalize(model.predict(trainIn[:cnt]), meta)
+    labelTrain = data.denormalize(trainLabel[:cnt], meta)
+
+    trainData = []
+    trainCols = []
+
+    for i in xrange(trainLabel.shape[1]):
+        trainData.append(list(predTrain[:,i]))
+        trainCols.append('train pred label{}'.format(i))
+        trainData.append(list(labelTrain[:,i]))
+        trainCols.append('train true label{}'.format(i))
+
+    traindf = pd.DataFrame(np.array(trainData).T, columns=trainCols)
+    print traindf
+
+    predTest = data.denormalize(model.predict(testIn[:cnt]), meta)
+    labelTest = data.denormalize(testLabel[:cnt], meta)
+
+    testData = []
+    testCols = []
+
+    for i in xrange(testLabel.shape[1]):
+        testData.append(list(predTest[:,i]))
+        testCols.append('test pred label{}'.format(i))
+        testData.append(list(labelTest[:,i]))
+        testCols.append('test true label{}'.format(i))
+
+    testdf = pd.DataFrame(np.array(testData).T, columns=testCols)
+    print testdf
