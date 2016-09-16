@@ -10,7 +10,7 @@ fetch:
   cols: ['smiles','fasta','score','is_testing_50_rand']
   order: 'smiles'
   index_col: ~
-  limit: 500000
+  limit: 100000
   where: ~
 
 # Experiment params
@@ -43,7 +43,7 @@ params:
     trainable_inner: true
 
     zscore_norm: true
-    logarithm: false
+    logarithm: true
 
     # learning rate decay settings
     learning_rate_decay: false
@@ -52,4 +52,4 @@ params:
     holdout_ratio: 0.5
 
     # statistics settings
-    comment: '[EDGE][STITCH907][500K] 24e627 smiles, e6beb8 fasta'
+    comment: '[EDGE][STITCH907][100K][LOG] 24e627 smiles, e6beb8 fasta'
