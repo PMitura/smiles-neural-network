@@ -6,7 +6,7 @@ template: 'rnn.yml'
 
 # DB fetch params
 fetch:
-  table: 'output.stitch_120ls_400fs_907d'
+  table: 'output.stitch_120ls_400lf_907d'
   cols: ['smiles','fasta','score']
   order: 'smiles'
   index_col: ~
