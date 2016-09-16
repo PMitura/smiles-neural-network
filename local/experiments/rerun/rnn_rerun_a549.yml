@@ -46,4 +46,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[RERUN][PRETRAINED][BIDIRECTIONAL][A549] trying bidirectional'
+    comment: '[RERUN][RLY][PRETRAINED][BIDIRECTIONAL][A549] rerun bidirectional pretrained on 4b1958'
