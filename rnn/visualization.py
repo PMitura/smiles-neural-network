@@ -211,7 +211,8 @@ def visualizeSequentialOutput(model, layerIdx, smilesData):
 
 
     cfg = model.get_config()[:layerIdx+1]
-    del cfg[1]
+
+    del cfg[2]
     layerIdx -= 1
     # print cfg
     cfg[layerIdx]['config']['return_sequences'] = True

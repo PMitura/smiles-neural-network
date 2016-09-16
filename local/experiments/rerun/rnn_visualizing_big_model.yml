@@ -24,7 +24,7 @@ params:
 
   rnn:
 
-    load_model: '6f7c468746e19ab2ed4c6adb4c15ab7ff50f9088'
+    load_model: '24e62794bb6d5b5c562e41a3a2cccc3525fa625f'
     num_partitions: 1
 
     # RNN parameters

@@ -11,19 +11,19 @@ persistence:
   model: false
 
 plots:
-  seq_output: false
+  seq_output: true
   seq_output_ignore_neurons: ~
   seq_output_select_neurons: ~
-  seq_output_name: 'seq_output_3.png'
-  seq_output_layer_idx: 2
+  seq_output_name: 'seq_output_grugru.png'
+  seq_output_layer_idx: 3
   seq_output_smiles: [
-  # 'NCC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=O'
+  'NCC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=O'
   # 'CCC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=O'
-  'CSC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=O'
+  # 'CSC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=O'
   ]
 
 
-  print_pred: true
+  print_pred: false
   print_pred_smiles: [
   'FFF=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=CCC',
   'OOO=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=CCC',
