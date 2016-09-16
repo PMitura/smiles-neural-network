@@ -69,4 +69,4 @@ params:
     label_idxs: 'range(1)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[PFAM][10K][GOODSTRAT][GRU][GRU] test setup for dropout grid search'
+    comment: '[PFAM][10K][GOODSTRAT][GRU][GRU] dropout only between GRUs'
