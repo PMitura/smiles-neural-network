@@ -1,5 +1,5 @@
-# Experiment pfam_distinct_907_2000
-name: 'pfam_distinct_907_2000'
+# Experiment rnn_pfam_907_2000
+name: 'rnn_pfam_907_2000'
 
 # Template for default values
 template: 'rnn.yml'
