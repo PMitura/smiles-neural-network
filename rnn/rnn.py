@@ -37,7 +37,7 @@ RP['chained_test_labels'] = eval(str(cc.exp['params']['rnn']['chained_test_label
 RP['freeze_idxs'] = eval(str(cc.exp['params']['rnn']['freeze_idxs']))
 RP['label_idxs'] = eval(str(cc.exp['params']['rnn']['label_idxs']))
 
-OPTIMIZER = Adam(lr = RP['learning_rate'])
+OPTIMIZER = Adam(lr = RP['learning_rate'], clipnorm=1.)
 
 def configureModel(input, outputLen = len(RD['labels'])):
     print('  Initializing and compiling...')
