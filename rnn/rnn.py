@@ -66,7 +66,7 @@ def configureModel(input, outputLen = len(RD['labels'])):
     model.add(Dropout(0.30))
     model.add(Dense(outputLen))
     '''
-    model = utility.loadModel('eab15a05a70b35d119c02fcc36b1cfaf27a0f36a')
+    model = utility.loadModel('67b51a1543b5d32b05671e4a08d193eed702ca54')
     model.pop()
     model.pop()
     model.add(Dense(outputLen))
