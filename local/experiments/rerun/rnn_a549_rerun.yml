@@ -47,4 +47,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[RERUN][A549][TDGRUGRU] pretrained on MACCS'
+    comment: '[RERUN][A549][TDGRUGRU] pretrained on ALL COMPOUNDS eab15a'
