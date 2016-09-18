@@ -219,7 +219,7 @@ def run(grid = None):
     if RP['edge_prediction']:
         trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessEdgeData(db.getData())
     else:
-        trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessFastaOneHotData(db.getData())
+        trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessData(db.getData())
 
     stats['training_row_count'] = len(testLabel)
     stats['testing_row_count'] = len(testLabel)
