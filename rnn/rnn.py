@@ -112,6 +112,7 @@ def configureEdgeModel(inputSmiles, inputFasta):
 
     mergedOutputLen = len(RD['labels'])
 
+    smilesModel = Sequential()
     smilesModel.add(TimeDistributed(Dense(300, activation = 'tanh', trainable = RP['trainable_inner']), input_shape = smilesGRUInputShape))
     smilesModel.add(Dropout(0.30))
     smilesModel.add(GRU(300, trainable = RP['trainable_inner'], return_sequences = True))
@@ -127,7 +128,7 @@ def configureEdgeModel(inputSmiles, inputFasta):
     smilesModel.pop() # dropout
     '''
     # utility.setModelConsumeLess(smilesModel, 'gpu')
-
+    fastaModel = Sequential()
     fastaModel.add(TimeDistributed(Dense(300, activation = 'tanh', trainable = RP['trainable_inner']), input_shape = fastaGRUInputShape))
     fastaModel.add(Dropout(0.30))
     fastaModel.add(GRU(300, trainable = RP['trainable_inner'], input_shape = (None, alphaSize ), return_sequences = True))

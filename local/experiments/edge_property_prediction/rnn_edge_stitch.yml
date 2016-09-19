@@ -34,6 +34,7 @@ params:
     epochs: 30
 
     classify: false
+    objective: 'mse'
 
     label_binning: false
     label_binning_after_train: false
