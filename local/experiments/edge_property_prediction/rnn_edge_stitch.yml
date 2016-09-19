@@ -10,7 +10,7 @@ fetch:
   cols: ['smiles','fasta','score_bin_500','is_testing_50_rand']
   order: 'smiles'
   index_col: ~
-  limit: 100000
+  limit: 10000
   where: ~
 
 # Experiment params
@@ -47,7 +47,7 @@ params:
     chained_models: false
     trainable_inner: true
 
-    zscore_norm: true
+    zscore_norm: false
     logarithm: false
 
     # learning rate decay settings
