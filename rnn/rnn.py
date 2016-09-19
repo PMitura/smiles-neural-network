@@ -112,34 +112,38 @@ def configureEdgeModel(inputSmiles, inputFasta):
 
     mergedOutputLen = len(RD['labels'])
 
-    # smilesModel = Sequential()
-    # smilesModel.add(TimeDistributed(Dense(300, activation = 'tanh'), input_shape = smilesGRUInputShape))
-    # smilesModel.add(Dropout(0.5))
-    # smilesModel.add(GRU(300))
-    # smilesModel.add(Activation('relu'))
-    # smilesModel.add(Dropout(0.3))
+    smilesModel.add(TimeDistributed(Dense(300, activation = 'tanh', trainable = RP['trainable_inner']), input_shape = smilesGRUInputShape))
+    smilesModel.add(Dropout(0.30))
+    smilesModel.add(GRU(300, trainable = RP['trainable_inner'], return_sequences = True))
+    smilesModel.add(Activation('relu', trainable = RP['trainable_inner']))
+    smilesModel.add(Dropout(0.30))
+    smilesModel.add(GRU(300, trainable = RP['trainable_inner']))
+    smilesModel.add(Activation('relu', trainable = RP['trainable_inner']))
 
+
+    '''
     smilesModel = utility.loadModel('24e62794bb6d5b5c562e41a3a2cccc3525fa625f', 'smiles_')
     smilesModel.pop() # output
     smilesModel.pop() # dropout
-
+    '''
     # utility.setModelConsumeLess(smilesModel, 'gpu')
 
-    # fastaModel = Sequential()
-    # fastaModel.add(TimeDistributed(Dense(300, activation = 'tanh'), input_shape = fastaGRUInputShape))
-    # fastaModel.add(Dropout(0.5))
-    # fastaModel.add(GRU(300))
-    # fastaModel.add(Activation('relu'))
-    # fastaModel.add(Dropout(0.3))
+    fastaModel.add(TimeDistributed(Dense(300, activation = 'tanh', trainable = RP['trainable_inner']), input_shape = fastaGRUInputShape))
+    fastaModel.add(Dropout(0.30))
+    fastaModel.add(GRU(300, trainable = RP['trainable_inner'], input_shape = (None, alphaSize ), return_sequences = True))
+    fastaModel.add(Activation('relu', trainable = RP['trainable_inner']))
+    fastaModel.add(Dropout(0.30))
+    fastaModel.add(GRU(300, trainable = RP['trainable_inner']))
+    fastaModel.add(Activation('relu', trainable = RP['trainable_inner']))
 
+    '''
     fastaModel = utility.loadModel('e6beb8b7e146b9ab46a71db8f3001bf62d96ff08', 'fasta_')
     fastaModel.pop() # activation
     fastaModel.pop() # output
     fastaModel.pop() # dropout
+    '''
 
     # utility.setModelConsumeLess(fastaModel, 'gpu')
-
-
 
     merged = Merge([smilesModel, fastaModel], mode='concat')
 

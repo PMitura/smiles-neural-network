@@ -7,4 +7,4 @@ model: 'rnn'
 
 # Persistence of models
 persistence:
-  model: false
+  model: true
