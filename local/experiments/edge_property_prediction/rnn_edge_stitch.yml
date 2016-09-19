@@ -19,7 +19,7 @@ params:
     smiles: 'smiles'
     fasta: 'fasta'
     nominals: ~
-    labels: ['score_bin']
+    labels: ['score']
 
     use_test_flags: true
     testing: 'is_testing_50_rand'
