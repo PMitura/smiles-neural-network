@@ -1,10 +1,10 @@
 ## Synopsis
 
-This project implements recurrent neural network for predicting properties of molecules based on their SMILES representation Powered by [Keras](https://github.com/fchollet/keras) framework.
+This project implements recurrent neural network with ultimate goal of predicting edge property of SMILES reperesented molecule, and FASTA represented protein. Powered by [Keras](https://github.com/fchollet/keras) framework.
 
 ## Motivation
 
-Prediction of molecular properties, such as interactions with various proteins, is an important task in drug research and many other fields of chemistry. This project uses recurrent neural networks in order to read molecular structure in ASCII based format known as SMILES, and learn to predict attributes of these molecules.
+Prediction of molecular properties, such as interactions with various proteins, is an important task in drug research and many other fields of chemistry. This project uses recurrent neural networks in order to read molecular and protein structure in ASCII based formats known as SMILES or FASTA, and learn to predict properties of interaction between these compounds.
 
 ## Installation
 
