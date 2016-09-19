@@ -119,7 +119,7 @@ def configureEdgeModel(inputSmiles, inputFasta):
     smilesModel.pop() # output
     smilesModel.pop() # dropout
 
-    utility.setModelConsumeLess(smilesModel, 'gpu')
+    # utility.setModelConsumeLess(smilesModel, 'gpu')
 
     # fastaModel = Sequential()
     # fastaModel.add(TimeDistributed(Dense(300, activation = 'tanh'), input_shape = fastaGRUInputShape))
@@ -133,7 +133,7 @@ def configureEdgeModel(inputSmiles, inputFasta):
     fastaModel.pop() # output
     fastaModel.pop() # dropout
 
-    utility.setModelConsumeLess(fastaModel, 'gpu')
+    # utility.setModelConsumeLess(fastaModel, 'gpu')
 
 
 

@@ -27,6 +27,7 @@ params:
 
     # load_model: '595a0920126134c2c948cc7fb9a7a237befa4658'
     edge_prediction: true
+    batch: 80
 
     # RNN parameters
     learning_rate: 0.001
