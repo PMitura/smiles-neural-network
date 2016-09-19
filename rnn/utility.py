@@ -9,6 +9,7 @@ from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 
 from keras.models import model_from_yaml
+from keras.layers import TimeDistributed, SimpleRNN, GRU, LSTM
 
 
 import utility
@@ -133,6 +134,11 @@ def getGitCommitHash():
         gitCommit = 'default'
 
     return gitCommit
+
+def setModelConsumeLess(model, mode='cpu'):
+    for i in xrange(len(model.layers)):
+        if type(model.layers[i]) is GRU or type(model.layers[i]) is LSTM:
+            model.layers[i].consume_less = mode
 
 
 
