@@ -57,4 +57,4 @@ params:
     # preprocessing switches
 
     # statistics settings
-    comment: '[RERUN][TDGRUGRU][PRETRAIN][COMPOUND_ALL_FEATURES] 50 features, 450k rows, 1:1 split'
+    comment: '[RERUN][TDGRUGRU][PRETRAIN][COMPOUND_ALL_FEATURES][eab15a] overtraining eab15a'
