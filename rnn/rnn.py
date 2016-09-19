@@ -68,11 +68,11 @@ def configureModel(input, outputLen = len(RD['labels'])):
     '''
 
     # molweight
-    model = utility.loadModel('b3d9609da78bfbf0ad1a62ee6740df3b52f104b4', 'mol_')
+    # model = utility.loadModel('b3d9609da78bfbf0ad1a62ee6740df3b52f104b4', 'mol_')
     # all compounds
     # model = utility.loadModel('eab15a05a70b35d119c02fcc36b1cfaf27a0f36a')
     # maccs
-    # model = utility.loadModel('67b51a1543b5d32b05671e4a08d193eed702ca54')
+    model = utility.loadModel('67b51a1543b5d32b05671e4a08d193eed702ca54', 'mol_')
 
     model.pop()
     model.pop()
@@ -80,9 +80,9 @@ def configureModel(input, outputLen = len(RD['labels'])):
     # for i in xrange(len(model.layers)):
         # model.layers[0].trainable = False
 
-    # model.add(Dropout(0.50))
-    # model.add(Dense(500))
-    # model.add(Activation('relu'))
+    model.add(Dropout(0.50))
+    model.add(Dense(500))
+    model.add(Activation('relu'))
     model.add(Dropout(0.50))
     model.add(Dense(500))
     model.add(Activation('relu'))

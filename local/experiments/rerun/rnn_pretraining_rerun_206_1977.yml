@@ -47,4 +47,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[RERUN][PRETRAINED][b3d960][DROPOUT][206_1977] pretrained TDGRUGRU b3d960, with two dense and dropout'
+    comment: '[RERUN][PRETRAINED][67b51a][DROPOUT][206_1977] pretrained TDGRUGRU 67b51a, with two dense and dropout'
