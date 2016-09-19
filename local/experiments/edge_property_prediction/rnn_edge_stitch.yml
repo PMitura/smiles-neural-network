@@ -7,7 +7,7 @@ template: 'rnn.yml'
 # DB fetch params
 fetch:
   table: 'output.stitch_120ls_400lf_907d'
-  cols: ['smiles','fasta','score','is_testing_50_rand']
+  cols: ['smiles','fasta','score_bin_500','is_testing_50_rand']
   order: 'smiles'
   index_col: ~
   limit: 100000
@@ -19,7 +19,7 @@ params:
     smiles: 'smiles'
     fasta: 'fasta'
     nominals: ~
-    labels: ['score']
+    labels: ['score_bin_500']
 
     use_test_flags: true
     testing: 'is_testing_50_rand'
@@ -32,7 +32,12 @@ params:
     learning_rate: 0.001
     epochs: 30
 
-    objective: 'mse'
+    classify: true
+    classify_threshold: 0.5
+    classify_label_pos: 1
+    classify_label_neg: 0
+    classify_activation: 'sigmoid'
+    objective: 'binary_crossentropy'
 
     label_binning: false
     label_binning_after_train: false
@@ -43,7 +48,7 @@ params:
     trainable_inner: true
 
     zscore_norm: true
-    logarithm: true
+    logarithm: false
 
     # learning rate decay settings
     learning_rate_decay: false
@@ -52,4 +57,4 @@ params:
     holdout_ratio: 0.5
 
     # statistics settings
-    comment: '[EDGE][STITCH907][100K][LOG] 24e627 smiles, e6beb8 fasta'
+    comment: '[EDGE][STITCH907][100K][CLASSIFICATION][SCORE_BIN_500] 24e627 smiles, e6beb8 fasta, trying classification'

@@ -57,4 +57,4 @@ params:
     label_idxs: 'range(166)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[GRUGRU][MACCS][400K]'
+    comment: '[TDGRUGRU][MACCS][400K]'
