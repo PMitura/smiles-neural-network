@@ -18,7 +18,9 @@ Just run `run.py` file, or `gpu.sh` script to run everything. You might want to 
 
 ## Configuration
 
-TODO
+This project uses YAML standard for configuration files. List of experiments to run is stated in `local/config.yml`, individual experiment configuration files are located in `local/experiments` folder. 
+
+Config files inherit their default values from templates, which can be found in `config/templates` file, along with documentation for configurable parameters.
 
 ## Project structure 
 
