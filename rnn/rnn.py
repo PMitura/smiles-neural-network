@@ -146,6 +146,9 @@ def configureEdgeModel(inputSmiles, inputFasta):
 
     mergedModel.add(Dense(mergedOutputLen))
 
+    if RP['classify']:
+        mergedModel.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
+
     mergedModel.compile(loss = RP['objective'], optimizer = OPTIMIZER)
 
     print('  ...done')
