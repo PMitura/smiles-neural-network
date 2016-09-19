@@ -92,7 +92,11 @@ def configureModel(input, outputLen = len(RD['labels'])):
     # model.layers[2].set_weights(pretrainedModel.layers[1].get_weights())
     # model.layers[2].trainable = True
 
-    model.compile(loss = RP['objective'], optimizer = OPTIMIZER)
+    metrics = []
+    if RP['classify']:
+        metrics.append('accuracy')
+
+    model.compile(loss = RP['objective'], optimizer = OPTIMIZER, metrics = metrics)
 
     print('  ...done')
     return model
@@ -155,7 +159,11 @@ def configureEdgeModel(inputSmiles, inputFasta):
     if RP['classify']:
         mergedModel.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
 
-    mergedModel.compile(loss = RP['objective'], optimizer = OPTIMIZER)
+    metrics = []
+    if RP['classify']:
+        metrics.append('accuracy')
+
+    mergedModel.compile(loss = RP['objective'], optimizer = OPTIMIZER, metrics = metrics)
 
     print('  ...done')
     return mergedModel
