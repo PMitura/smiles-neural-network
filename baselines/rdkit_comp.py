@@ -122,6 +122,5 @@ df = df.loc[:,df.apply(pd.Series.nunique) != 1]
 print(df.describe())
 
 print(df.to_csv('cdk_kr_206_1977_dense_pruned.csv'))
-;;;
-
+'''
 
