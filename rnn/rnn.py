@@ -76,6 +76,10 @@ def configureModel(input, outputLen = len(RD['labels'])):
 
     model.pop()
     model.pop()
+
+    for i in xrange(len(model.layers))
+        model.layers[0].trainable = False
+
     model.add(Dropout(0.50))
     model.add(Dense(500))
     model.add(Activation('relu'))
