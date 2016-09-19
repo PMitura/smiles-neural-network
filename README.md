@@ -22,18 +22,34 @@ This project uses YAML standard for configuration files. List of experiments to 
 
 Config files inherit their default values from templates, which can be found in `config/templates` file, along with documentation for configurable parameters.
 
-## Project structure 
+## Project structure
 
-TODO
+List of key project files and directories:
 
-## Contributors
-
-TODO
+```
+.
++-- baselines             | Standalone non-NN baseline models for comparison
++-- computing             | Visualization and statistics of datasets
++-- config                
+|   +-- templates         | Templates of default values for configs
+|   --- config.yml        | Common configuration for all experiments
++-- db                    | Remote DB connection
++-- local
+|   +-- experiments       | Custom experiment configs
+|   --- config.yml        | Common config specifying list if experiments
++-- rnn
+|   --- data.py           | Data preprocessing
+|   --- dnn.py            | Deep Neural Network model essentials
+|   --- metrics.py        | Statistics computation
+|   --- rnn.py            | Recurrent Neural Network model essentials
+|   --- utility.py        | Miscellaneous methods
+|   --- visualization.py  | Data and results visualizations
+--- gpu.sh                | Script for running app under GPU
+--- requirements.txt      | Project dependencies
+--- run.py                | Main run script
+```
 
 ## License
 
 This project is licensed under [BSD-3-Clause License](LICENSE).
 
-## How to contribute
-
-TODO
