@@ -45,7 +45,7 @@ def main(argv):
             for dropout in grid:
                 cc.exp['params']['rnn']['dropout'] = dropout
                 cc.exp['params']['rnn']['comment'] = \
-                    '[PFAM][10K][GOODSTRAT][GRU][GRU][DROP {}] dropout before top, with clipping'.format(dropout)
+                    '[PFAM][10K][GOODSTRAT][GRU][GRU][DROP {}] dropout after bottom, with clipping'.format(dropout)
                 rnn.rnn.run()
 
         elif cc.cfg['model'] == 'dnn':
