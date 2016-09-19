@@ -1,16 +1,16 @@
 ## Synopsis
 
-This is neural network for predicting properties of molecules based on their SMILES representation, built on [Keras](https://github.com/fchollet/keras) framework.
+This project implements recurrent neural network for predicting properties of molecules based on their SMILES representation Powered by [Keras](https://github.com/fchollet/keras) framework.
 
 ## Motivation
 
-Prediction of molecular properties, such as interactions with various proteins, is an important task in drug research and many other fields of chemistry. This project uses recurrent neural networks to read molecules in raw structural format known as SMILES, and is configurable to try learning any given numerical marker.  
+Prediction of molecular properties, such as interactions with various proteins, is an important task in drug research and many other fields of chemistry. This project uses recurrent neural networks in order to read molecular structure in ASCII based format known as SMILES, and learn to predict attributes of these molecules.
 
 ## Installation
 
-We use Python 2.7, and the project should run fine on Python 3.5 as well. All dependencies are specified in [requirements](requirements.txt) file.
+The application is developed and tested on Python 2.7. Required dependencies are specified in `requirements.txt` file, and should be available using `pip`. We use [Theano](https://github.com/Theano/Theano) as a backend for Keras, TensorFlow option is not tested.
 
-Training phase significantly benefits from use of GPU. Please consult [Keras](https://github.com/fchollet/keras) documentation for further information about CUDA configuration.
+Training phase run times significantly benefit from use of GPU. Please consult [Keras](https://github.com/fchollet/keras) documentation for further information about CUDA configuration.
 
 ## Execution
 
@@ -20,7 +20,7 @@ Just run `run.py` file, or `gpu.sh` script to run everything. You might want to 
 
 This project uses YAML standard for configuration files. List of experiments to run is stated in `local/config.yml`, individual experiment configuration files are located in `local/experiments` folder. 
 
-Config files inherit their default values from templates, which can be found in `config/templates` file, along with documentation for configurable parameters.
+Config files inherit default values of parameters from templates, which can be found in `config/templates` folder, along with documentation for configurable parameters.
 
 ## Project structure
 
@@ -36,7 +36,7 @@ List of key project files and directories:
 +-- db                    | Remote DB connection
 +-- local
 |   +-- experiments       | Custom experiment configs
-|   --- config.yml        | Common config specifying list if experiments
+|   --- config.yml        | Root config specifying list of experiments to be executed
 +-- rnn
 |   --- data.py           | Data preprocessing
 |   --- dnn.py            | Deep Neural Network model essentials
