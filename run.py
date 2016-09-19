@@ -39,7 +39,7 @@ def main(argv):
 
             # REMOVEME: hardcoded grid
             
-            grid = [0.1]
+            grid = [0.0]
             seed = [72391, 32123, 49325]
             # grid = [0.225, 0.25, 0.275, 0.325, 0.35, 0.375, 0.425, 0.45, 0.475]
 
