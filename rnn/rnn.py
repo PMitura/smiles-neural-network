@@ -76,11 +76,12 @@ def configureModel(input, outputLen = len(RD['labels'])):
 
     model.pop()
     model.pop()
-    model.add(Dense(300))
-    model.add(Activation('relu')
     model.add(Dropout(0.30))
     model.add(Dense(300))
-    model.add(Activation('relu')
+    model.add(Activation('relu'))
+    model.add(Dropout(0.30))
+    model.add(Dense(300))
+    model.add(Activation('relu'))
     model.add(Dropout(0.30))
     model.add(Dense(outputLen))
 
