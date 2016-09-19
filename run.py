@@ -39,17 +39,14 @@ def main(argv):
 
             # REMOVEME: hardcoded grid
             
-            grid = [0.1]
-            seed = [72391, 32123, 49325]
+            grid = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
             # grid = [0.225, 0.25, 0.275, 0.325, 0.35, 0.375, 0.425, 0.45, 0.475]
 
             for dropout in grid:
-                for s in seed:
-                    cc.exp['params']['rnn']['dropout'] = dropout
-                    cc.exp['params']['rnn']['seed'] = s
-                    cc.exp['params']['rnn']['comment'] = \
-                        '[PFAM][10K][GOODSTRAT][GRU][GRU][DROP {}] dropout before top, seed grid'.format(dropout)
-                    rnn.rnn.run()
+                cc.exp['params']['rnn']['dropout'] = dropout
+                cc.exp['params']['rnn']['comment'] = \
+                    '[PFAM][10K][GOODSTRAT][GRU][GRU][DROP {}] dropout before top, with clipping'.format(dropout)
+                rnn.rnn.run()
 
         elif cc.cfg['model'] == 'dnn':
             import rnn.dnn
