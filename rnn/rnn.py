@@ -64,7 +64,7 @@ def configureModel(input, outputLen = len(RD['labels'])):
     # model.add(TimeDistributed(Dense(300, activation = 'tanh', trainable = RP['trainable_inner']), input_shape = (None, alphaSize )))
 
     # model.add(Dropout(RP['dropout'], input_shape = (None, alphaSize)))
-    model.add(GRU(300, trainable = RP['trainable_inner'], return_sequences = True))
+    model.add(GRU(300, trainable = RP['trainable_inner'], return_sequences = True, input_shape = (None, alphaSize)))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
     # model.add(Dropout(RP['dropout']))
     model.add(GRU(300, trainable = RP['trainable_inner']))
