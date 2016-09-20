@@ -4,7 +4,7 @@
 db:
   user: 'postgres'
   pass: 'samurai'
-  host: '147.32.233.145'
+  host: 'asgard.kessl.net'
   name: 'chembl_21'
   driver: 'postgresql'
 
