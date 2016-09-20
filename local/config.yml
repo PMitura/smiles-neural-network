@@ -2,7 +2,7 @@
 
 # Experiments to run
 
-experiments: ['local/experiments/edge_property_prediction/rnn_edge_stitch.yml']
+experiments: ['local/experiments/edge_property_prediction/rnn_edge_stitch_classification.yml']
 model: 'rnn'
 
 # Persistence of models

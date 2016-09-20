@@ -10,7 +10,7 @@ fetch:
   cols: ['smiles','fasta','score_bin_500','is_testing_50_rand']
   order: 'smiles'
   index_col: ~
-  limit: 100000
+  limit: 10000
   where: ~
 
 # Experiment params
@@ -58,4 +58,4 @@ params:
     holdout_ratio: 0.5
 
     # statistics settings
-    comment: '[EDGE][STITCH907][100K][CLASSIFICATION][SCORE_BIN_500] 24e627 smiles, e6beb8 fasta, trying classification'
+    comment: '[RUNTIME][EDGE][STITCH907][10K][CLASSIFICATION][SCORE_BIN_500] 24e627 smiles, e6beb8 fasta, trying classification'
