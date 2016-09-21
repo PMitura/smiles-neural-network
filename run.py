@@ -8,7 +8,19 @@ from config import config as cc
 from keras.optimizers import Adam, Adadelta, Adagrad, Nadam, Adamax
 import theano
 
+class Unbuffered(object):
+   def __init__(self, stream):
+       self.stream = stream
+   def write(self, data):
+       self.stream.write(data)
+       self.stream.flush()
+   def __getattr__(self, attr):
+       return getattr(self.stream, attr)
+
 def main(argv):
+    # buffer hack
+    sys.stdout = Unbuffered(sys.stdout)
+
     path = 'local/config.yml'
 
     if len(argv) >= 1:
