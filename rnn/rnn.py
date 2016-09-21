@@ -121,6 +121,8 @@ def configureEdgeModel(inputSmiles, inputFasta):
     smilesModel.add(GRU(300, trainable = RP['trainable_inner']))
     smilesModel.add(Activation('relu', trainable = RP['trainable_inner']))
 
+    utility.setModelConsumeLess(smilesModel, 'mem'):
+
 
     '''
     smilesModel = utility.loadModel('24e62794bb6d5b5c562e41a3a2cccc3525fa625f', 'smiles_')
@@ -136,6 +138,9 @@ def configureEdgeModel(inputSmiles, inputFasta):
     fastaModel.add(Dropout(0.30))
     fastaModel.add(GRU(300, trainable = RP['trainable_inner']))
     fastaModel.add(Activation('relu', trainable = RP['trainable_inner']))
+
+    utility.setModelConsumeLess(fastaModel, 'mem'):
+
 
     '''
     fastaModel = utility.loadModel('e6beb8b7e146b9ab46a71db8f3001bf62d96ff08', 'fasta_')
