@@ -4,6 +4,8 @@ import mysql.connector
 import pandas as pd
 import numpy
 
+import socket
+
 
 def getCon():
 
