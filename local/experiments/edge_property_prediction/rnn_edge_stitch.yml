@@ -10,7 +10,7 @@ fetch:
   cols: ['smiles','fasta','score','is_testing_50_rand']
   order: 'smiles'
   index_col: ~
-  limit: 500000
+  limit: 250000
   where: ~
 
 # Experiment params
@@ -54,5 +54,5 @@ params:
     holdout_ratio: 0.5
 
     # statistics settings
-    comment: '[EDGE][STITCH907][500k][SCORE] not pretrained'
+    comment: '[EDGE][STITCH907][250k][SCORE] not pretrained'
     # comment: '[TEST]'
