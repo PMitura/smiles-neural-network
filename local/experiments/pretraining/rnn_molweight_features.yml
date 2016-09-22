@@ -26,6 +26,7 @@ params:
     # RNN parameters
     learning_rate: 0.001
     epochs: 30
+    batch: 80
 
     td_layer_multiplier: 2
     gru_layer_multiplier: 2
@@ -49,4 +50,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[RERUN][TDGRUGRU][PRETRAIN][MOLWEIGHT_FEATURES]'
+    comment: '[RERUN][TDTDGRUGRU][PRETRAIN][MOLWEIGHT_FEATURES]'
