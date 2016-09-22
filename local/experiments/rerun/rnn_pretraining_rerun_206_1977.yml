@@ -47,4 +47,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[RERUN][PRETRAINED][DROPOUT][206_1977] rerun properly transfer of knowledge to 206_1977 with dropout'
+    comment: '[RERUN][PRETRAINED][eab15a][DROPOUT][206_1977] pretrained TDGRUGRU eab15a, with two dense and dropout'

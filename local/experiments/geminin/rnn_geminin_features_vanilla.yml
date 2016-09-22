@@ -11,17 +11,14 @@ fetch:
   order: 'canonical_smiles'
   index_col: ~
   limit: ~
-  where:  'is_testing IS NOT NULL and length(canonical_smiles) <= 80'
+  where:  'is_testing IS NOT NULL and length(canonical_smiles) <= 120'
 
 # Experiment params
 params:
   data:
     # number of label columns to prepare
-    input_count: 1
-    extra_nominals: 0
-    label_count: 1
+    smiles: 'canonical_smiles'
     use_test_flags: true
-    # for statistics sending
     labels: ['standard_value_log']
     testing: 'is_testing'
   rnn:
@@ -39,11 +36,6 @@ params:
     early_stop: 20
 
     chained_models: false
-    chained_labels: '[range(1, 25)]'
-    # chained_labels: '[range(1, 4) * 8]'
-    chained_test_labels: '[[0] * 24]'
-    chained_predict: '[0]'
-    freeze_idxs: 'set()'
     trainable_inner: true
 
     zscore_norm: true
@@ -55,8 +47,5 @@ params:
     flag_based_hold: true
     holdout_ratio: 0.2
 
-    # preprocessing switches
-    label_idxs: 'range(1)'      # indexes of columns to use as label
-
     # statistics settings
-    comment: '[GEMININ][VANILLA] start with blank, train on geminin'
+    comment: '[RERUN][GEMININ][PRETRAINED][b3d960] trying geminin once more with pretrained b3d960'
