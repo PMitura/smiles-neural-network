@@ -11,6 +11,7 @@ fetch:
   order: 'canonical_smiles'
   index_col: ~
   limit: ~
+  input_mode: 'smiles'
   where:  'is_testing_all IS NOT NULL and length(canonical_smiles) <= 120'
 
 # Experiment params
@@ -24,7 +25,7 @@ params:
     # load_model: '6340d6800a8965e8ffa367459ae292c9f88d25dd'
     # RNN parameters
     learning_rate: 0.001
-    epochs: 150
+    epochs: 30
 
     td_layer_multiplier: 2
     gru_layer_multiplier: 2

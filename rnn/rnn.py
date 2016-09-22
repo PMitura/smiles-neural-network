@@ -57,27 +57,26 @@ def configureModel(input, outputLen = len(RD['labels'])):
     else:
     '''
 
-    '''
+
     model.add(TimeDistributed(Dense(300, activation = 'tanh', trainable = RP['trainable_inner']), input_shape = (None, alphaSize )))
     model.add(Dropout(0.30))
-    model.add(GRU(300, trainable = RP['trainable_inner'], input_shape = (None, alphaSize ), return_sequences = True))
+    model.add(GRU(300, trainable = RP['trainable_inner'], return_sequences = True))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
-    # model.add(Dropout(RP['dropout']))
+    model.add(Dropout(0.30))
     model.add(GRU(300, trainable = RP['trainable_inner']))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
-    model.add(Dropout(RP['dropout']))
+    model.add(Dropout(0.30))
     model.add(Dense(outputLen))
-    '''
 
     # molweight
-    model = utility.loadModel('b3d9609da78bfbf0ad1a62ee6740df3b52f104b4', 'mol_')
+    # model = utility.loadModel('b3d9609da78bfbf0ad1a62ee6740df3b52f104b4', 'mol_')
     # all compounds
     # model = utility.loadModel('eab15a05a70b35d119c02fcc36b1cfaf27a0f36a', 'mol_')
     # maccs
     # model = utility.loadModel('67b51a1543b5d32b05671e4a08d193eed702ca54', 'mol_')
 
-    model.pop()
-    model.pop()
+    # model.pop()
+    # model.pop()
 
     # for i in xrange(len(model.layers)):
         # model.layers[0].trainable = False
@@ -91,7 +90,7 @@ def configureModel(input, outputLen = len(RD['labels'])):
     model.add(Activation('relu'))
     model.add(Dropout(0.30))
     '''
-    model.add(Dense(outputLen))
+    # model.add(Dense(outputLen))
 
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
@@ -255,8 +254,8 @@ def run(grid = None):
     if RP['edge_prediction']:
         trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessEdgeData(db.getData())
     else:
-        # trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessData(db.getData())
-        trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessFastaOneHotData(db.getData())
+        trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessData(db.getData())
+        # trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessFastaOneHotData(db.getData())
 
     stats['training_row_count'] = len(testLabel)
     stats['testing_row_count'] = len(testLabel)
