@@ -69,7 +69,7 @@ def configureModel(input, outputLen = len(RD['labels'])):
     model.add(Dense(outputLen))
     '''
 
-    molweight
+    # molweight
     model = utility.loadModel('b12ad8040890ddd8fe9bd6bb9c5d8cc0c56dbe7a', 'mol_')
     # all compounds
     # model = utility.loadModel('eab15a05a70b35d119c02fcc36b1cfaf27a0f36a', 'mol_')
