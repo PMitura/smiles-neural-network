@@ -12,6 +12,8 @@ import visualization
 from config import config as cc
 import yaml
 
+import pandas as pd
+
 import socket
 
 # not used to relieve MetaCentrum of some dependencies
@@ -89,13 +91,8 @@ def configureModel(input, outputLen = len(RD['labels'])):
     model.add(Dropout(0.30))
     model.add(Dense(outputLen))
 
-
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
-
-    # pretrainedModel = utility.loadModel('6340d6800a8965e8ffa367459ae292c9f88d25dd')
-    model.compile(loss = RP['objective'], optimizer = OPTIMIZER)
-
 
     # for i in range(2):
     # model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
@@ -262,7 +259,8 @@ def run(grid = None):
     if RP['edge_prediction']:
         trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessEdgeData(db.getData())
     else:
-        trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessData(db.getData())
+        # trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessData(db.getData())
+        trainIn, trainLabel, testIn, testLabel, preprocessMeta = data.preprocessFastaOneHotData(db.getData())
 
     stats['training_row_count'] = len(testLabel)
     stats['testing_row_count'] = len(testLabel)
@@ -307,13 +305,14 @@ def run(grid = None):
         visualization.layerActivations(model, testIn, testLabel)
 
     if cc.cfg['plots']['seq_output']:
-        visualization.visualizeSequentialOutput(model, cc.cfg['plots']['seq_output_layer_idx'], cc.cfg['plots']['seq_output_smiles'])
-
-    if cc.cfg['plots']['print_train_test_pred']:
-        visualization.printTrainTestPred(model, cc.cfg['plots']['print_train_test_pred_cnt'], trainIn, trainLabel, testIn, testLabel, preprocessMeta)
+        df = pd.DataFrame(cc.cfg['plots']['seq_output_seq_input'], columns=[RD['fasta'] if cc.cfg['plots']['seq_output_seq_input_name'] == 'fasta' else RD['smiles']])
+        visualization.visualizeSequentialOutput(model, cc.cfg['plots']['seq_output_layer_idx'], df)
 
     if cc.cfg['plots']['print_pred']:
         visualization.printPrediction(model, cc.cfg['plots']['print_pred_smiles'])
+
+    if cc.cfg['plots']['print_train_test_pred']:
+        visualization.printTrainTestPred(model, cc.cfg['plots']['print_train_test_pred_cnt'], trainIn, trainLabel, testIn, testLabel, preprocessMeta)
 
     # statistics to send to journal
     stats['runtime_second'] = time.time() - stats['runtime_second']

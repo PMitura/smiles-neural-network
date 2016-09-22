@@ -262,6 +262,7 @@ def preprocessFastaOneHotData(df):
     labels, meta = normalize(labels)
 
     # FIXME or abandon branch: hardcoded pasta stuff
+    '''
     pfSet = set()
     for label in labels:
         pfSet.add(label[0])
@@ -275,6 +276,7 @@ def preprocessFastaOneHotData(df):
     for i in range(len(labels)):
         newLabels[i][pfMapping[labels[i][0]]] = 1
     labels = newLabels
+    '''
 
     # create training and testing sets
     if RP['flag_based_hold']:

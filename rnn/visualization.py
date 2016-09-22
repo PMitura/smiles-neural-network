@@ -196,24 +196,30 @@ def layerActivations(model, data, labels):
 
     print('...done')
 
-def visualizeSequentialOutput(model, layerIdx, smilesData):
+def visualizeSequentialOutput(model, layerIdx, df):
 
     if not os.path.exists(cc.cfg['plots']['seq_output_dir']):
         os.makedirs(cc.cfg['plots']['seq_output_dir'])
 
-    smilesDf = pd.DataFrame(smilesData, columns=[cc.exp['params']['data']['smiles']])
 
-    input = data.formatSequentialInput(smilesDf)
+    if cc.cfg['plots']['seq_output_seq_input_name'] == 'smiles':
+        input = data.formatSequentialInput(df)
+    elif cc.cfg['plots']['seq_output_seq_input_name'] == 'fasta':
+        input = data.formatFastaInput(df)
+    else:
+        raise 'visual err'
+
 
     # model.layers[layerIdx].return_sequences = True
     # model.compile(loss="mean_squared_error", optimizer="rmsprop")
 
 
+    cfg = model.get_config()[:4]
 
     cfg = model.get_config()[:layerIdx+1]
-
     del cfg[2]
     layerIdx -= 1
+
     # print cfg
     cfg[layerIdx]['config']['return_sequences'] = True
 
@@ -241,27 +247,38 @@ def visualizeSequentialOutput(model, layerIdx, smilesData):
         arrMask = list(range(output.shape[2]))
     arrMask = np.array([x for x in arrMask if not x in dropSet])
 
-    fig = plt.figure(figsize=(input.shape[1] * 0.8,len(arrMask) * len(smilesData) * 1.5))
-
-    for i,smilesOutput in enumerate(output):
+    fig = plt.figure(figsize=(input.shape[1] * 0.3,len(arrMask) * len(df) * 1.5))
 
 
-        selected = smilesOutput.T[arrMask]
+    for i,seqOutput in enumerate(output):
+
+        # print seqOutput.shape
+        # print seqOutput
+
+        selected = seqOutput.T[arrMask]
 
         Z = sch.linkage(selected, method='single', metric='cosine')
         leaves = sch.leaves_list(Z)
         # leaves = range(len(selected))
         reordered = selected[leaves]
 
-        ax = fig.add_subplot(len(smilesData),1,i+1)
+        ax = fig.add_subplot(len(df),1,i+1)
+
+        print 'foo'
 
         ppl.pcolormesh(fig, ax, reordered,
-               xticklabels=list(smilesData[i]),
+               xticklabels=list(df.values[i][0]),
                yticklabels=arrMask[leaves],
                vmin=-1,
                vmax=1)
 
+        print 'foo'
+
+    print 'bar'
+
     fig.savefig('{}/{}'.format(cc.cfg['plots']['seq_output_dir'],cc.cfg['plots']['seq_output_name']))
+
+    print 'bar'
 
 def printPrediction(model, smilesData):
     # FIXME hardcoded
@@ -323,6 +340,7 @@ def printPrediction(model, smilesData):
     outputLastSymbol = outputSymbols[:,outputSymbols.shape[1]-1,:]
 
     distanceMatrixLastSymbolCorrel = np.corrcoef(outputLastSymbol)
+
     print 'Distance matrix last symbol correlation'
     print distanceMatrixLastSymbolCorrel
 
