@@ -4,7 +4,6 @@
 
 experiments: ['local/experiments/edge_property_prediction/rnn_edge_stitch.yml']
 # experiments: ['local/experiments/pfam/rnn_pfam_10_drop.yml']
-
 model: 'rnn'
 
 # Persistence of models
