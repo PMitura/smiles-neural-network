@@ -112,12 +112,6 @@ def configureModel(input, outputLen = len(RD['labels'])):
 def configureEdgeModel(inputSmiles, inputFasta):
     print('  Initializing edge model and compiling...')
 
-    loadModel = utility.loadModel('678602fe956b795849c03e301180cbf79505b5fa')
-    loadModel.compile(loss = RP['objective'], optimizer = OPTIMIZER, metrics = metrics)
-
-    return loadModel
-
-
     smilesGRUInputShape = (None, inputSmiles.shape[2])
     # smilesGRUSize = int(RP['gru_layer_multiplier'] * smilesGRUInputShape[1])
 

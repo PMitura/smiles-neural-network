@@ -25,7 +25,7 @@ params:
     testing: 'is_testing_50_rand'
   rnn:
 
-    # load_model: '595a0920126134c2c948cc7fb9a7a237befa4658'
+    load_model: '678602fe956b795849c03e301180cbf79505b5fa'
     edge_prediction: true
     batch: 80
 
