@@ -1,17 +1,17 @@
-# Experiment rnn_pfam_907_400
-name: 'rnn_pfam_907_400'
+# Experiment rnn_pfam_907_2000
+name: 'rnn_pfam_907_2000'
 
 # Template for default values
 template: 'rnn.yml'
 
 # DB fetch params
 fetch:
-  table: 'output.pfam_distinct_907_400'
+  table: 'output.pfam_distinct_907_2000'
   cols: ['pfam_sequence','pfama_acc_max','is_testing_50_strat']
   order: 'pfam_sequence'
   index_col: ~
-  limit: ~
-  where:  'rank <= 600'
+  limit: 500000
+  where:  'length(pfam_sequence) <= 400'
 
 # Experiment params
 params:
@@ -68,4 +68,4 @@ params:
     label_idxs: 'range(1)'      # indexes of columns to use as label
 
     # statistics settings
-    comment: '[PFAM][550K][GOODSTRAT][GRU][GRU]'
+    comment: '[PFAM][500K][GOODSTRAT][TDGRUGRU]'

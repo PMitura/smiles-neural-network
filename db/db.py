@@ -4,6 +4,8 @@ import mysql.connector
 import pandas as pd
 import numpy
 
+import socket
+
 
 def getCon():
 
@@ -14,6 +16,11 @@ def getCon():
         'host': cc.cfg['db']['host'],
         'database': cc.cfg['db']['name']
     }
+
+
+    # FIXME: hardcoded switch
+    if socket.gethostname() == 'seppuku':
+        dbcfg['host'] = 'localhost'
 
     if cc.cfg['db']['driver']=='postgresql':
         con = psycopg2.connect(**dbcfg)

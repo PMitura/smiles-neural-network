@@ -48,8 +48,6 @@ def computeMAE(pred, truth):
     return (np.absolute(pred - truth)).mean()
 
 def predict(model, input, labels, meta):
-    # FIXME: hardcoded edge
-
     if RP['edge_prediction']:
         partitioner = PermutationPartitioner(len(input[0]), len(input[0]) / RP['num_partitions'])
     else:
@@ -147,7 +145,10 @@ def computeAUC(pred, truth):
 
 
 def classify(model, input, labels, meta):
-    partitioner = PermutationPartitioner(len(input), len(input) / RP['num_partitions'])
+    if RP['edge_prediction']:
+        partitioner = PermutationPartitioner(len(input[0]), len(input[0]) / RP['num_partitions'])
+    else:
+        partitioner = PermutationPartitioner(len(input), len(input) / RP['num_partitions'])
     iterations = RP['num_partitions']**2
 
     metrics = {
@@ -165,7 +166,10 @@ def classify(model, input, labels, meta):
 
         part = partitioner.get()
 
-        partIn = input[part]
+        if RP['edge_prediction']:
+            partIn = [input[0][part],input[1][part]]
+        else:
+            partIn = input[part]
         partLabelsT = labels[part].T
         partPredT = model.predict(partIn, batch_size = RP['batch']).T
 

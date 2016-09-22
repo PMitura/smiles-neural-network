@@ -37,7 +37,7 @@ RP['chained_test_labels'] = eval(str(cc.exp['params']['rnn']['chained_test_label
 RP['freeze_idxs'] = eval(str(cc.exp['params']['rnn']['freeze_idxs']))
 RP['label_idxs'] = eval(str(cc.exp['params']['rnn']['label_idxs']))
 
-OPTIMIZER = Adam(lr = RP['learning_rate'])
+OPTIMIZER = Adam(lr = RP['learning_rate'], clipnorm = 1.)
 
 def configureModel(input, outputLen = len(RD['labels'])):
     print('  Initializing and compiling...')
@@ -55,34 +55,28 @@ def configureModel(input, outputLen = len(RD['labels'])):
     else:
     '''
 
-
-    # {'parameters_num': 11704, 'name': 'timedistributed_1'}
-    # {'output_dim': 152, 'parameters_num': 139080, 'activation': 'tanh', 'name': 'gru_1', 'input_dim': 152}
-    # {'activation': 'relu', 'parameters_num': 0, 'name': 'activation_1'}
-    # {'output_dim': 53, 'parameters_num': 8109, 'activation': 'linear', 'name': 'dense_2', 'input_dim': None}
-
-
-    # model.add(TimeDistributed(Dense(152, activation = 'tanh'), trainable = True, input_shape = (None, alphaSize )))
-    # model.add(Dropout(0.25))
-    # model.add(GRU(152, trainable = True, ))
-    # model.add(Dropout(0.25))
-    # model.add(Dense(outputLen) )
-
-    # model.add(TimeDistributed(Dense(int(RP['td_layer_multiplier'] * alphaSize), activation = 'tanh',
-    #     trainable = RP['trainable_inner']),
-    #     input_shape = (None, alphaSize )))
-
-    # model.add(GRU(150, trainable = RP['trainable_inner'], input_shape = (None, alphaSize ), dropout_W=0.2,  dropout_U=0.2, return_sequences=True))
-    # model.add(GRU(int(RP['gru_layer_multiplier'] * alphaSize), trainable = RP['trainable_inner'], dropout_W=0.2,  dropout_U=0.2, return_sequences = True ))
-    # model.add(TimeDistributed(Dense(300, activation = 'tanh', trainable = RP['trainable_inner']), input_shape = (None, alphaSize )))
-
+    '''
+    model.add(TimeDistributed(Dense(300, activation = 'tanh', trainable = RP['trainable_inner']), input_shape = (None, alphaSize )))
+    model.add(Dropout(0.30))
     model.add(GRU(300, trainable = RP['trainable_inner'], input_shape = (None, alphaSize ), return_sequences = True))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
-    model.add(Dropout(0.30))
+    # model.add(Dropout(RP['dropout']))
     model.add(GRU(300, trainable = RP['trainable_inner']))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
-    model.add(Dropout(0.30))
+    model.add(Dropout(RP['dropout']))
     model.add(Dense(outputLen))
+    '''
+
+    # molweight
+    # model = utility.loadModel('b3d9609da78bfbf0ad1a62ee6740df3b52f104b4')
+    # all compounds
+    model = utility.loadModel('eab15a05a70b35d119c02fcc36b1cfaf27a0f36a')
+    # maccs
+    # model = utility.loadModel('67b51a1543b5d32b05671e4a08d193eed702ca54')
+
+    # model.pop()
+    # model.pop()
+    # model.add(Dense(outputLen))
 
     # for layer in model.layers:
         # print layer.name
@@ -98,7 +92,11 @@ def configureModel(input, outputLen = len(RD['labels'])):
     # model.layers[2].set_weights(pretrainedModel.layers[1].get_weights())
     # model.layers[2].trainable = True
 
-    model.compile(loss = RP['objective'], optimizer = OPTIMIZER)
+    metrics = []
+    if RP['classify']:
+        metrics.append('accuracy')
+
+    model.compile(loss = RP['objective'], optimizer = OPTIMIZER, metrics = metrics)
 
     print('  ...done')
     return model
@@ -114,28 +112,44 @@ def configureEdgeModel(inputSmiles, inputFasta):
 
     mergedOutputLen = len(RD['labels'])
 
-    # smilesModel = Sequential()
-    # smilesModel.add(TimeDistributed(Dense(300, activation = 'tanh'), input_shape = smilesGRUInputShape))
-    # smilesModel.add(Dropout(0.5))
-    # smilesModel.add(GRU(300))
-    # smilesModel.add(Activation('relu'))
-    # smilesModel.add(Dropout(0.3))
+    smilesModel = Sequential()
+    smilesModel.add(TimeDistributed(Dense(300, activation = 'tanh', trainable = RP['trainable_inner']), input_shape = smilesGRUInputShape))
+    smilesModel.add(Dropout(0.30))
+    smilesModel.add(GRU(300, trainable = RP['trainable_inner'], return_sequences = True))
+    smilesModel.add(Activation('relu', trainable = RP['trainable_inner']))
+    smilesModel.add(Dropout(0.30))
+    smilesModel.add(GRU(300, trainable = RP['trainable_inner']))
+    smilesModel.add(Activation('relu', trainable = RP['trainable_inner']))
 
-    smilesModel = utility.loadModel('6f7c468746e19ab2ed4c6adb4c15ab7ff50f9088', 'smiles_')
+    # utility.setModelConsumeLess(smilesModel, 'mem')
+
+
+    '''
+    smilesModel = utility.loadModel('24e62794bb6d5b5c562e41a3a2cccc3525fa625f', 'smiles_')
     smilesModel.pop() # output
     smilesModel.pop() # dropout
+    '''
+    # utility.setModelConsumeLess(smilesModel, 'gpu')
+    fastaModel = Sequential()
+    fastaModel.add(TimeDistributed(Dense(300, activation = 'tanh', trainable = RP['trainable_inner']), input_shape = fastaGRUInputShape))
+    fastaModel.add(Dropout(0.30))
+    fastaModel.add(GRU(300, trainable = RP['trainable_inner'], return_sequences = True))
+    fastaModel.add(Activation('relu', trainable = RP['trainable_inner']))
+    fastaModel.add(Dropout(0.30))
+    fastaModel.add(GRU(300, trainable = RP['trainable_inner']))
+    fastaModel.add(Activation('relu', trainable = RP['trainable_inner']))
 
-    # fastaModel = Sequential()
-    # fastaModel.add(TimeDistributed(Dense(300, activation = 'tanh'), input_shape = fastaGRUInputShape))
-    # fastaModel.add(Dropout(0.5))
-    # fastaModel.add(GRU(300))
-    # fastaModel.add(Activation('relu'))
-    # fastaModel.add(Dropout(0.3))
+    # utility.setModelConsumeLess(fastaModel, 'mem')
 
-    fastaModel = utility.loadModel('7de8eec6b8c9496325212282646ae6414d2f4e7f', 'fasta_')
+
+    '''
+    fastaModel = utility.loadModel('e6beb8b7e146b9ab46a71db8f3001bf62d96ff08', 'fasta_')
     fastaModel.pop() # activation
     fastaModel.pop() # output
     fastaModel.pop() # dropout
+    '''
+
+    # utility.setModelConsumeLess(fastaModel, 'gpu')
 
     merged = Merge([smilesModel, fastaModel], mode='concat')
 
@@ -144,15 +158,22 @@ def configureEdgeModel(inputSmiles, inputFasta):
 
     mergedModel.add(Dense(300))
     mergedModel.add(Activation('relu'))
-    mergedModel.add(Dropout(0.5))
+    mergedModel.add(Dropout(0.3))
 
-    mergedModel.add(Dense(150))
+    mergedModel.add(Dense(300))
     mergedModel.add(Activation('relu'))
     mergedModel.add(Dropout(0.3))
 
     mergedModel.add(Dense(mergedOutputLen))
 
-    mergedModel.compile(loss = RP['objective'], optimizer = OPTIMIZER)
+    if RP['classify']:
+        mergedModel.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
+
+    metrics = []
+    if RP['classify']:
+        metrics.append('accuracy')
+
+    mergedModel.compile(loss = RP['objective'], optimizer = OPTIMIZER, metrics = metrics)
 
     print('  ...done')
     return mergedModel
