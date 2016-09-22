@@ -363,4 +363,4 @@ def run(grid = None):
         metricStats['mae_std'] = testMetrics['mae_std']
 
     stats.update(metricStats)
-    # db.sendStatistics(**stats)
+    db.sendStatistics(**stats)
