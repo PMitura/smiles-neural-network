@@ -82,6 +82,7 @@ def configureModel(input, outputLen = len(RD['labels'])):
     # for i in xrange(len(model.layers)):
         # model.layers[0].trainable = False
 
+        '''
     model.add(Dropout(0.50))
     model.add(Dense(500))
     model.add(Activation('relu'))
@@ -89,16 +90,11 @@ def configureModel(input, outputLen = len(RD['labels'])):
     model.add(Dense(500))
     model.add(Activation('relu'))
     model.add(Dropout(0.30))
+    '''
     model.add(Dense(outputLen))
 
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
-
-    # for i in range(2):
-    # model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
-    # model.layers[0].trainable = True
-    # model.layers[2].set_weights(pretrainedModel.layers[1].get_weights())
-    # model.layers[2].trainable = True
 
     metrics = []
     if RP['classify']:
