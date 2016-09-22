@@ -49,7 +49,6 @@ def main(argv):
 
             print(cc.cfg,cc.exp)
 
-
             rnn.rnn.run()
 
 
