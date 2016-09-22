@@ -50,4 +50,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[RERUN][TDTDGRUGRU][PRETRAIN][MOLWEIGHT_FEATURES]'
+    comment: '[RERUN][TDTDGRUGRU][RELURELU][PRETRAIN][MOLWEIGHT_FEATURES]'
