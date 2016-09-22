@@ -89,13 +89,13 @@ def configureModel(input, outputLen = len(RD['labels'])):
     model.add(Dropout(0.30))
     model.add(Dense(outputLen))
 
-    # for layer in model.layers:
-        # print layer.name
 
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
 
     # pretrainedModel = utility.loadModel('6340d6800a8965e8ffa367459ae292c9f88d25dd')
+    model.compile(loss = RP['objective'], optimizer = OPTIMIZER)
+
 
     # for i in range(2):
     # model.layers[0].set_weights(pretrainedModel.layers[0].get_weights())
@@ -312,6 +312,9 @@ def run(grid = None):
     if cc.cfg['plots']['print_train_test_pred']:
         visualization.printTrainTestPred(model, cc.cfg['plots']['print_train_test_pred_cnt'], trainIn, trainLabel, testIn, testLabel, preprocessMeta)
 
+    if cc.cfg['plots']['print_pred']:
+        visualization.printPrediction(model, cc.cfg['plots']['print_pred_smiles'])
+
     # statistics to send to journal
     stats['runtime_second'] = time.time() - stats['runtime_second']
     stats['memory_pm_mb'], stats['memory_vm_mb'] = utility.getMemoryUsage()
@@ -361,4 +364,4 @@ def run(grid = None):
         metricStats['mae_std'] = testMetrics['mae_std']
 
     stats.update(metricStats)
-    db.sendStatistics(**stats)
+    # db.sendStatistics(**stats)

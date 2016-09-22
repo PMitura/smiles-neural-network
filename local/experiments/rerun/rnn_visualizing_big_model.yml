@@ -1,6 +1,5 @@
-
-# Experiment rnn_pretraining_rerun_206_1977
-name: 'rnn_pretraining_rerun_206_1977'
+# Experiment rnn_visualizing_big_model
+name: 'rnn_visualizing_big_model'
 
 # Template for default values
 template: 'rnn.yml'
@@ -11,7 +10,7 @@ fetch:
   cols: ['canonical_smiles','standard_value_log','is_testing']
   order: 'canonical_smiles'
   index_col: ~
-  limit: ~
+  limit: 10 # ~
   where:  ~ # 'length(canonical_smiles) <= 80'
 
 # Experiment params
@@ -24,6 +23,10 @@ params:
     testing: 'is_testing'
 
   rnn:
+
+    load_model: '24e62794bb6d5b5c562e41a3a2cccc3525fa625f'
+    num_partitions: 1
+
     # RNN parameters
     learning_rate: 0.00003
     epochs: 150
@@ -47,4 +50,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[RERUN][PRETRAINED][eab15a][DROPOUT][206_1977] pretrained TDGRUGRU eab15a, with two dense and dropout'
+    comment: '[RERUN][VISUAL]'

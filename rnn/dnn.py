@@ -96,7 +96,10 @@ def run():
     model = Sequential()
 
     # hidden
-    model.add(Dense(100, W_regularizer=l2(0.3),activity_regularizer=activity_l2(0.01), input_shape=(X.shape[1], )))
+    # model.add(Dense(200, W_regularizer=l2(0.3),activity_regularizer=activity_l2(0.01), input_shape=(X.shape[1], )))
+    # model.add(Activation('relu'))
+    # model.add(Dropout(0.2))
+    model.add(Dense(150, W_regularizer=l2(0.5),activity_regularizer=activity_l2(0.03), input_shape=(X.shape[1], )))
     model.add(Activation('relu'))
     model.add(Dense(1))
 

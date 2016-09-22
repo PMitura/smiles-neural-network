@@ -9,3 +9,12 @@ model: 'rnn'
 # Persistence of models
 persistence:
   model: true
+
+plots:
+  seq_output: false
+  seq_output_name: 'seq_output_grugru.png'
+  seq_output_layer_idx: 3
+  seq_output_smiles: ['NCC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=O']
+
+  print_pred: false
+  print_pred_smiles: ['FFF=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=CCC']
