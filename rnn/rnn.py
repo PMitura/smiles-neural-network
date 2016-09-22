@@ -39,7 +39,7 @@ RP['chained_test_labels'] = eval(str(cc.exp['params']['rnn']['chained_test_label
 RP['freeze_idxs'] = eval(str(cc.exp['params']['rnn']['freeze_idxs']))
 RP['label_idxs'] = eval(str(cc.exp['params']['rnn']['label_idxs']))
 
-OPTIMIZER = Adam(lr = RP['learning_rate'], clipnorm = 1.)
+OPTIMIZER = Adam(lr = RP['learning_rate'], clipnorm = 0.1)
 
 def configureModel(input, outputLen = len(RD['labels'])):
     print('  Initializing and compiling...')
@@ -57,7 +57,7 @@ def configureModel(input, outputLen = len(RD['labels'])):
     else:
     '''
 
-
+    '''
     model.add(TimeDistributed(Dense(300, activation = 'tanh', trainable = RP['trainable_inner']), input_shape = (None, alphaSize )))
     model.add(Dropout(0.30))
     model.add(GRU(300, trainable = RP['trainable_inner'], return_sequences = True))
@@ -67,30 +67,29 @@ def configureModel(input, outputLen = len(RD['labels'])):
     model.add(Activation('relu', trainable = RP['trainable_inner']))
     model.add(Dropout(0.30))
     model.add(Dense(outputLen))
+    '''
 
-    # molweight
-    # model = utility.loadModel('b3d9609da78bfbf0ad1a62ee6740df3b52f104b4', 'mol_')
+    molweight
+    model = utility.loadModel('b12ad8040890ddd8fe9bd6bb9c5d8cc0c56dbe7a', 'mol_')
     # all compounds
     # model = utility.loadModel('eab15a05a70b35d119c02fcc36b1cfaf27a0f36a', 'mol_')
     # maccs
     # model = utility.loadModel('67b51a1543b5d32b05671e4a08d193eed702ca54', 'mol_')
 
-    # model.pop()
-    # model.pop()
+    model.pop()
+    model.pop()
 
     # for i in xrange(len(model.layers)):
         # model.layers[0].trainable = False
 
-    '''
-    model.add(Dropout(0.50))
-    model.add(Dense(500))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.50))
+    model.add(Dropout(0.30))
     model.add(Dense(500))
     model.add(Activation('relu'))
     model.add(Dropout(0.30))
-    '''
-    # model.add(Dense(outputLen))
+    model.add(Dense(500))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.30))
+    model.add(Dense(outputLen))
 
     if RP['classify']:
         model.add(Activation(RP['classify_activation'], trainable = RP['trainable_inner']))
