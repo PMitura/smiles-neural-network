@@ -142,15 +142,14 @@ def setModelConsumeLess(model, mode='cpu'):
 
 
 
-def saveModel(model):
+def saveModel(model, name):
     if not os.path.exists(cc.cfg['persistence']['model_dir']):
         os.makedirs(cc.cfg['persistence']['model_dir'])
 
     yamlModel = model.to_yaml()
-    gitCommit = utility.getGitCommitHash()
 
-    open(os.path.join(cc.cfg['persistence']['model_dir'], gitCommit+'.yml'), 'w').write(yamlModel)
-    model.save_weights(os.path.join(cc.cfg['persistence']['model_dir'], gitCommit+'.h5'), overwrite=True)
+    open(os.path.join(cc.cfg['persistence']['model_dir'], name +'.yml'), 'w').write(yamlModel)
+    model.save_weights(os.path.join(cc.cfg['persistence']['model_dir'], name +'.h5'), overwrite=True)
 
 
 def loadModel(modelName, layerPrefix=None):

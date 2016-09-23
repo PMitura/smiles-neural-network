@@ -23,7 +23,7 @@ params:
   rnn:
     # RNN parameters
     learning_rate: 0.001
-    epochs: 150
+    epochs: 30
 
     td_layer_multiplier: 2
     gru_layer_multiplier: 2
@@ -32,7 +32,7 @@ params:
     label_binning: false
     label_binning_after_train: false
     label_binning_ratio: 0.5
-    early_stop: 20
+    early_stop: 5
 
     chained_models: false
     trainable_inner: true
@@ -47,4 +47,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[RERUN][NEWPC][A549][TDGRUGRU] pretrained on MOLWEIGHT b3d960'
+    comment: '[GRID][NEURONS={}][A549][TDGRUGRU] performing grid search for neurons'

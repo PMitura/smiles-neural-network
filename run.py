@@ -44,25 +44,25 @@ def main(argv):
                 # cc.exp['params']['rnn']['comment'] = '[LEARNING_CURVE][LIMIT_{}] limiting data to {} rows'.format(lg,lg)
 
                 # reloads the rnn.rnn module which populates new config values to their respective vars
+
+            # rnn.rnn.run()
+
+
+            # REMOVEME: hardcoded grid for neurons
+            grid = [100,150,200,250,300,350,400,450,500]
+            cc.exp['grid'] = {}
+
             import rnn.rnn
             reload(rnn.rnn)
 
-            print(cc.cfg,cc.exp)
+            comment = cc.exp['params']['rnn']['comment']
+            for neurons in grid:
+                cc.exp['params']['rnn']['comment'] = comment.format(neurons)
+                cc.exp['grid']['neurons'] = neurons
 
-            rnn.rnn.run()
-
-
-            # REMOVEME: hardcoded grid
-            '''
-            grid = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-            # grid = [0.225, 0.25, 0.275, 0.325, 0.35, 0.375, 0.425, 0.45, 0.475]
-
-            for dropout in grid:
-                cc.exp['params']['rnn']['dropout'] = dropout
-                cc.exp['params']['rnn']['comment'] = \
-                    '[PFAM][10K][GOODSTRAT][GRU][GRU][DROP {}] dropout after bottom, with clipping'.format(dropout)
+                print(cc.cfg,cc.exp)
                 rnn.rnn.run()
-            '''
+
 
         elif cc.cfg['model'] == 'dnn':
             import rnn.dnn

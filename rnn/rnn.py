@@ -31,6 +31,8 @@ import keras.callbacks
 # handy aliases for config
 RP = cc.exp['params']['rnn']
 RD = cc.exp['params']['data']
+RG = cc.exp['grid']
+
 
 # manual eval where needed
 RP['chained_labels'] = eval(str(cc.exp['params']['rnn']['chained_labels']))
@@ -58,14 +60,12 @@ def configureModel(input, outputLen = len(RD['labels'])):
     '''
 
 
-    model.add(TimeDistributed(Dense(300, activation = 'relu', trainable = RP['trainable_inner']), input_shape = (None, alphaSize )))
+    model.add(TimeDistributed(Dense(RG['neurons'], activation = 'tanh', trainable = RP['trainable_inner']), input_shape = (None, alphaSize )))
     model.add(Dropout(0.30))
-    model.add(TimeDistributed(Dense(300, activation = 'relu', trainable = RP['trainable_inner'])))
-    model.add(Dropout(0.30))
-    model.add(GRU(300, trainable = RP['trainable_inner'], return_sequences = True))
+    model.add(GRU(RG['neurons'], trainable = RP['trainable_inner'], return_sequences = True))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
     model.add(Dropout(0.30))
-    model.add(GRU(300, trainable = RP['trainable_inner']))
+    model.add(GRU(RG['neurons'], trainable = RP['trainable_inner']))
     model.add(Activation('relu', trainable = RP['trainable_inner']))
     model.add(Dropout(0.30))
     model.add(Dense(outputLen))
@@ -276,7 +276,10 @@ def run(grid = None):
 
     # persistence first
     if cc.cfg['persistence']['model']:
-        utility.saveModel(model)
+        name = '{}_ng_{}'.format(stats['git_commit'],RG['neurons'])
+        # name = stats['git_commit']
+        stats['persistent_model_name'] = name
+        utility.saveModel(model, name)
 
     # compute metrics for the model based on the task for both testing and training data
     print('\nGetting metrics for training data:')
