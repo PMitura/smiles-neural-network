@@ -49,7 +49,7 @@ def main(argv):
 
 
             # REMOVEME: hardcoded grid for neurons
-            grid = [100,150,200,250,300,350,400,450,500]
+            grid = [300,350,400,450,500]
             cc.exp['grid'] = {}
 
             import rnn.rnn
