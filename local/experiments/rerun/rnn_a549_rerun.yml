@@ -48,4 +48,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[RERUN][NEWPC][A549][TDGRUGRU] pretrained on MOLWEIGHT b12ad80'
+    comment: '[RERUN][NEWPC][A549][TDTDGRUGRU] pretrained on MOLWEIGHT 357bb33'
