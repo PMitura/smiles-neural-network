@@ -70,7 +70,7 @@ def configureModel(input, outputLen = len(RD['labels'])):
     '''
 
     # molweight
-    model = utility.loadModel('357bb33c05916557049b8c828c069fc0aebf7cc5', 'mol_')
+    model = utility.loadModel('2dedf1c697b8f6d68bb42887217e8d20c2a4528e', 'mol_')
     # all compounds
     # model = utility.loadModel('eab15a05a70b35d119c02fcc36b1cfaf27a0f36a', 'mol_')
     # maccs
