@@ -47,4 +47,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[GRID][NEURONS={}][A549][TDGRUGRU] performing grid search for neurons'
+    comment: '[GRID][ACTIVATIONS={}][A549][TDGRUGRU] performing grid search for activations'

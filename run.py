@@ -56,16 +56,25 @@ def main(argv):
 
 
             # REMOVEME: hardcoded grid for neurons
-            grid = [550,600]
+            grid = [
+                ['tanh','tanh','tanh'],
+                ['tanh','tanh','relu'],
+                ['tanh','relu','tanh'],
+                ['relu','tanh','tanh'],
+                ['tanh','relu','relu'],
+                ['relu','relu','tanh'],
+                ['relu','tanh','relu'],
+                ['relu','relu','relu']
+            ]
             cc.exp['grid'] = {}
 
             import rnn.rnn
             reload(rnn.rnn)
 
             comment = cc.exp['params']['rnn']['comment']
-            for neurons in grid:
-                cc.exp['params']['rnn']['comment'] = comment.format(neurons)
-                cc.exp['grid']['neurons'] = neurons
+            for activations in grid:
+                cc.exp['params']['rnn']['comment'] = comment.format(','.join(activations))
+                cc.exp['grid']['activations'] = activations
 
                 print(cc.cfg,cc.exp)
                 subprocessrun(rnn.rnn.run)

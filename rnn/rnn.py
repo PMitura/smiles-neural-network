@@ -60,13 +60,13 @@ def configureModel(input, outputLen = len(RD['labels'])):
     '''
 
 
-    model.add(TimeDistributed(Dense(RG['neurons'], activation = 'tanh', trainable = RP['trainable_inner']), input_shape = (None, alphaSize )))
+    model.add(TimeDistributed(Dense(300, activation = RG['activations'][0], trainable = RP['trainable_inner']), input_shape = (None, alphaSize )))
     model.add(Dropout(0.30))
-    model.add(GRU(RG['neurons'], trainable = RP['trainable_inner'], return_sequences = True))
-    model.add(Activation('relu', trainable = RP['trainable_inner']))
+    model.add(GRU(300, trainable = RP['trainable_inner'], return_sequences = True))
+    model.add(Activation(RG['activations'][1], trainable = RP['trainable_inner']))
     model.add(Dropout(0.30))
-    model.add(GRU(RG['neurons'], trainable = RP['trainable_inner']))
-    model.add(Activation('relu', trainable = RP['trainable_inner']))
+    model.add(GRU(300, trainable = RP['trainable_inner']))
+    model.add(Activation(RG['activations'][2], trainable = RP['trainable_inner']))
     model.add(Dropout(0.30))
     model.add(Dense(outputLen))
 
@@ -276,7 +276,7 @@ def run(grid = None):
 
     # persistence first
     if cc.cfg['persistence']['model']:
-        name = '{}_ng_{}'.format(stats['git_commit'],RG['neurons'])
+        name = '{}_ng_{}'.format(stats['git_commit'],','.join(RG['activations']))
         # name = stats['git_commit']
         stats['persistent_model_name'] = name
         utility.saveModel(model, name)
