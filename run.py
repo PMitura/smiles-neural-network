@@ -50,14 +50,14 @@ def main(argv):
 
             # REMOVEME: hardcoded grid for neurons
             grid = [
-                ['tanh','tanh','tanh'],
-                ['tanh','tanh','relu'],
-                ['tanh','relu','tanh'],
-                ['relu','tanh','tanh'],
-                ['tanh','relu','relu'],
-                ['relu','relu','tanh'],
-                ['relu','tanh','relu'],
-                ['relu','relu','relu']
+                # ['tanh','tanh','tanh'],
+                # ['tanh','tanh','relu'],
+                # ['tanh','relu','tanh'],
+                # ['relu','tanh','tanh'],
+                ['tanh','relu','relu']
+                # ['relu','relu','tanh'],
+                # ['relu','tanh','relu'],
+                # ['relu','relu','relu']
             ]
             cc.exp['grid'] = {}
 
