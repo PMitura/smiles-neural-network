@@ -7,6 +7,8 @@ import sys, getopt
 from config import config as cc
 from keras.optimizers import Adam, Adadelta, Adagrad, Nadam, Adamax
 import theano
+from multiprocessing import Process
+
 
 class Unbuffered(object):
    def __init__(self, stream):
@@ -16,6 +18,11 @@ class Unbuffered(object):
        self.stream.flush()
    def __getattr__(self, attr):
        return getattr(self.stream, attr)
+
+def subprocessrun(target):
+    p = Process(target=target)
+    p.start()
+    p.join()
 
 def main(argv):
     # buffer hack
@@ -61,7 +68,7 @@ def main(argv):
                 cc.exp['grid']['neurons'] = neurons
 
                 print(cc.cfg,cc.exp)
-                rnn.rnn.run()
+                subprocessrun(rnn.rnn.run)
 
 
         elif cc.cfg['model'] == 'dnn':
@@ -69,7 +76,7 @@ def main(argv):
             reload(rnn.dnn)
 
             print(cc.cfg,cc.exp)
-            rnn.dnn.run()
+            subprocessrun(rnn.dnn.run)
         else:
             raise Exception('Run: unknown model')
 
