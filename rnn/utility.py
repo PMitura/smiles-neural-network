@@ -162,6 +162,11 @@ def loadModel(modelName, layerPrefix=None):
 
     return model
 
+def freeModel(model):
+    # TODO:
+    pass
+
+
 def plotLoss(values):
     print '    Plotting losses'
 

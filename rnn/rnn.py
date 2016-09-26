@@ -364,3 +364,5 @@ def run(grid = None):
 
     stats.update(metricStats)
     db.sendStatistics(**stats)
+
+    utility.freeModel(model)
