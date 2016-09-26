@@ -24,6 +24,7 @@ params:
     # RNN parameters
     learning_rate: 0.001
     epochs: 30
+    num_partitions: 5
 
     td_layer_multiplier: 2
     gru_layer_multiplier: 2

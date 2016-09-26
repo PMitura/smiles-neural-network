@@ -300,6 +300,7 @@ def run(grid = None):
     else:
         testMetrics = metrics.predict(model, testIn, testLabel, preprocessMeta)
 
+
     # utilities and visualizations
     if cc.cfg['plots']['layer_activations']:
         visualization.layerActivations(model, testIn, testLabel)

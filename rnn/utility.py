@@ -163,9 +163,13 @@ def loadModel(modelName, layerPrefix=None):
     return model
 
 def freeModel(model):
-    # TODO:
-    pass
-
+    print 'Freeing model...'
+    if model.model.train_function:
+        model.model.train_function.function.free()
+    if model.model.test_function:
+        model.model.test_function.function.free()
+    if model.model.predict_function:
+        model.model.predict_function.function.free()
 
 def plotLoss(values):
     print '    Plotting losses'

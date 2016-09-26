@@ -7,8 +7,6 @@ import sys, getopt
 from config import config as cc
 from keras.optimizers import Adam, Adadelta, Adagrad, Nadam, Adamax
 import theano
-from multiprocessing import Process
-
 
 class Unbuffered(object):
    def __init__(self, stream):
@@ -18,11 +16,6 @@ class Unbuffered(object):
        self.stream.flush()
    def __getattr__(self, attr):
        return getattr(self.stream, attr)
-
-def subprocessrun(target):
-    p = Process(target=target)
-    p.start()
-    p.join()
 
 def main(argv):
     # buffer hack
@@ -57,14 +50,14 @@ def main(argv):
 
             # REMOVEME: hardcoded grid for neurons
             grid = [
-                ['tanh','tanh','tanh']
-                # ['tanh','tanh','relu'],
-                # ['tanh','relu','tanh'],
-                # ['relu','tanh','tanh'],
-                # ['tanh','relu','relu'],
-                # ['relu','relu','tanh'],
-                # ['relu','tanh','relu'],
-                # ['relu','relu','relu']
+                ['tanh','tanh','tanh'],
+                ['tanh','tanh','relu'],
+                ['tanh','relu','tanh'],
+                ['relu','tanh','tanh'],
+                ['tanh','relu','relu'],
+                ['relu','relu','tanh'],
+                ['relu','tanh','relu'],
+                ['relu','relu','relu']
             ]
             cc.exp['grid'] = {}
 
@@ -77,7 +70,6 @@ def main(argv):
                 cc.exp['grid']['activations'] = activations
 
                 print(cc.cfg,cc.exp)
-                # subprocessrun(rnn.rnn.run)
                 rnn.rnn.run()
 
 
@@ -86,7 +78,7 @@ def main(argv):
             reload(rnn.dnn)
 
             print(cc.cfg,cc.exp)
-            subprocessrun(rnn.dnn.run)
+            rnn.dnn.run()
         else:
             raise Exception('Run: unknown model')
 
