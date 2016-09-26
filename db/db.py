@@ -61,6 +61,8 @@ def getData():
         con = con,
         index_col = cc.exp['fetch']['index_col'])
 
+    con.close()
+
     print('...done')
     return df
 

@@ -13,16 +13,44 @@ from rdkit import Chem
 from rdkit.Chem import Descriptors
 from rdkit.Chem import MACCSkeys
 from rdkit.Chem import SDWriter
+from rdkit.Chem import AllChem
 
 from sets import Set
 
-smiles = 'Oc1ccc(cc1)C(=C(CC(F)(F)F)c2ccccc2)c3ccc(O)cc3'
+cc.exp['fetch'] = {
+    'table': 'output.target_molweight_features_wide',
+    'cols': ['canonical_smiles','is_testing_all'],
+    'order': 'canonical_smiles',
+    'index_col': None,
+    'limit': None,
+    'input_mode': 'smiles',
+    'where':  'is_testing_all IS NOT NULL and length(canonical_smiles) <= 120',
+}
 
-writer = SDWriter('test.sdf')
+dbDf = db.getData()
 
-mol = Chem.MolFromSmiles(smiles)
-writer.write(mol)
+writer = SDWriter('{}.sdf'.format(cc.exp['fetch']['table']))
+
+outputRows = []
+
+for i,row in dbDf.iterrows():
+    print('{}/{}'.format(i+1,len(dbDf)))
+
+    print row.values
+
+    try:
+        mol = Chem.AddHs(Chem.MolFromSmiles(row['canonical_smiles']))
+
+        AllChem.EmbedMolecule(mol)
+        AllChem.MMFFOptimizeMolecule(mol)
+
+        writer.write(mol)
+        outputRows.append(row.values)
+    except:
+        pass
+
+outDf = pd.DataFrame(outputRows, columns=dbDf.columns)
+
+outDf.to_csv('{}.csv'.format(cc.exp['fetch']['table']))
 
 writer.close()
-
-
