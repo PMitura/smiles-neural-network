@@ -77,7 +77,8 @@ def main(argv):
                 cc.exp['grid']['activations'] = activations
 
                 print(cc.cfg,cc.exp)
-                subprocessrun(rnn.rnn.run)
+                # subprocessrun(rnn.rnn.run)
+                rnn.rnn.run()
 
 
         elif cc.cfg['model'] == 'dnn':
