@@ -58,4 +58,4 @@ params:
     holdout_ratio: 0.5
 
     # statistics settings
-    comment: '[RUNTIME][EDGE][STITCH907][10K][CLASSIFICATION][SCORE_BIN_500] 24e627 smiles, e6beb8 fasta, trying classification'
+    comment: '[TEST][EDGE][STITCH907][10K][CLASSIFICATION][SCORE_BIN_500][TANH] trying classification'

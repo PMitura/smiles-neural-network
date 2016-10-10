@@ -121,10 +121,10 @@ def configureEdgeModel(inputSmiles, inputFasta):
     smilesModel.add(TimeDistributed(Dense(300, activation = 'tanh', trainable = RP['trainable_inner']), input_shape = smilesGRUInputShape))
     smilesModel.add(Dropout(0.30))
     smilesModel.add(GRU(300, trainable = RP['trainable_inner'], return_sequences = True))
-    smilesModel.add(Activation('relu', trainable = RP['trainable_inner']))
+    smilesModel.add(Activation('tanh', trainable = RP['trainable_inner']))
     smilesModel.add(Dropout(0.30))
     smilesModel.add(GRU(300, trainable = RP['trainable_inner']))
-    smilesModel.add(Activation('relu', trainable = RP['trainable_inner']))
+    smilesModel.add(Activation('tanh', trainable = RP['trainable_inner']))
 
     # utility.setModelConsumeLess(smilesModel, 'mem')
 
@@ -138,10 +138,10 @@ def configureEdgeModel(inputSmiles, inputFasta):
     fastaModel.add(TimeDistributed(Dense(300, activation = 'tanh', trainable = RP['trainable_inner']), input_shape = fastaGRUInputShape))
     fastaModel.add(Dropout(0.30))
     fastaModel.add(GRU(300, trainable = RP['trainable_inner'], return_sequences = True))
-    fastaModel.add(Activation('relu', trainable = RP['trainable_inner']))
+    fastaModel.add(Activation('tanh', trainable = RP['trainable_inner']))
     fastaModel.add(Dropout(0.30))
     fastaModel.add(GRU(300, trainable = RP['trainable_inner']))
-    fastaModel.add(Activation('relu', trainable = RP['trainable_inner']))
+    fastaModel.add(Activation('tanh', trainable = RP['trainable_inner']))
 
     # utility.setModelConsumeLess(fastaModel, 'mem')
 
