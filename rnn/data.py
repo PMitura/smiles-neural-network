@@ -19,7 +19,6 @@ RD = cc.exp['params']['data']
 RP = cc.exp['params']['rnn']
 
 SMILES_ALPHABET_UNKNOWN = '?'
-'''
 SMILES_ALPHABET = [SMILES_ALPHABET_UNKNOWN,'-',
     '=','#','*','/','\\',
     '.','(',')','[',']',
@@ -37,13 +36,15 @@ SMILES_ALPHABET = [SMILES_ALPHABET_UNKNOWN,'-',
     'P','Q','R','S','T',
     'U','V','W','X','Y',
     'Z']
-'''
+
 
 # old aphabet to use with some models
+'''
 SMILES_ALPHABET = [SMILES_ALPHABET_UNKNOWN,'-','=','#','*','.','(',')','[',']','{','}','-','+',
     '0','1','2','3','4','5','6','7','8','9',
     'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
     'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+'''
 
 SMILES_ALPHABET_LOOKUP_TABLE = { v:k for k,v in enumerate(SMILES_ALPHABET) }
 SMILES_ALPHABET_LEN = len(SMILES_ALPHABET)
