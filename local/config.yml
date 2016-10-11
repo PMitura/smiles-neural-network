@@ -2,7 +2,7 @@
 
 # Experiments to run
 
-experiments: ['local/experiments/edge_property_prediction/rnn_edge_stitch_classification.yml']
+experiments: ['local/experiments/edge_property_prediction/rnn_edge_stitch_class_strat_domain.yml']
 # experiments: ['local/experiments/pfam/rnn_pfam_10_drop.yml']
 model: 'rnn'
 
