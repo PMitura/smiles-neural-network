@@ -37,41 +37,37 @@ def main(argv):
 
 
         if cc.cfg['model'] == 'rnn':
-            # limitGrid = [10,50,100,500,1000,5000,10000,50000,100000]
 
-            # for lg in limitGrid:
-                # cc.exp['fetch']['limit'] = lg
-                # cc.exp['params']['rnn']['comment'] = '[LEARNING_CURVE][LIMIT_{}] limiting data to {} rows'.format(lg,lg)
+            if cc.cfg['grid']:
 
-                # reloads the rnn.rnn module which populates new config values to their respective vars
+                # REMOVEME: hardcoded grid for ratio
+                grid = [
+                    [1,1,1],
+                    [1,1,2],
+                    [1,2,1],
+                    [2,1,1],
+                    [1,2,2],
+                    [2,1,2],
+                    [2,2,1]
+                ]
+                cc.exp['grid'] = {}
 
-            # rnn.rnn.run()
+                import rnn.rnn
+                reload(rnn.rnn)
 
+                comment = '[GRID][RATIO={}][A549][TDGRUGRU] performing grid search for ratio'
+                for ratios in grid:
+                    cc.exp['params']['rnn']['comment'] = comment.format(','.join(ratios))
+                    cc.exp['grid']['ratios'] = ratios
 
-            # REMOVEME: hardcoded grid for neurons
-            grid = [
-                # ['tanh','tanh','tanh'],
-                # ['tanh','tanh','relu'],
-                # ['tanh','relu','tanh'],
-                # ['relu','tanh','tanh'],
-                ['tanh','relu','relu']
-                # ['relu','relu','tanh'],
-                # ['relu','tanh','relu'],
-                # ['relu','relu','relu']
-            ]
-            cc.exp['grid'] = {}
-
-            import rnn.rnn
-            reload(rnn.rnn)
-
-            comment = cc.exp['params']['rnn']['comment']
-            for activations in grid:
-                cc.exp['params']['rnn']['comment'] = comment.format(','.join(activations))
-                cc.exp['grid']['activations'] = activations
+                    print(cc.cfg,cc.exp)
+                    rnn.rnn.run()
+            else:
+                import rnn.rnn
+                reload(rnn.rnn)
 
                 print(cc.cfg,cc.exp)
                 rnn.rnn.run()
-
 
         elif cc.cfg['model'] == 'dnn':
             import rnn.dnn
