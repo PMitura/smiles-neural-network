@@ -276,7 +276,7 @@ def run(grid = None):
 
     # persistence first
     if cc.cfg['persistence']['model']:
-        name = '{}_rg_{}'.format(stats['git_commit'],':'.join(RG['ratios']))
+        name = '{}_rg_{}'.format(stats['git_commit'],':'.join([str(x) for x in RG['ratios']]))
         # name = stats['git_commit']
         stats['persistent_model_name'] = name
         utility.saveModel(model, name)
