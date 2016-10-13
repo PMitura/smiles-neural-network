@@ -57,7 +57,7 @@ def main(argv):
 
                 comment = '[GRID][RATIO={}][A549][TDGRUGRU] performing grid search for ratio'
                 for ratios in grid:
-                    cc.exp['params']['rnn']['comment'] = comment.format(','.join(ratios))
+                    cc.exp['params']['rnn']['comment'] = comment.format(':'.join([str(x) for x in ratios]))
                     cc.exp['grid']['ratios'] = ratios
 
                     print(cc.cfg,cc.exp)
