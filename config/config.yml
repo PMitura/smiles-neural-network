@@ -37,6 +37,7 @@ plots:
   print_train_test_pred_cnt: 5
 
 model: 'rnn'
+grid: false
 
 # Persistence of models
 persistence:

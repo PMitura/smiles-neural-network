@@ -6,8 +6,8 @@ template: 'rnn.yml'
 
 # DB fetch params
 fetch:
-  table: 'output.stitch_100k_nostrat_domains'
-  cols: ['smiles','fasta','score_bin_500','is_testing_50_rand']
+  table: 'output.stitch_100k_strat_smiles'
+  cols: ['smiles','fasta','score_bin_500','smiles_split']
   order: 'smiles'
   index_col: ~
   limit: 100000
@@ -22,7 +22,7 @@ params:
     labels: ['score_bin_500']
 
     use_test_flags: true
-    testing: 'is_testing_50_rand'
+    testing: 'smiles_split'
   rnn:
 
     # load_model: '595a0920126134c2c948cc7fb9a7a237befa4658'
@@ -58,4 +58,4 @@ params:
     holdout_ratio: 0.5
 
     # statistics settings
-    comment: '[EDGE][STITCH907][100K][CLASSIFICATION][ALL_DOMAINS] classification with all domains'
+    comment: '[EDGE][STITCH907][100K][CLASSIFICATION][STRAT_SMILES] stratified smiles to see if we generalize on smiles'

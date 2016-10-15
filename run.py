@@ -34,7 +34,7 @@ def main(argv):
     for experiment in cc.cfg['experiments']:
         # load configuration into global var and run it
         cc.loadExperiment(experiment)
-
+        cc.exp['grid'] = {}
 
         if cc.cfg['model'] == 'rnn':
 
@@ -50,7 +50,6 @@ def main(argv):
                     # [2,1,2],
                     [2,2,1]
                 ]
-                cc.exp['grid'] = {}
 
                 import rnn.rnn
                 reload(rnn.rnn)
