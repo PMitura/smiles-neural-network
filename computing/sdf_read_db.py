@@ -91,6 +91,9 @@ while not suppl.atEnd():
     print len(df)
 
 
+    sys.stdout.flush()
+
+
 con.close()
 
 print total
