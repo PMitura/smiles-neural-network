@@ -19,7 +19,7 @@ from sets import Set
 
 SEND_TABLE = 'output.target_molweight_padel_3d_desc'
 
-LIMIT = 100
+LIMIT = 1000
 
 def sendData(con, df):
 
