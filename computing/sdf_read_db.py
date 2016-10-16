@@ -43,7 +43,7 @@ def sendData(con, df):
 
         for d in vals:
             if type(d) is float:
-                dat.append(round(d,30))
+                dat.append(round(d,17))
             else:
                 dat.append(d)
 
@@ -56,7 +56,18 @@ def sendData(con, df):
 con = db.getCon()
 suppl = SDMolSupplier('../local/data/output.target_molweight_features_wide.sdf')
 
-idx = 1
+leskip=172406
+# leskip=5
+cnt = 0
+
+for mol in suppl:
+    cnt+=1
+    if cnt>=leskip:
+        break
+
+idx = 1+leskip
+
+print 'x'
 
 total = 0
 
