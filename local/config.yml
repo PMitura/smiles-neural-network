@@ -2,8 +2,8 @@
 
 # Experiments to run
 
-experiments: ['local/experiments/edge_property_prediction/rnn_edge_stitch_classification.yml']
-# experiments: ['local/experiments/rerun/rnn_a549_rerun.yml']
+# experiments: ['local/experiments/edge_property_prediction/rnn_edge_stitch_classification.yml']
+experiments: ['local/experiments/rerun/rnn_molweight_3d_desc.yml']
 # experiments: ['local/experiments/pfam/rnn_pfam_10_drop.yml']
 model: 'rnn'
 grid: false

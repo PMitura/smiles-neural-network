@@ -56,14 +56,14 @@ def sendData(con, df):
 con = db.getCon()
 suppl = SDMolSupplier('../local/data/output.target_molweight_features_wide.sdf')
 
-leskip=175333
-# leskip=5
+leskip=0
 cnt = 0
 
-for mol in suppl:
-    cnt+=1
-    if cnt>=leskip:
-        break
+if leskip != 0:
+    for mol in suppl:
+        cnt+=1
+        if cnt>=leskip:
+            break
 
 idx = 1+leskip
 
@@ -99,7 +99,7 @@ while not suppl.atEnd():
     idx += cnt
 
     total += len(df)
-    print len(df)
+    print len(df), total
 
 
     sys.stdout.flush()
