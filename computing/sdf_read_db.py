@@ -19,7 +19,7 @@ from sets import Set
 
 SEND_TABLE = 'output.target_molweight_padel_3d_desc'
 
-LIMIT = 10000
+LIMIT = 100
 
 def sendData(con, df):
 
@@ -78,14 +78,10 @@ while not suppl.atEnd():
     df['canonical_smiles'] = pd.Series(smiles,index=df.index)
 
     df = df.dropna()
-    # sendData(con,df)
+    sendData(con,df)
     idx += cnt
 
-
-
     total += len(df)
-
-
     print len(df)
 
 
