@@ -43,7 +43,7 @@ def sendData(con, df):
 
         for d in vals:
             if type(d) is float:
-                dat.append(round(d,10))
+                dat.append(round(d,8))
             else:
                 dat.append(d)
 
