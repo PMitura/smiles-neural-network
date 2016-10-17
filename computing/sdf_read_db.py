@@ -19,7 +19,7 @@ from sets import Set
 
 SEND_TABLE = 'output.target_molweight_padel_3d_desc'
 
-LIMIT = 1000
+LIMIT = 10000
 
 def sendData(con, df):
 
@@ -42,8 +42,8 @@ def sendData(con, df):
         dat = []
 
         for d in vals:
-            if type(d) is float:
-                dat.append(round(d,8))
+            if type(d) is float and d < 1e-17:
+                dat.append(0)
             else:
                 dat.append(d)
 
