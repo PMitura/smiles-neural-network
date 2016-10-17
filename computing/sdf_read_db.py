@@ -42,12 +42,15 @@ def sendData(con, df):
         dat = []
 
         for d in vals:
-            if type(d) is float and d < 1e-17:
-                dat.append(0)
+            if type(d) is float
+                dat.append(round(d,8))
             else:
                 dat.append(d)
 
-        cursor.execute(query, tuple(dat))
+        try:
+            cursor.execute(query, tuple(dat))
+        except:
+            pass
 
     con.commit()
     cursor.close()
