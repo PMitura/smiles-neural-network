@@ -17,6 +17,8 @@ import pandas as pd
 
 from sklearn.manifold import TSNE
 from sklearn.metrics.pairwise import pairwise_distances
+from sklearn.metrics import roc_curve, auc
+
 
 import data
 from config import config as cc
@@ -376,3 +378,26 @@ def printTrainTestPred(model, cnt, trainIn, trainLabel, testIn, testLabel, meta)
 
     testdf = pd.DataFrame(np.array(testData).T, columns=testCols)
     print testdf
+
+def plotROCCurve(model, testIn, testLabel):
+
+    if not os.path.exists(cc.cfg['plots']['roc_curve_dir']):
+        os.makedirs(cc.cfg['plots']['roc_curve_dir'])
+
+    dataPred = model.predict(testIn, batch_size = 80)
+
+    fpr, tpr, _ = roc_curve(testLabel.T[0],dataPred.T[0])
+
+    plt.figure()
+    lw = 2
+    plt.plot(fpr, tpr, color='darkorange')
+    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic example')
+    # plt.legend(loc="lower right")
+
+    plt.savefig('{}/{}'.format(cc.cfg['plots']['roc_curve_dir'],cc.cfg['plots']['roc_curve_name']))
+    plt.close()

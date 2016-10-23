@@ -31,6 +31,10 @@ plots:
   seq_output_seq_input_name: ~
   seq_output_seq_input: ~
 
+  roc_curve: false
+  roc_curve_dir: 'local/plots'
+  roc_curve_name: 'roc_curve.png'
+
   print_pred: false
 
   print_train_test_pred: false

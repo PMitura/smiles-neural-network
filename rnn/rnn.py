@@ -285,24 +285,26 @@ def run(grid = None):
         stats['persistent_model_name'] = name
         utility.saveModel(model, name)
 
-    # compute metrics for the model based on the task for both testing and training data
-    print('\nGetting metrics for training data:')
-    if RP['classify']:
-        if RP['discrete_label']:
-            trainMetrics = metrics.discreteClassify(model, trainIn, trainLabel, preprocessMeta)
+    # turns off metric computing when equal to 0
+    if RP['num_partitions']:
+        # compute metrics for the model based on the task for both testing and training data
+        print('\nGetting metrics for training data:')
+        if RP['classify']:
+            if RP['discrete_label']:
+                trainMetrics = metrics.discreteClassify(model, trainIn, trainLabel, preprocessMeta)
+            else:
+                trainMetrics = metrics.classify(model, trainIn, trainLabel, preprocessMeta)
         else:
-            trainMetrics = metrics.classify(model, trainIn, trainLabel, preprocessMeta)
-    else:
-        trainMetrics = metrics.predict(model, trainIn, trainLabel, preprocessMeta)
+            trainMetrics = metrics.predict(model, trainIn, trainLabel, preprocessMeta)
 
-    print('\nGetting metrics for test data:')
-    if RP['classify']:
-        if RP['discrete_label']:
-            testMetrics = metrics.discreteClassify(model, testIn, testLabel, preprocessMeta)
+        print('\nGetting metrics for test data:')
+        if RP['classify']:
+            if RP['discrete_label']:
+                testMetrics = metrics.discreteClassify(model, testIn, testLabel, preprocessMeta)
+            else:
+                testMetrics = metrics.classify(model, testIn, testLabel, preprocessMeta)
         else:
-            testMetrics = metrics.classify(model, testIn, testLabel, preprocessMeta)
-    else:
-        testMetrics = metrics.predict(model, testIn, testLabel, preprocessMeta)
+            testMetrics = metrics.predict(model, testIn, testLabel, preprocessMeta)
 
 
     # utilities and visualizations
@@ -318,6 +320,9 @@ def run(grid = None):
 
     if cc.cfg['plots']['print_train_test_pred']:
         visualization.printTrainTestPred(model, cc.cfg['plots']['print_train_test_pred_cnt'], trainIn, trainLabel, testIn, testLabel, preprocessMeta)
+
+    if cc.cfg['plots']['roc_curve']:
+        visualization.plotROCCurve(model,testIn,testLabel)
 
     # statistics to send to journal
     stats['runtime_second'] = time.time() - stats['runtime_second']
@@ -343,31 +348,33 @@ def run(grid = None):
     stats['objective'] = RP['objective']
     stats['learning_curve'] = {'val':open('{}/{}'.format(cc.cfg['plots']['dir'], utility.PLOT_NAME),'rb').read(),'type':'bin'}
 
-    # metric statistics to send
-    metricStats = {}
+    # turn off metric sending when no metrics where computed
+    if RP['num_partitions']:
+        # metric statistics to send
+        metricStats = {}
 
-    if RP['classify']:
-        metricStats['relevance_training'] = trainMetrics['acc_avg']
-        metricStats['relevance_training_std'] = trainMetrics['acc_std']
-        metricStats['relevance_testing'] = testMetrics['acc_avg']
-        metricStats['relevance_testing_std'] = testMetrics['acc_std']
-        metricStats['log_loss'] = testMetrics['log_loss_avg']
-        metricStats['log_loss_std'] = testMetrics['log_loss_std']
-        metricStats['auc'] = testMetrics['auc_avg']
-        metricStats['auc_std'] = testMetrics['auc_std']
-        metricStats['auc_micro'] = testMetrics['auc_avg']
-        metricStats['auc_micro_std'] = testMetrics['auc_std']
-    else:
-        metricStats['relevance_training'] = trainMetrics['r2_avg']
-        metricStats['relevance_training_std'] = trainMetrics['r2_std']
-        metricStats['relevance_testing'] = testMetrics['r2_avg']
-        metricStats['relevance_testing_std'] = testMetrics['r2_std']
-        metricStats['mse'] = testMetrics['mse_avg']
-        metricStats['mse_std'] = testMetrics['mse_std']
-        metricStats['mae'] = testMetrics['mae_avg']
-        metricStats['mae_std'] = testMetrics['mae_std']
+        if RP['classify']:
+            metricStats['relevance_training'] = trainMetrics['acc_avg']
+            metricStats['relevance_training_std'] = trainMetrics['acc_std']
+            metricStats['relevance_testing'] = testMetrics['acc_avg']
+            metricStats['relevance_testing_std'] = testMetrics['acc_std']
+            metricStats['log_loss'] = testMetrics['log_loss_avg']
+            metricStats['log_loss_std'] = testMetrics['log_loss_std']
+            metricStats['auc'] = testMetrics['auc_avg']
+            metricStats['auc_std'] = testMetrics['auc_std']
+            metricStats['auc_micro'] = testMetrics['auc_avg']
+            metricStats['auc_micro_std'] = testMetrics['auc_std']
+        else:
+            metricStats['relevance_training'] = trainMetrics['r2_avg']
+            metricStats['relevance_training_std'] = trainMetrics['r2_std']
+            metricStats['relevance_testing'] = testMetrics['r2_avg']
+            metricStats['relevance_testing_std'] = testMetrics['r2_std']
+            metricStats['mse'] = testMetrics['mse_avg']
+            metricStats['mse_std'] = testMetrics['mse_std']
+            metricStats['mae'] = testMetrics['mae_avg']
+            metricStats['mae_std'] = testMetrics['mae_std']
 
-    stats.update(metricStats)
-    db.sendStatistics(**stats)
+        stats.update(metricStats)
+        db.sendStatistics(**stats)
 
     utility.freeModel(model)
