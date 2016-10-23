@@ -10,7 +10,7 @@ fetch:
   cols: ['pfam_sequence','pfama_acc_max','domain_split']
   order: 'pfam_sequence'
   index_col: ~
-  limit: ~
+  limit: 100000
   where: ~
 
 # Experiment params
