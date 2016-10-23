@@ -1,0 +1,65 @@
+# Experiment rnn_pfam_domain_split_50_50
+name: 'rnn_pfam_domain_split_50_50'
+
+# Template for default values
+template: 'rnn.yml'
+
+# DB fetch params
+fetch:
+  table: 'output.pfam_distinct_domain_split_50_50'
+  cols: ['pfam_sequence','pfama_acc_max','domain_split']
+  order: 'pfam_sequence'
+  index_col: ~
+  limit: ~
+  where: ~
+
+# Experiment params
+params:
+  data:
+    # number of label columns to prepare
+    smiles: 'canonical_smiles'
+    fasta: 'pfam_sequence'
+    nominals: ~ # ['standard_type','ki_33']
+    labels: ['pfama_acc_max']
+
+    use_test_flags: true
+    testing: 'domain_split'
+  rnn:
+    edge_prediction: false
+    fasta_prediction: true
+
+    # RNN parameters
+    learning_rate: 0.001
+    epochs: 30
+    early_stop: 5
+    batch: 80
+
+    classify: true            # regression if false
+    classify_threshold: 0.5
+    classify_label_pos: 1
+    classify_label_neg: 0
+    classify_activation: 'sigmoid'
+    num_partitions: 5
+
+    objective: 'categorical_crossentropy'
+
+    label_binning: false
+    label_binning_after_train: false
+    label_binning_ratio: 0.5
+
+    chained_models: false
+    trainable_inner: true
+
+    zscore_norm: false
+    logarithm: false
+
+    # output to one-hot for classification over id based discrete label
+    discrete_label: true
+
+    # learning rate decay settings
+    learning_rate_decay: false
+
+    flag_based_hold: true
+
+    # statistics settings
+    comment: '[PFAM][DOMAIN_SPLIT_50_50] testing generalization on pfam on unseen domains'
