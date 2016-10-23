@@ -1,16 +1,16 @@
-# Experiment rnn_pfam_domain_split_50_50
-name: 'rnn_pfam_domain_split_50_50'
+# Experiment rnn_pfam_domain_split_70_70
+name: 'rnn_pfam_domain_split_70_70'
 
 # Template for default values
 template: 'rnn.yml'
 
 # DB fetch params
 fetch:
-  table: 'output.pfam_distinct_domain_split_50_50'
+  table: 'output.pfam_distinct_domain_split_70_70'
   cols: ['pfam_sequence','pfama_acc_max','domain_split']
   order: 'pfam_sequence'
   index_col: ~
-  limit: 100000
+  limit: ~
   where: ~
 
 # Experiment params
@@ -62,4 +62,4 @@ params:
     flag_based_hold: true
 
     # statistics settings
-    comment: '[PFAM][DOMAIN_SPLIT_50_50] testing generalization on pfam on unseen domains'
+    comment: '[PFAM][DOMAIN_SPLIT_70_70] testing generalization on pfam on unseen domains'
