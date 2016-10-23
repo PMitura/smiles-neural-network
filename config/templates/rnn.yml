@@ -22,6 +22,7 @@ params:
     # Do not train, just load
     load_model: null
     edge_prediction: false
+    fasta_prediction: false
     discrete_label: false
 
     # RNN parameters
