@@ -10,7 +10,7 @@ fetch:
   cols: ['smiles','fasta','score_bin_500','smiles_split']
   order: 'smiles'
   index_col: ~
-  limit: 10
+  limit: ~
   where: ~
 
 # Experiment params
