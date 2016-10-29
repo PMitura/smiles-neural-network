@@ -41,7 +41,7 @@ params:
     trainable_inner: true
 
     zscore_norm: true
-    logarithm: false
+    logarithm: true
 
     # learning rate decay settings
     learning_rate_decay: false
@@ -50,4 +50,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[SMILES][3DDESC][TDGRUGRU][LONG] running best model on 3d desc, long run'
+    comment: '[SMILES][3DDESC][TDGRUGRU][LOG] running best model on 3d desc, long run with log'
