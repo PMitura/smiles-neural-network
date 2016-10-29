@@ -24,8 +24,8 @@ params:
   rnn:
     # RNN parameters
     learning_rate: 0.001
-    epochs: 30
-    batch: 80
+    epochs: 150
+    batch: 160
     num_partitions: 5
 
     td_layer_multiplier: 2
@@ -50,4 +50,4 @@ params:
     holdout_ratio: 0.2
 
     # statistics settings
-    comment: '[SMILES][3DDESC][TDGRUGRU] running best model on 3d desc'
+    comment: '[SMILES][3DDESC][TDGRUGRU][LONG] running best model on 3d desc, long run'

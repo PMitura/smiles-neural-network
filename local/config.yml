@@ -3,8 +3,8 @@
 # Experiments to run
 
 # experiments: ['local/experiments/edge_property_prediction/rnn_edge_stitch_classification.yml']
-experiments: ['local/experiments/visualization/rnn_edge_stitch_classification_roc.yml']
-# experiments: ['local/experiments/rerun/rnn_molweight_3d_desc.yml']
+# experiments: ['local/experiments/visualization/rnn_edge_stitch_classification_roc.yml']
+experiments: ['local/experiments/rerun/rnn_molweight_3d_desc.yml']
 # experiments: ['local/experiments/pfam/rnn_pfam_domain_split_70_70.yml']
 model: 'rnn'
 grid: false
@@ -19,7 +19,7 @@ plots:
   seq_output_layer_idx: 3
   seq_output_smiles: ['NCC=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=O']
 
-  roc_curve: true
+  roc_curve: false
 
   print_pred: false
   print_pred_smiles: ['FFF=CC1=CN(C2CC(O)C(CO)O2)C(=O)NC1=CCC']
