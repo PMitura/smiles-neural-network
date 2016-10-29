@@ -1,0 +1,15 @@
+# Experiment rnn_alogp
+name: 'rnn_alogp'
+
+# Template for default values
+template: 'rnn.yml'
+
+# DB fetch params
+fetch:
+  table: 'output.pfam_distinct_10_1000'
+  cols: ['pfam_sequence']
+  order: 'pfam_sequence'
+  index_col: ~
+  limit: 10
+  where: ~ # 'is_testing IS NOT NULL'
+

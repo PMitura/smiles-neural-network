@@ -35,7 +35,10 @@ def main(argv):
         # load configuration into global var and run it
         cc.loadExperiment(experiment)
 
+        import rnn.pfam_propy
+        rnn.pfam_propy.pfamToPropy()
 
+        """
         if cc.cfg['model'] == 'rnn':
 
             if cc.cfg['grid']:
@@ -46,7 +49,7 @@ def main(argv):
                     # [1,1,2],
                     # [1,2,1],
                     # [2,1,1],
-                    # [1,2,2],
+          "         # [1,2,2],
                     # [2,1,2],
                     [2,2,1]
                 ]
@@ -77,6 +80,7 @@ def main(argv):
             rnn.dnn.run()
         else:
             raise Exception('Run: unknown model')
+        """
 
 if __name__ == '__main__':
     main(sys.argv[1:])

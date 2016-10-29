@@ -1,0 +1,5 @@
+Using Theano backend.
+/usr/local/lib/python2.7/dist-packages/numpy/lib/nanfunctions.py:675: RuntimeWarning: Mean of empty slice
+  warnings.warn("Mean of empty slice", RuntimeWarning)
+/usr/local/lib/python2.7/dist-packages/numpy/lib/nanfunctions.py:1147: RuntimeWarning: Degrees of freedom <= 0 for slice.
+  warnings.warn("Degrees of freedom <= 0 for slice.", RuntimeWarning)

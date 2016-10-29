@@ -1,0 +1,115 @@
+({'experiments': ['local/experiments/rerun/rnn_a549_rerun.yml'], 'statistics': {'table': 'output.journal'}, 'plots': {'seq_output_dir': 'local/plots/seq_output', 'layer_activations_points_cap': 1000, 'seq_output': False, 'seq_output_ignore_neurons': None, 'histograms': False, 'print_train_test_pred_cnt': 15, 'seq_output_smiles': None, 'layer_activations_dir': 'local/plots/activations', 'layer_activations': False, 'seq_output_select_neurons': None, 'histograms_dir': 'local/plots/hists', 'layer_activations_label_cap': 10, 'print_train_test_pred': False, 'seq_output_layer_idx': None, 'dir': 'local/plots'}, 'model': 'rnn', 'db': {'host': 'asgard.kessl.net', 'pass': 'samurai', 'driver': 'postgresql', 'user': 'postgres', 'name': 'chembl_21'}, 'persistence': {'model': True, 'model_dir': 'local/models'}}, {'params': {'data': {'smiles': 'canonical_smiles', 'labels': ['standard_value_log'], 'use_embedding': False, 'nominals': None, 'testing': 'is_testing', 'label_count': None, 'eps': 0.0001, 'use_test_flags': True, 'input_count': None, 'extra_nominals': None}, 'rnn': {'discrete_label': False, 'comment': '[RERUN][A549][TDGRUGRU] pretrained on MOLWEIGHT b3d960', 'chained_predict': None, 'learning_rate_decay_type': 'step', 'edge_prediction': False, 'label_binning': False, 'epochs': 3, 'seed': 12346, 'chained_test_labels': None, 'classify_activation': 'tanh', 'use_partitions': True, 'early_stop': 20, 'trainable_inner': True, 'classify_label_pos': 1, 'learning_rate_decay_step_config_steps': 20, 'num_partitions': 5, 'load_model': None, 'label_binning_after_train': False, 'td_layer_multiplier': 2, 'predict_print_samples': 15, 'objective': 'mse', 'label_binning_ratio': 0.5, 'gru_layer_multiplier': 2, 'embedding_outputs': 30, 'classify': False, 'learning_rate_decay_step_config_ratio': 0.5, 'chained_labels': None, 'learning_rate': 0.001, 'zscore_norm': True, 'flag_based_hold': True, 'classify_label_neg': -1, 'classify_threshold': 0, 'distrib_bins': 15, 'learning_rate_decay': False, 'logarithm': False, 'scatter_visualize': False, 'batch': 160, 'chained_models': False, 'freeze_idxs': None, 'holdout_ratio': 0.2, 'label_idxs': None}}, 'name': 'rnn_a549_rerun', 'template': 'rnn.yml', 'fetch': {'index_col': None, 'cols': ['canonical_smiles', 'standard_value_log', 'is_testing'], 'limit': '300', 'table': 'output.target_a549', 'where': 'length(canonical_smiles) <= 120', 'order': 'canonical_smiles'}})
+Downloading data...
+SELECT "canonical_smiles","standard_value_log","is_testing" FROM output.target_a549 WHERE length(canonical_smiles) <= 120 ORDER BY canonical_smiles  LIMIT 300
+...done
+  Initializing and compiling...
+  ...done
+  Training model...
+Train on 156 samples, validate on 144 samples
+Epoch 1/3
+156/156 [==============================] - 7s - loss: 0.8359 - val_loss: nan
+Epoch 2/3
+156/156 [==============================] - 5s - loss: nan - val_loss: nan
+Epoch 3/3
+156/156 [==============================] - 6s - loss: nan - val_loss: nan
+    Plotting losses
+    Model weights:
+____________________________________________________________________________________________________
+Layer (type)                     Output Shape          Param #     Connected to                     
+====================================================================================================
+timedistributed_1 (TimeDistribute(None, None, 300)     23100       timedistributed_input_1[0][0]    
+____________________________________________________________________________________________________
+dropout_1 (Dropout)              (None, None, 300)     0           timedistributed_1[0][0]          
+____________________________________________________________________________________________________
+gru_1 (GRU)                      (None, None, 300)     540900      dropout_1[0][0]                  
+____________________________________________________________________________________________________
+activation_1 (Activation)        (None, None, 300)     0           gru_1[0][0]                      
+____________________________________________________________________________________________________
+dropout_2 (Dropout)              (None, None, 300)     0           activation_1[0][0]               
+____________________________________________________________________________________________________
+gru_2 (GRU)                      (None, 300)           540900      dropout_2[0][0]                  
+____________________________________________________________________________________________________
+activation_2 (Activation)        (None, 300)           0           gru_2[0][0]                      
+____________________________________________________________________________________________________
+dense_1 (Dense)                  (None, 1)             301         activation_2[0][0]               
+====================================================================================================
+Total params: 1105201
+____________________________________________________________________________________________________
+None
+  ...done
+
+Getting metrics for training data:
+	iter:	1/25
+	iter:	2/25
+	iter:	3/25
+	iter:	4/25
+	iter:	5/25
+	iter:	6/25
+	iter:	7/25
+	iter:	8/25
+	iter:	9/25
+	iter:	10/25
+	iter:	11/25
+	iter:	12/25
+	iter:	13/25
+	iter:	14/25
+	iter:	15/25
+	iter:	16/25
+	iter:	17/25
+	iter:	18/25
+	iter:	19/25
+	iter:	20/25
+	iter:	21/25
+	iter:	22/25
+	iter:	23/25
+	iter:	24/25
+	iter:	25/25
+1/1 - standard_value_log:
+	R2:	nan	+/-	nan
+	MSE:	nan	+/-	nan
+	MAE:	nan	+/-	nan
+Overall metrics:
+	R2:	nan	+/-	nan
+	MSE:	nan	+/-	nan
+	MAE:	nan	+/-	nan
+
+Getting metrics for test data:
+	iter:	1/25
+	iter:	2/25
+	iter:	3/25
+	iter:	4/25
+	iter:	5/25
+	iter:	6/25
+	iter:	7/25
+	iter:	8/25
+	iter:	9/25
+	iter:	10/25
+	iter:	11/25
+	iter:	12/25
+	iter:	13/25
+	iter:	14/25
+	iter:	15/25
+	iter:	16/25
+	iter:	17/25
+	iter:	18/25
+	iter:	19/25
+	iter:	20/25
+	iter:	21/25
+	iter:	22/25
+	iter:	23/25
+	iter:	24/25
+	iter:	25/25
+1/1 - standard_value_log:
+	R2:	nan	+/-	nan
+	MSE:	nan	+/-	nan
+	MAE:	nan	+/-	nan
+Overall metrics:
+	R2:	nan	+/-	nan
+	MSE:	nan	+/-	nan
+	MAE:	nan	+/-	nan
+  Memory usage:
+    Physical: 457.752576 MB
+    Virtual:  1672.060928 MB
+Sending statistics...
+INSERT INTO output.journal (comment,testing_row_count,runtime_second,label_name,seed,learning_curve,memory_pm_mb,relevance_testing,experiment_config,relevance_testing_std,mae_std,hostname,loaded_model,objective,mse,memory_vm_mb,relevance_training,relevance_training_std,epoch_count,mse_std,epoch_max,learning_rate,batch_size,split_name,training_row_count,mae,optimization_method,task,parameter_count,git_commit,model,dataset_name) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+...done
