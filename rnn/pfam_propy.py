@@ -32,11 +32,11 @@ def pfamToPropy():
         for key in descArray[0].items():
             keys.append(key[0])
         writer.writerow(keys)
-        vals = []
         for row in descArray:
+            vals = []
             for key, value in row.items():
                 vals.append(value)
-        writer.writerow(vals)
+            writer.writerow(vals)
 
     print '  ...done'
 

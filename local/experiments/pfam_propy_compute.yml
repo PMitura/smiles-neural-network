@@ -10,6 +10,6 @@ fetch:
   cols: ['pfam_sequence']
   order: 'pfam_sequence'
   index_col: ~
-  limit: 300000
+  limit: 500000
   where: ~ # 'is_testing IS NOT NULL'
 
