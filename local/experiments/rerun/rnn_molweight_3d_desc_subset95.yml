@@ -1,0 +1,53 @@
+# Experiment rnn_molweight_3d_desc
+name: 'rnn_molweight_3d_desc'
+
+# Template for default values
+template: 'rnn.yml'
+
+# DB fetch params
+fetch:
+  table: 'output.target_molweight_padel_3d_desc'
+  cols: ['canonical_smiles','TDB1u','TDB2u','TDB3u','TDB1m','TDB2m','TDB3m','TDB1v','TDB3v','TDB1e','TDB3e','TDB1p','TDB2p','TDB3p','TDB1i','TDB2i','TDB3i','TDB1s','TDB2s','TDB3s','TDB1r','PPSA-1','PPSA-2','PPSA-3','PNSA-1','DPSA-3','FPSA-1','FPSA-2','FPSA-3','WPSA-3','WNSA-1','RPCG','RNCG','THSA','RHSA','GRAV-1','GRAV-4','GRAV-5','LOBMAX','MOMI-X','MOMI-Z','MOMI-XY','MOMI-XZ','MOMI-R','geomRadius','geomShape','RDF10u','RDF15u','RDF20u','RDF25u','RDF30u','RDF35u','RDF40u','RDF10m','RDF20m','RDF25m','RDF30m','RDF35m','RDF40m','RDF20v','RDF30v','RDF35v','RDF40v','RDF10s','RDF15s','RDF20s','RDF25s','RDF30s','RDF35s','RDF40s','L1u','L2u','P1u','P2u','E1u','E2u','E3u','Au','Du','L2m','P1m','E1m','E2m','E3m','Vm','Dm','E1v','E2v','E3v','Dv','E1e','E2e','E1p','E2p','E3p','Dp','is_testing_all']
+  order: 'canonical_smiles'
+  index_col: ~
+  limit: ~
+  input_mode: 'smiles'
+  where: 'is_testing_all IS NOT NULL and length(canonical_smiles) <= 120'
+
+# Experiment params
+params:
+  data:
+    smiles: 'canonical_smiles'
+    labels: ['TDB1u','TDB2u','TDB3u','TDB1m','TDB2m','TDB3m','TDB1v','TDB3v','TDB1e','TDB3e','TDB1p','TDB2p','TDB3p','TDB1i','TDB2i','TDB3i','TDB1s','TDB2s','TDB3s','TDB1r','PPSA-1','PPSA-2','PPSA-3','PNSA-1','DPSA-3','FPSA-1','FPSA-2','FPSA-3','WPSA-3','WNSA-1','RPCG','RNCG','THSA','RHSA','GRAV-1','GRAV-4','GRAV-5','LOBMAX','MOMI-X','MOMI-Z','MOMI-XY','MOMI-XZ','MOMI-R','geomRadius','geomShape','RDF10u','RDF15u','RDF20u','RDF25u','RDF30u','RDF35u','RDF40u','RDF10m','RDF20m','RDF25m','RDF30m','RDF35m','RDF40m','RDF20v','RDF30v','RDF35v','RDF40v','RDF10s','RDF15s','RDF20s','RDF25s','RDF30s','RDF35s','RDF40s','L1u','L2u','P1u','P2u','E1u','E2u','E3u','Au','Du','L2m','P1m','E1m','E2m','E3m','Vm','Dm','E1v','E2v','E3v','Dv','E1e','E2e','E1p','E2p','E3p','Dp']
+    use_test_flags: true
+    testing: 'is_testing_all'
+  rnn:
+    # RNN parameters
+    learning_rate: 0.001
+    epochs: 150
+    batch: 160
+    num_partitions: 5
+
+    td_layer_multiplier: 2
+    gru_layer_multiplier: 2
+
+    classify: false            # regression if false
+    label_binning: false
+    label_binning_after_train: false
+    label_binning_ratio: 0.5
+    early_stop: 20
+
+    chained_models: false
+    trainable_inner: true
+
+    zscore_norm: true
+    logarithm: true
+
+    # learning rate decay settings
+    learning_rate_decay: false
+
+    flag_based_hold: true
+    holdout_ratio: 0.2
+
+    # statistics settings
+    comment: '[SMILES][3DDESC][SUBSET][TDGRUGRU][LOG] running best model on subset of 95 3d desc'
