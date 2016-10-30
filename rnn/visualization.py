@@ -396,7 +396,7 @@ def plotROCCurve(model, testIn, testLabel):
     plt.ylim([0.0, 1.05])
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
-    plt.title('Receiver operating characteristic example')
+    plt.title(cc.cfg['plots']['roc_curve_title'])
     # plt.legend(loc="lower right")
 
     plt.savefig('{}/{}'.format(cc.cfg['plots']['roc_curve_dir'],cc.cfg['plots']['roc_curve_name']))

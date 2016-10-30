@@ -33,6 +33,7 @@ plots:
 
   roc_curve: false
   roc_curve_dir: 'local/plots'
+  roc_curve_title: ~
   roc_curve_name: 'roc_curve.png'
 
   print_pred: false
